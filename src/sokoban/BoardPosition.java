@@ -8,7 +8,7 @@ package sokoban;
  *
  * @author figgefred
  */
-public class BoardPosition 
+public class BoardPosition
 {
     public final int Row;
     public final int Column;
