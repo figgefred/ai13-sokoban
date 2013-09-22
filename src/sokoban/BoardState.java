@@ -21,30 +21,22 @@ import sokoban.Algorithms.ISearchAlgorithmPath;
 public class BoardState 
 {
     // Game board
-    private Map<BoardPosition, Node> Map;
-    private List<List<NodeType>> newMap = new ArrayList<>();
+    private List<List<NodeType>> NewMap = new ArrayList<>();
     private Set<BoardPosition> Goals;
     private BoardPosition CurrentNode;
-    private boolean StartingOnGoal = false;
-    private int IDCounter = 1;
     
-    private ISearchAlgorithmPath PathSearcher;
-    
-    
-    public BoardState(ISearchAlgorithmPath pathSearch, List<String> rows)
+    public BoardState(List<String> rows)
     {    
-        PathSearcher = pathSearch;
-        
         // Init board
         buildBoard(rows);
     }
     
     private void buildBoard(List<String> rows)
     {
-        StartingOnGoal = false;
-        IDCounter = 1;
+        
+        //IDCounter = 1;
         Goals = new HashSet<>();
-        Map = new HashMap<>();
+        NewMap = new ArrayList<>();
         
         char[] columns = null;
         String tmp ;
@@ -55,7 +47,7 @@ public class BoardState
                 break;
             columns = tmp.toCharArray();
             
-            newMap.add(new ArrayList<NodeType>(columns.length));
+            NewMap.add(new ArrayList<NodeType>(columns.length));
             for(int cIndex = 0; cIndex  < columns.length; cIndex++)
             {
 				
@@ -77,7 +69,7 @@ public class BoardState
                     CurrentNode = p;                    
                 }
                 
-                newMap.get(rIndex).add(type);
+                NewMap.get(rIndex).add(type);
                                 
                 /*
                 if(n.getNodeType() == NodeType.PLAYER_ON_GOAL)
@@ -120,31 +112,13 @@ public class BoardState
         */
     }
     
-    public String findPath(Node dest)
-    {
-        Set<Node> destination = new HashSet<>();
-        destination.add(dest);
-        return findPath(destination);
+    private boolean isPlayerPosition(NodeType type) {
+        return type == NodeType.PLAYER || type == NodeType.PLAYER_ON_GOAL;
     }
     
-    public String findPath(Set<Node> destinations)
+    private boolean isGoalType(NodeType type)
     {
-        if(StartingOnGoal)
-            return "";
-        Path p = PathSearcher.getPath(CurrentNode, destinations);
-        if(p == null)
-            return "no path";
-        
-        return p.toString();
-    }    
-    
-    private boolean isPlayerPosition(NodeType n) {
-        return n.getNodeType() == NodeType.PLAYER || n.getNodeType() == NodeType.PLAYER_ON_GOAL;
-    }
-    
-    private boolean isGoalType(NodeType n)
-    {
-        return n.getNodeType() == NodeType.GOAL;
+        return type == NodeType.GOAL;
     }
     
     private NodeType getNodeType(char c)
@@ -183,24 +157,25 @@ public class BoardState
 		}
 	}
     
-	public NodeType getNode(int x, int y)
-	{
-		return newMap.get(x).get(y);
-	}
+    public NodeType getNode(int x, int y)
+    {
+            return NewMap.get(x).get(y);
+    }
 	
     public NodeType getNode(BoardPosition pos)
     {
-        return newMap.get(pos.Row).get(pos.Column);
+        return NewMap.get(pos.Row).get(pos.Column);
     }
     
     public BoardPosition getPlayerNode()
     {
-        return ;
+        return CurrentNode;
     }
     
     public Set<BoardPosition> getGoalNodes()
     {
         return Goals;
     }
+    
 
 }

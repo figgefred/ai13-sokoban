@@ -12,15 +12,15 @@ import java.util.List;
  * @author figgefred
  */
 public class Path {
-    private List<Node> Nodes;
+    private List<BoardPosition> Nodes;
     private String StringOutput;
     
-    public Path(List<Node> nodes)
+    public Path(List<BoardPosition> nodes)
     {
         this.Nodes = nodes;
     }
     
-    public Node get(int index)
+    public BoardPosition get(int index)
     {
         if(index >= Nodes.size() || index < 0)
         {
@@ -29,7 +29,7 @@ public class Path {
         return Nodes.get(index);
     }
     
-    public List<Node> getPath()
+    public List<BoardPosition> getPath()
     {
         return Nodes;
     }
@@ -38,15 +38,18 @@ public class Path {
     public String toString()
     {
         StringBuilder sb = new StringBuilder();
-        Node parentNode = null;
-        for(Node n: Nodes)
+        BoardPosition parentNode = null;
+        for(BoardPosition n: Nodes)
         {
             if(parentNode == null)
             {
                 parentNode = n;
                 continue;
             }
-            sb.append(Constants.DirectionToString(n.getDirection(parentNode)));
+            //sb.append(Constants.DirectionToString(n.getDirection(parentNode)));
+            
+            // TODO print direction from n to parentNode
+            
             sb.append(" ");
             parentNode = n;
         }

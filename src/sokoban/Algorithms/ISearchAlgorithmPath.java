@@ -5,7 +5,8 @@
 package sokoban.Algorithms;
 
 import java.util.Set;
-import sokoban.Node;
+import sokoban.BoardPosition;
+import sokoban.BoardState;
 import sokoban.Path;
 
 /**
@@ -14,5 +15,6 @@ import sokoban.Path;
  */
 public interface ISearchAlgorithmPath 
 {
-    public Path getPath(Node initialPosition, Set<Node> destinations);
+    public Path getPath(BoardState state, BoardPosition initialPosition, BoardPosition destination);
+    public Path getPath(BoardState state, BoardPosition initialPosition, Set<BoardPosition> destination);
 }

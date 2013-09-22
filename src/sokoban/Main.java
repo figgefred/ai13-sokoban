@@ -49,6 +49,7 @@ public class Main {
 		levelBuffer.add(buffer);
 		
 		int levelNumber = 1;
+                
 		for(List<String> level: levelBuffer)
 		{			
 			if(VERBOSE)
@@ -58,8 +59,11 @@ public class Main {
 					System.out.println(line);
 				}
 			}
-			BoardState b = new BoardState(pathSearcher, level);
-			String output = b.findPath(b.getGoalNodes());
+			BoardState b = new BoardState(level);
+                        
+                        Player player = new Player(b, pathSearcher);
+                        
+			String output = player.findPath(b.getPlayerNode(), b.getGoalNodes());
 			System.out.println("Level " + levelNumber + ": " + output);
 			levelNumber++;
 		}
