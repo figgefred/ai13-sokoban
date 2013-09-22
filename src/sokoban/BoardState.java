@@ -82,6 +82,23 @@ public class BoardState
         return type == NodeType.GOAL;
     }
     
+    public List<BoardPosition> getBlockNodes()
+    {
+        List<BoardPosition> blocks = new ArrayList<>();
+        for(int i = 0; i < Map.size(); i++)
+        {
+            for(int j = 0; j < Map.get(i).size(); j ++)
+            {
+                NodeType type = getNode(i,j);
+                if( type == NodeType.BLOCK || type == NodeType.BLOCK_ON_GOAL )
+                {
+                    blocks.add(new BoardPosition(i, j));
+                }
+            }
+        }
+        return blocks;
+    }
+    
     public NodeType getNode(int x, int y)
     {
         if(x < 0 || x >= Map.size())
