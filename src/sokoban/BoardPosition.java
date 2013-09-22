@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package sokoban;
 
 /**
@@ -38,5 +34,10 @@ public class BoardPosition
             MyHash = 12345*Row*Row + Column;
         }
         return MyHash;
+    }
+    
+    @Override
+    public String toString() {
+    	return "Row: " + Row + ", col: " + Column;
     }
 }
