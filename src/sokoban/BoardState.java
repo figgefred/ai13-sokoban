@@ -21,7 +21,7 @@ import sokoban.Algorithms.ISearchAlgorithmPath;
 public class BoardState 
 {
     // Game board
-    private List<List<NodeType>> NewMap = new ArrayList<>();
+    private List<List<NodeType>> Map = new ArrayList<>();
     private Set<BoardPosition> Goals;
     private BoardPosition CurrentNode;
     
@@ -36,7 +36,7 @@ public class BoardState
         
         //IDCounter = 1;
         Goals = new HashSet<>();
-        NewMap = new ArrayList<>();
+        Map = new ArrayList<>();
         
         char[] columns = null;
         String tmp ;
@@ -47,7 +47,7 @@ public class BoardState
                 break;
             columns = tmp.toCharArray();
             
-            NewMap.add(new ArrayList<NodeType>(columns.length));
+            Map.add(new ArrayList<NodeType>(columns.length));
             for(int cIndex = 0; cIndex  < columns.length; cIndex++)
             {
 				
@@ -69,7 +69,7 @@ public class BoardState
                     CurrentNode = p;                    
                 }
                 
-                NewMap.get(rIndex).add(type);
+                Map.get(rIndex).add(type);
                                 
                 /*
                 if(n.getNodeType() == NodeType.PLAYER_ON_GOAL)
@@ -159,12 +159,35 @@ public class BoardState
     
     public NodeType getNode(int x, int y)
     {
-            return NewMap.get(x).get(y);
+            return Map.get(x).get(y);
     }
 	
     public NodeType getNode(BoardPosition pos)
     {
-        return NewMap.get(pos.Row).get(pos.Column);
+        return Map.get(pos.Row).get(pos.Column);
+    }
+    
+    public List<BoardPosition> getNeighbours(int x, int y)
+    {
+        List<BoardPosition> positions = new ArrayList<>();
+        // UP
+        if(x > 0)
+         positions.add(new BoardPosition(x-1,y));
+        // Down
+        if(x < Map.size()-1)
+         positions.add(new BoardPosition(x+1,y));
+        // LEFT
+        if(y > 0)
+         positions.add(new BoardPosition(x,y-1));
+        //RIGHT
+        if(y < Map.get(x).size()-1)
+         positions.add(new BoardPosition(x,y+1));
+        return positions;
+    }
+    
+    public List<BoardPosition> getNeighbours(BoardPosition pos)
+    {
+        return getNeighbours(pos.Row, pos.Column);
     }
     
     public BoardPosition getPlayerNode()
