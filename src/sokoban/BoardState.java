@@ -12,9 +12,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
-
-import com.sun.corba.se.impl.orbutil.graph.Node;
-
 import sokoban.Algorithms.ISearchAlgorithmPath;
 
 /**
@@ -230,6 +227,27 @@ public class BoardState
     	}
     	return true;
 	}
+
+ public Direction getDirection(BoardPosition from, BoardPosition to)
+    {
+        if( from.Row-1 == to.Row && from.Column == to.Column )
+        {
+            return Direction.UP;
+        }
+        if(from.Row+1 == to.Row && from.Column == to.Column)
+        {
+            return Direction.DOWN;
+        }
+        if(from.Column-1 == to.Column && from.Row == to.Row)
+        {
+            return Direction.LEFT;
+        }
+        if(from.Column+1 == to.Column && from.Row == to.Row)
+        {
+            return Direction.RIGHT;
+        }
+        return Direction.NONE;
+    }
     
 
 }
