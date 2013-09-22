@@ -1,10 +1,14 @@
+<<<<<<< HEAD
 #java specific
+=======
+>>>>>>> b6972e54a1577201333cff7f015ebb2e1456720b
 *.class
 
 # Package Files #
 *.jar
 *.war
 *.ear
+<<<<<<< HEAD
 
 #netbeans ignore personal stuff 
 /nbproject/
@@ -18,3 +22,5 @@
 *.DS_Store
 *.swp
 *.out
+=======
+>>>>>>> b6972e54a1577201333cff7f015ebb2e1456720b
