@@ -128,4 +128,40 @@ public class Constants {
 		}
 	}
     
+    public static char GetCharFromNodeType(NodeType type) {
+    	switch(type)
+		{
+			case SPACE:
+			{       
+				return ' ';
+			}
+			case BLOCK:
+			{
+				return '$';
+			}
+			case BLOCK_ON_GOAL:
+			{
+				return '*';
+			}
+			case PLAYER_ON_GOAL:
+			{
+				return '+';
+			}
+			case GOAL:
+			{
+				return '.';
+			}
+			case PLAYER:
+			{
+				return '@';
+			}
+			case WALL:
+			default:
+			{
+				return '#';
+			}
+		}
+    }
+    
+    
 }

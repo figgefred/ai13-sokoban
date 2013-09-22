@@ -82,13 +82,14 @@ public class BoardState
         return type == NodeType.GOAL;
     }
     
-    public NodeType getNode(int x, int y)
+    public NodeType getNode(int row, int col)
     {
-        if(x < 0 || x >= Map.size())
+        if(row < 0 || row >= Map.size())
             return NodeType.INVALID;
-        if(y < 0 || y >= Map.get(x).size())
+        if(col < 0 || col >= Map.get(row).size())
             return NodeType.INVALID;
-        return Map.get(x).get(y);
+        
+        return Map.get(row).get(col);
     }
 	
     public NodeType getNode(BoardPosition pos)
@@ -96,21 +97,21 @@ public class BoardState
         return getNode(pos.Row, pos.Column);
     }
     
-    public List<BoardPosition> getNeighbours(int x, int y)
+    public List<BoardPosition> getNeighbours(int row, int col)
     {
         List<BoardPosition> positions = new ArrayList<>();
         // UP
-        if(x > 0)
-         positions.add(new BoardPosition(x-1,y));
+        if(row > 0)
+         positions.add(new BoardPosition(row-1,col));
         // Down
-        if(x < Map.size()-1)
-         positions.add(new BoardPosition(x+1,y));
+        if(row < Map.size()-1)
+         positions.add(new BoardPosition(row+1,col));
         // LEFT
-        if(y > 0)
-         positions.add(new BoardPosition(x,y-1));
+        if(col > 0)
+         positions.add(new BoardPosition(row,col-1));
         //RIGHT
-        if(y < Map.get(x).size()-1)
-         positions.add(new BoardPosition(x,y+1));
+        if(col < Map.get(row).size()-1)
+         positions.add(new BoardPosition(row,col+1));
         return positions;
     }
     
@@ -148,34 +149,34 @@ public class BoardState
      * Throws exception if the move is invalid.
      * 
      * Todo: Maybe add function to move player in a direction?
-     * @param x
-     * @param y
+     * @param row
+     * @param col
      */
-    public void movePlayerTo(int x, int y)
+    public void movePlayerTo(int row, int col)
     {
-    	if(x < 0 || x >= Map.size())
-    		throw new IllegalArgumentException("Position is out of bounds (x = " + x + ")");
+    	if(row < 0 || row >= Map.size())
+    		throw new IllegalArgumentException("Position is out of bounds (x = " + row + ")");
     
-    	int diff = x - CurrentNode.Column + y - CurrentNode.Row;
+    	int diff = col - CurrentNode.Column + row - CurrentNode.Row;
     	if(Math.abs(diff) > 1)
     		throw new IllegalArgumentException("Can't move player more than one coordinate");
     	
-    	NodeType type = Map.get(y).get(x);
+    	NodeType type = Map.get(col).get(row);
 		if(type == NodeType.BLOCK || type == NodeType.BLOCK_ON_GOAL)
 		{
 			// Check if block can be pushed	(and if so do so)	
 			if(diff > 0) // North, west
 			{
-				if(y > CurrentNode.Row) // North
-					pushBlock(x, y, x, y+1);
+				if(row > CurrentNode.Row) // North
+					pushBlock(row, col, row, col+1);
 				else
-					pushBlock(x, y, x+1, y);
+					pushBlock(row, col, row+1, col);
 			}
 			else { // south, east
-				if(y < CurrentNode.Row) // South
-					pushBlock(x, y, x, y-1);
+				if(row < CurrentNode.Row) // South
+					pushBlock(row, col, row, col-1);
 				else
-					pushBlock(x, y, x-1, y);
+					pushBlock(row, col, row-1, col);
 			}
 		
 		} else if(type != NodeType.SPACE) {
@@ -184,26 +185,27 @@ public class BoardState
 		}
 		
 		// Set new position
-		Map.get(y).set(x, type == NodeType.GOAL ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER);    	
+		Map.get(col).set(row, type == NodeType.GOAL ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER);    	
     	
 		// Reset old position
     	NodeType playerType = Map.get(CurrentNode.Row).get(CurrentNode.Column);
 		Map.get(CurrentNode.Row).set(CurrentNode.Column, (playerType == NodeType.PLAYER) ? NodeType.SPACE : NodeType.GOAL);
+		CurrentNode = new BoardPosition(row, col);
 	
     }
     
-    private void pushBlock(int x, int y, int newx, int newy) {
-    	NodeType orig = Map.get(y).get(x);
-    	NodeType dest = Map.get(newy).get(newx);
+    private void pushBlock(int row, int col, int newrow, int newcol) {
+    	NodeType orig = Map.get(row).get(col);
+    	NodeType dest = Map.get(newrow).get(newcol);
     	
     	if(orig != NodeType.BLOCK && orig != NodeType.BLOCK_ON_GOAL)
     		throw new IllegalArgumentException("Push was called to push non-block: " + orig.toString());
     	if(dest != NodeType.GOAL && dest != NodeType.SPACE)
     		throw new IllegalArgumentException("Can't push block, something is in the way: " + dest.toString());    	
     	
-    	Map.get(y).set(x, (orig == NodeType.BLOCK_ON_GOAL) ? NodeType.GOAL : NodeType.SPACE);
+    	Map.get(col).set(row, (orig == NodeType.BLOCK_ON_GOAL) ? NodeType.GOAL : NodeType.SPACE);
     	
-    	Map.get(newy).set(newx, (dest == NodeType.GOAL) ? NodeType.BLOCK_ON_GOAL : NodeType.BLOCK);
+    	Map.get(newcol).set(newrow, (dest == NodeType.GOAL) ? NodeType.BLOCK_ON_GOAL : NodeType.BLOCK);
     }
     
     /***
@@ -228,25 +230,37 @@ public class BoardState
     	return true;
 	}
 
- public Direction getDirection(BoardPosition from, BoardPosition to)
-    {
-        if( from.Row-1 == to.Row && from.Column == to.Column )
-        {
-            return Direction.UP;
-        }
-        if(from.Row+1 == to.Row && from.Column == to.Column)
-        {
-            return Direction.DOWN;
-        }
-        if(from.Column-1 == to.Column && from.Row == to.Row)
-        {
-            return Direction.LEFT;
-        }
-        if(from.Column+1 == to.Column && from.Row == to.Row)
-        {
-            return Direction.RIGHT;
-        }
-        return Direction.NONE;
+    public Direction getDirection(BoardPosition from, BoardPosition to)
+	{
+	    if( from.Row-1 == to.Row && from.Column == to.Column )
+	    {
+	        return Direction.UP;
+	    }
+	    if(from.Row+1 == to.Row && from.Column == to.Column)
+	    {
+	        return Direction.DOWN;
+	    }
+	    if(from.Column-1 == to.Column && from.Row == to.Row)
+	    {
+	        return Direction.LEFT;
+	    }
+	    if(from.Column+1 == to.Column && from.Row == to.Row)
+	    {
+	        return Direction.RIGHT;
+	    }
+	    return Direction.NONE;
+	}
+    
+    @Override
+    public String toString() {
+    	StringBuilder builder = new StringBuilder();
+    	for(List<NodeType> row : Map) {
+    		for(NodeType t : row)
+    			builder.append(Constants.GetCharFromNodeType(t));
+    		builder.append('\n');
+    	}
+    	
+    	return builder.toString();   		
     }
     
 
