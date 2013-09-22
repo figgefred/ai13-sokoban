@@ -142,5 +142,25 @@ public class BoardState
         return Goals;
     }
     
+    public Direction getDirection(BoardPosition from, BoardPosition to)
+    {
+        if( from.Row-1 == to.Row && from.Column == to.Column )
+        {
+            return Direction.UP;
+        }
+        if(from.Row+1 == to.Row && from.Column == to.Column)
+        {
+            return Direction.DOWN;
+        }
+        if(from.Column-1 == to.Column && from.Row == to.Row)
+        {
+            return Direction.LEFT;
+        }
+        if(from.Column+1 == to.Column && from.Row == to.Row)
+        {
+            return Direction.RIGHT;
+        }
+        return Direction.NONE;
+    }
 
 }
