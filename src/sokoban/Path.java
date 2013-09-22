@@ -4,7 +4,9 @@
  */
 package sokoban;
 
+import java.util.Collections;
 import java.util.List;
+import sokoban.types.Direction;
 
 /**
  * A class holding a list of Nodes representing a path.
@@ -17,7 +19,14 @@ public class Path {
     
     public Path(List<BoardPosition> nodes)
     {
+        this(nodes, false);
+    }
+    
+    public Path(List<BoardPosition> nodes, boolean reversedList)
+    {
         this.Nodes = nodes;
+        if(reversedList)
+            Collections.reverse(Nodes);
     }
     
     public BoardPosition get(int index)
@@ -38,22 +47,35 @@ public class Path {
     public String toString()
     {
         StringBuilder sb = new StringBuilder();
-        BoardPosition parentNode = null;
+        BoardPosition firstNode = null;
+        
         for(BoardPosition n: Nodes)
         {
-            if(parentNode == null)
+            if(firstNode == null)
             {
-                parentNode = n;
+                firstNode = n;
                 continue;
             }
-            //sb.append(Constants.DirectionToString(n.getDirection(parentNode)));
-            
-            // TODO print direction from n to parentNode
+            sb.append(Constants.DirectionToString(getDirection(firstNode, n)));
             
             sb.append(" ");
-            parentNode = n;
+            firstNode = n;
         }
         return sb.toString();
+    }
+    
+    private Direction getDirection(BoardPosition p1, BoardPosition p2)
+    {
+        if(p1.Row > p2.Row)
+            return Direction.UP;
+        if(p1.Row < p2.Row)
+            return Direction.DOWN;
+        if(p1.Column > p2.Column)
+            return Direction.LEFT;
+        if(p1.Column < p2.Column)
+            return Direction.RIGHT;
+        else 
+            return Direction.NONE;
     }
     
 }
