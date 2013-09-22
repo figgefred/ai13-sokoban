@@ -57,7 +57,7 @@ public class BoardState
                 n.setNodeType(getNodeType(columns[cIndex]));
                 Map.put(p, n);
                 */
-                NodeType type = getNodeType(columns[cIndex]);
+                NodeType type = Constants.GetNodeType(columns[cIndex]);
                 
                 if(isGoalType(type))
                 {
@@ -68,48 +68,9 @@ public class BoardState
                 {
                     CurrentNode = p;                    
                 }
-                
                 Map.get(rIndex).add(type);
-                                
-                /*
-                if(n.getNodeType() == NodeType.PLAYER_ON_GOAL)
-                {
-                    StartingOnGoal = true;
-                }
-                * */
             }
         }
-        
-        /*
-        BoardPosition[] positions = new BoardPosition[4];
-        Direction[] directions = Constants.GetPossibleDirections();
-        
-        for(Node n : Map.values())
-        {   
-            if(n.getNodeType() == NodeType.WALL)
-            {
-                continue;
-            }
-            int row = n.Position.Row;
-            int col = n.Position.Column;
-            // up
-                positions[0] = new BoardPosition(row-1, col);
-            //down
-                positions[1] = new BoardPosition(row+1, col);
-            //left
-                positions[2] = new BoardPosition(row, col-1);
-            // right
-                positions[3] = new BoardPosition(row, col+1);
-            for(int i = 0; i < positions.length; i++)
-            {
-                Node neighbour = Map.get(positions[i]);
-                if(neighbour != null)
-                {
-                    n.addNeighbour(directions[i], neighbour);
-                }
-            }            
-        }
-        */
     }
     
     private boolean isPlayerPosition(NodeType type) {
@@ -121,50 +82,18 @@ public class BoardState
         return type == NodeType.GOAL;
     }
     
-    private NodeType getNodeType(char c)
-	{
-		switch(c)
-		{
-			case ' ':
-			{       
-				return NodeType.SPACE;
-			}
-			case '$':
-			{
-				return NodeType.BLOCK;
-			}
-			case '*':
-			{
-				return NodeType.BLOCK_ON_GOAL;
-			}
-			case '+':
-			{
-				return NodeType.PLAYER_ON_GOAL;
-			}
-			case '.':
-			{
-				return NodeType.GOAL;
-			}
-			case '@':
-			{
-				return NodeType.PLAYER;
-			}
-			case '#':
-			default:
-			{
-				return NodeType.WALL;
-			}
-		}
-	}
-    
     public NodeType getNode(int x, int y)
     {
-            return Map.get(x).get(y);
+        if(x < 0 || x >= Map.size())
+            return NodeType.INVALID;
+        if(y < 0 || y >= Map.get(x).size())
+            return NodeType.INVALID;
+        return Map.get(x).get(y);
     }
 	
     public NodeType getNode(BoardPosition pos)
     {
-        return Map.get(pos.Row).get(pos.Column);
+        return getNode(pos.Row, pos.Column);
     }
     
     public List<BoardPosition> getNeighbours(int x, int y)
@@ -192,10 +121,10 @@ public class BoardState
     
     public int getColumnsCount(int r)
     {
-        int size = Map.get(r).size();
+        int size = Map.size();
         if(r < 0 || r >= size)
             return -1;
-        return size;
+        return Map.get(r).size();
     }
     
     public List<BoardPosition> getNeighbours(BoardPosition pos)

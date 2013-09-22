@@ -39,17 +39,27 @@ public class BFS_Path implements ISearchAlgorithmPath {
         }
         Map<BoardPosition, BoardPosition> path = new HashMap<BoardPosition, BoardPosition>();
         Queue<BoardPosition> queue = new LinkedList<BoardPosition>();
-
+        
+        
         boolean[][] visited = new boolean[state.getRowsCount()][];
         for(int i = 0; i < visited.length; i++)
         {
-            visited[i] = new boolean[state.getColumnsCount(i)];
+            int size = state.getColumnsCount(i);
+            /*if(size < 0)
+                size = 0;*/
+            visited[i] = new boolean[size];
         }
+        
+        //System.out.println("Test: pos= " + pStart);
+        //System.out.println("Test: coordinates pointing at= " + state.getNode(pStart));
+        //System.out.println("Test: visited has= " + visited[pStart.Row].length + " columns");
+        //System.out.println("Test: map has= " + state.getColumnsCount(pStart.Row) + " columns");
         
         if( !visited[pStart.Row][pStart.Column])
         {
             visited[pStart.Row][pStart.Column] = true;
         }
+        
         queue.add(pStart);
         BoardPosition goalReached = null;
         
@@ -102,9 +112,15 @@ public class BFS_Path implements ISearchAlgorithmPath {
     
     private boolean isNoneBlockingNode(BoardState state, BoardPosition p)
     {
-        return state.getNode(p) != NodeType.WALL &&
-               state.getNode(p) != NodeType.BLOCK &&
-               state.getNode(p) != NodeType.BLOCK_ON_GOAL;
+        NodeType type = state.getNode(p);
+        if(type == NodeType.INVALID)
+            System.err.println("Referring to position " + p + " which refers to INVALID type");
+        
+        return 
+               type != NodeType.INVALID &&
+               type != NodeType.WALL &&
+               type != NodeType.BLOCK &&
+               type != NodeType.BLOCK_ON_GOAL;
     }
     
 }
