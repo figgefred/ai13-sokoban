@@ -21,6 +21,8 @@
 /bin/
 .classpath
 .project
+build.xml
+manifest.mf
 
 ## generic files to ignore
 *~
