@@ -161,7 +161,7 @@ public class BoardState
     	if(Math.abs(diff) > 1)
     		throw new IllegalArgumentException("Can't move player more than one coordinate");
     	
-    	NodeType type = Map.get(col).get(row);
+    	NodeType type = Map.get(row).get(col);
 		if(type == NodeType.BLOCK || type == NodeType.BLOCK_ON_GOAL)
 		{
 			// Check if block can be pushed	(and if so do so)	
@@ -185,7 +185,7 @@ public class BoardState
 		}
 		
 		// Set new position
-		Map.get(col).set(row, type == NodeType.GOAL ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER);    	
+		Map.get(row).set(col, type == NodeType.GOAL ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER);    	
     	
 		// Reset old position
     	NodeType playerType = Map.get(CurrentNode.Row).get(CurrentNode.Column);
