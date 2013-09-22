@@ -62,14 +62,77 @@ public class BoardStateTest {
 	public void testBasicMovement() throws IOException {		
 		BoardState board = getBoardFromFile("testing/movetest1");
 		assertEquals(NodeType.PLAYER, board.getNode(2, 4));
+		System.out.println(board.toString());
 		
-		board.movePlayerTo(4,3);
+		board.movePlayerTo(3,4);
 		assertEquals(NodeType.PLAYER, board.getNode(3, 4));
 		assertEquals(NodeType.SPACE, board.getNode(2, 4));
 		
+		System.out.println(board.toString());
+		
 		board.movePlayerTo(3,3);
+		System.out.println(board.toString());
 		assertEquals(NodeType.PLAYER, board.getNode(3, 3));
 		assertEquals(NodeType.SPACE, board.getNode(3, 4));
 		
+		board.movePlayerTo(3,4);
+		System.out.println(board.toString());
+		assertEquals(NodeType.PLAYER, board.getNode(3, 4));
+		assertEquals(NodeType.SPACE, board.getNode(3, 3));		
+		
+		board.movePlayerTo(2,4);
+		System.out.println(board.toString());
+		assertEquals(NodeType.PLAYER, board.getNode(2, 4));
+		assertEquals(NodeType.SPACE, board.getNode(3, 4));	
+	}
+	
+	@Test
+	public void testPushMovement() throws IOException {
+		BoardState board = getBoardFromFile("testing/pushtest1");		
+		assertEquals(NodeType.PLAYER, board.getNode(3, 4));
+		System.out.println(board.toString());
+		
+		board.movePlayerTo(2,4);
+		System.out.println(board.toString());
+		assertEquals(NodeType.BLOCK_ON_GOAL, board.getNode(1, 4));
+		assertEquals(NodeType.PLAYER, board.getNode(2, 4));
+		assertEquals(NodeType.SPACE, board.getNode(3, 4));
+		
+		board.movePlayerTo(3,4);
+		System.out.println(board.toString());
+		board.movePlayerTo(4,4);
+		System.out.println(board.toString());
+		assertEquals(NodeType.BLOCK, board.getNode(5, 4));
+		assertEquals(NodeType.PLAYER, board.getNode(4, 4));
+		assertEquals(NodeType.SPACE, board.getNode(3, 4));
+		assertEquals(NodeType.SPACE, board.getNode(2, 4));
+		
+		board.movePlayerTo(3,4);
+		System.out.println(board.toString());
+		board.movePlayerTo(3,3);
+		System.out.println(board.toString());
+		assertEquals(NodeType.BLOCK, board.getNode(3, 2));
+		assertEquals(NodeType.PLAYER, board.getNode(3, 3));
+		assertEquals(NodeType.SPACE, board.getNode(3, 4));
+		assertEquals(NodeType.SPACE, board.getNode(2, 4));
+		assertEquals(NodeType.SPACE, board.getNode(4, 4));
+		
+		board.movePlayerTo(3,4);
+		System.out.println(board.toString());
+		board.movePlayerTo(3,5);
+		System.out.println(board.toString());
+		assertEquals(NodeType.BLOCK_ON_GOAL, board.getNode(3, 6));
+		assertEquals(NodeType.PLAYER, board.getNode(3, 5));
+		assertEquals(NodeType.SPACE, board.getNode(3, 4));
+		assertEquals(NodeType.SPACE, board.getNode(2, 4));
+		assertEquals(NodeType.SPACE, board.getNode(4, 4));
+		assertEquals(NodeType.SPACE, board.getNode(3, 3));
+
+	}
+	
+	@Test
+	public void testBadMovement()
+	{		
+	
 	}
 }
