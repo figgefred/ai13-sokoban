@@ -185,6 +185,19 @@ public class BoardState
         return positions;
     }
     
+    public int getRowsCount()
+    {
+        return Map.size();
+    }
+    
+    public int getColumnsCount(int r)
+    {
+        int size = Map.get(r).size();
+        if(r < 0 || r >= size)
+            return -1;
+        return size;
+    }
+    
     public List<BoardPosition> getNeighbours(BoardPosition pos)
     {
         return getNeighbours(pos.Row, pos.Column);
