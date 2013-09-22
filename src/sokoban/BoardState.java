@@ -9,6 +9,7 @@ import sokoban.types.NodeType;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import sokoban.Algorithms.ISearchAlgorithmPath;
@@ -21,8 +22,9 @@ public class BoardState
 {
     // Game board
     private Map<BoardPosition, Node> Map;
-    private Set<Node> Goals;
-    private Node StartNode;
+    private List<List<NodeType>> newMap = new ArrayList<>();
+    private Set<BoardPosition> Goals;
+    private BoardPosition CurrentNode;
     private boolean StartingOnGoal = false;
     private int IDCounter = 1;
     
@@ -52,27 +54,41 @@ public class BoardState
             if(tmp == null || tmp.equals(""))
                 break;
             columns = tmp.toCharArray();
+            
+            newMap.add(new ArrayList<NodeType>(columns.length));
             for(int cIndex = 0; cIndex  < columns.length; cIndex++)
             {
+				
                 BoardPosition p = new BoardPosition(rIndex, cIndex);
+                /*
                 Node n = new Node(IDCounter++, p);
                 n.setNodeType(getNodeType(columns[cIndex]));
                 Map.put(p, n);
-                if(isGoalType(n))
+                */
+                NodeType type = getNodeType(columns[cIndex]);
+                
+                if(isGoalType(type))
                 {
-                    Goals.add(n);
+                    Goals.add(p);
                 }
-                if(isPlayerPosition(n))
+                
+                if(isPlayerPosition(type))
                 {
-                    StartNode = n;
+                    CurrentNode = p;                    
                 }
+                
+                newMap.get(rIndex).add(type);
+                                
+                /*
                 if(n.getNodeType() == NodeType.PLAYER_ON_GOAL)
                 {
                     StartingOnGoal = true;
                 }
+                * */
             }
         }
         
+        /*
         BoardPosition[] positions = new BoardPosition[4];
         Direction[] directions = Constants.GetPossibleDirections();
         
@@ -101,6 +117,7 @@ public class BoardState
                 }
             }            
         }
+        */
     }
     
     public String findPath(Node dest)
@@ -114,70 +131,74 @@ public class BoardState
     {
         if(StartingOnGoal)
             return "";
-        Path p = PathSearcher.getPath(StartNode, destinations);
+        Path p = PathSearcher.getPath(CurrentNode, destinations);
         if(p == null)
             return "no path";
         
         return p.toString();
-    }
+    }    
     
-    
-    private boolean isPlayerPosition(Node n) {
+    private boolean isPlayerPosition(NodeType n) {
         return n.getNodeType() == NodeType.PLAYER || n.getNodeType() == NodeType.PLAYER_ON_GOAL;
     }
     
-    private static boolean isGoalType(Node n)
+    private boolean isGoalType(NodeType n)
     {
         return n.getNodeType() == NodeType.GOAL;
     }
     
     private NodeType getNodeType(char c)
-        {
-            switch(c)
-            {
-                case ' ':
-                {       
-                    return NodeType.SPACE;
-                }
-                case '$':
-                {
-                    return NodeType.BLOCK;
-                }
-                case '*':
-                {
-                    return NodeType.BLOCK_ON_GOAL;
-                }
-                case '+':
-                {
-                    return NodeType.PLAYER_ON_GOAL;
-                }
-                case '.':
-                {
-                    return NodeType.GOAL;
-                }
-                case '@':
-                {
-                    return NodeType.PLAYER;
-                }
-                case '#':
-                default:
-                {
-                    return NodeType.WALL;
-                }
-            }
-        }
+	{
+		switch(c)
+		{
+			case ' ':
+			{       
+				return NodeType.SPACE;
+			}
+			case '$':
+			{
+				return NodeType.BLOCK;
+			}
+			case '*':
+			{
+				return NodeType.BLOCK_ON_GOAL;
+			}
+			case '+':
+			{
+				return NodeType.PLAYER_ON_GOAL;
+			}
+			case '.':
+			{
+				return NodeType.GOAL;
+			}
+			case '@':
+			{
+				return NodeType.PLAYER;
+			}
+			case '#':
+			default:
+			{
+				return NodeType.WALL;
+			}
+		}
+	}
     
-    public Node getNode(BoardPosition pos)
+	public NodeType getNode(int x, int y)
+	{
+		return newMap.get(x).get(y);
+	}
+	
+    public NodeType getNode(BoardPosition pos)
     {
-        return Map.get(pos);
+        return newMap.get(pos.Row).get(pos.Column);
     }
     
-    public Node getPlayerNode()
+    public BoardPosition getPlayerNode()
     {
-        return StartNode;
+        return ;
     }
     
-    public Set<Node> getGoalNodes()
+    public Set<BoardPosition> getGoalNodes()
     {
         return Goals;
     }
