@@ -14,7 +14,13 @@
 /nbproject/
 /nbproject/private/
 /build/
+/dist/
 
+#eclipse ignore grej
+/.metadata/
+/bin/
+.classpath
+.project
 
 ## generic files to ignore
 *~
