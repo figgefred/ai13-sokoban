@@ -8,9 +8,10 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+
+import sokoban.Algorithms.AStar_Path;
 import sokoban.Algorithms.BFS_Path;
 import sokoban.Algorithms.ISearchAlgorithmPath;
-import sokoban.BoardState;
 import sokoban.*;
 
 
@@ -24,11 +25,15 @@ public class Main {
 	public static void main(String[] args) throws IOException {
                 
 		ISearchAlgorithmPath pathSearcher = new BFS_Path();
+		//ISearchAlgorithmPath pathSearcher = new AStar_Path();
+
 		//BufferedReader br = new BufferedReader(
 		//new InputStreamReader(System.in));
 		
 		//FileReader rawInput = new FileReader("all.slc");
-		FileReader rawInput = new FileReader("sample.slc");
+		//FileReader rawInput = new FileReader("sample.slc");
+		FileReader rawInput = new FileReader("twenty.slc"); //the first twenty maps
+
 		BufferedReader br = new BufferedReader(rawInput);
 		String tmp = br.readLine();
 		List<String> buffer = null;
