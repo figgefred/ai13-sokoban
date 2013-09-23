@@ -10,6 +10,6 @@ package sokoban.types;
  */
 public enum NodeType {
     
-    BLOCK, BLOCK_ON_GOAL, WALL, PLAYER, GOAL, PLAYER_ON_GOAL, SPACE
+    INVALID, BLOCK, BLOCK_ON_GOAL, WALL, PLAYER, GOAL, PLAYER_ON_GOAL, SPACE
 }
 

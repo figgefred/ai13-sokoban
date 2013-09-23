@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package sokoban;
+package Main;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 import sokoban.Algorithms.BFS_Path;
 import sokoban.Algorithms.ISearchAlgorithmPath;
+import sokoban.BoardState;
+import sokoban.*;
 
 
 public class Main {
@@ -65,8 +67,24 @@ public class Main {
                         
 			String output = player.findPath(b.getPlayerNode(), b.getGoalNodes());
 			System.out.println("Level " + levelNumber + ": " + output);
+                        if(VERBOSE)
+                        {
+                            StringBuilder sb = new StringBuilder();
+                            for(int i = 0; i < b.getRowsCount(); i++)
+                            {
+                                for(int j = 0; j < b.getColumnsCount(i); j++)
+                                {
+                                    sb.append(Constants.GetTypeAsString(b.getNode(i, j)));
+                                }
+                                sb.append("\n");
+                            }
+                            System.out.println("###########DEBUG##############");
+                            System.out.println(sb.toString());
+                            System.out.println("###########DEBUG##############");
+                        }
 			levelNumber++;
 		}
 	}
 } // End Main
+
 

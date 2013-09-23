@@ -32,24 +32,35 @@ public class BFS_Path implements ISearchAlgorithmPath {
     }
     
     @Override
-    public Path getPath(BoardState state, BoardPosition initialNode, Set<BoardPosition> destinations) {
-        if(initialNode == null || destinations.isEmpty())
+    public Path getPath(BoardState state, BoardPosition pStart, Set<BoardPosition> destinations) {
+        if(pStart == null || destinations.isEmpty())
         {
             return null;
         }
         Map<BoardPosition, BoardPosition> path = new HashMap<BoardPosition, BoardPosition>();
         Queue<BoardPosition> queue = new LinkedList<BoardPosition>();
-
-        Map<BoardPosition, Boolean> Visited = new HashMap<BoardPosition, Boolean>();
         
-        Boolean visited = Visited.get(initialNode);
         
-        if(visited == null || !visited.booleanValue())
+        boolean[][] visited = new boolean[state.getRowsCount()][];
+        for(int i = 0; i < visited.length; i++)
         {
-            Visited.put(initialNode, true);
+            int size = state.getColumnsCount(i);
+            /*if(size < 0)
+                size = 0;*/
+            visited[i] = new boolean[size];
         }
-        queue.add(initialNode);
-
+        
+        //System.out.println("Test: pos= " + pStart);
+        //System.out.println("Test: coordinates pointing at= " + state.getNode(pStart));
+        //System.out.println("Test: visited has= " + visited[pStart.Row].length + " columns");
+        //System.out.println("Test: map has= " + state.getColumnsCount(pStart.Row) + " columns");
+        
+        if( !visited[pStart.Row][pStart.Column])
+        {
+            visited[pStart.Row][pStart.Column] = true;
+        }
+        
+        queue.add(pStart);
         BoardPosition goalReached = null;
         
         while(!queue.isEmpty())
@@ -58,25 +69,21 @@ public class BFS_Path implements ISearchAlgorithmPath {
             if(destinations.contains(p))
             {
                 goalReached = p;
-                continue;
+                break;
+//                continue;
             }
 
-            BoardPosition[] neighbours = null;
-            
-            //TODO find neighbours
-           
-            
-            
+            List<BoardPosition> neighbours = state.getNeighbours(p);
             for(BoardPosition p2: neighbours)
             {
                 // SOMETHING
-                visited = Visited.get(p2);
-                if( visited == null  || !visited.booleanValue())
+                if( !visited[p2.Row][p2.Column] )
                 {
-                    Visited.put(p2, true);
-                    if(isNoneBlockingNode(p2))
+                    visited[p2.Row][p2.Column] = true;
+                    if(isNoneBlockingNode(state, p2))
                     {
                         queue.add(p2);
+                        // p2 came from p
                         path.put(p2, p);
                     }
                 }
@@ -99,17 +106,21 @@ public class BFS_Path implements ISearchAlgorithmPath {
             //nodes.add(n2);
             p1 = p2;
         }
-        return new Path(nodes);
+        boolean reversedList = true;
+        return new Path(nodes, reversedList);
     }
     
-    private boolean isNoneBlockingNode(BoardPosition n)
+    private boolean isNoneBlockingNode(BoardState state, BoardPosition p)
     {
-        // TODO 
+        NodeType type = state.getNode(p);
+        if(type == NodeType.INVALID)
+            System.err.println("Referring to position " + p + " which refers to INVALID type");
         
-        return true;
-        /*return n.getNodeType() != NodeType.WALL &&
-                n.getNodeType() != NodeType.BLOCK &&
-                n.getNodeType() != NodeType.BLOCK_ON_GOAL;*/
+        return 
+               type != NodeType.INVALID &&
+               type != NodeType.WALL &&
+               type != NodeType.BLOCK &&
+               type != NodeType.BLOCK_ON_GOAL;
     }
     
 }

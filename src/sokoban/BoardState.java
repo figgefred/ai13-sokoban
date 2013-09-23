@@ -57,7 +57,7 @@ public class BoardState
                 n.setNodeType(getNodeType(columns[cIndex]));
                 Map.put(p, n);
                 */
-                NodeType type = getNodeType(columns[cIndex]);
+                NodeType type = Constants.GetNodeType(columns[cIndex]);
                 
                 if(isGoalType(type))
                 {
@@ -68,48 +68,9 @@ public class BoardState
                 {
                     CurrentNode = p;                    
                 }
-                
                 Map.get(rIndex).add(type);
-                                
-                /*
-                if(n.getNodeType() == NodeType.PLAYER_ON_GOAL)
-                {
-                    StartingOnGoal = true;
-                }
-                * */
             }
         }
-        
-        /*
-        BoardPosition[] positions = new BoardPosition[4];
-        Direction[] directions = Constants.GetPossibleDirections();
-        
-        for(Node n : Map.values())
-        {   
-            if(n.getNodeType() == NodeType.WALL)
-            {
-                continue;
-            }
-            int row = n.Position.Row;
-            int col = n.Position.Column;
-            // up
-                positions[0] = new BoardPosition(row-1, col);
-            //down
-                positions[1] = new BoardPosition(row+1, col);
-            //left
-                positions[2] = new BoardPosition(row, col-1);
-            // right
-                positions[3] = new BoardPosition(row, col+1);
-            for(int i = 0; i < positions.length; i++)
-            {
-                Node neighbour = Map.get(positions[i]);
-                if(neighbour != null)
-                {
-                    n.addNeighbour(directions[i], neighbour);
-                }
-            }            
-        }
-        */
     }
     
     private boolean isPlayerPosition(NodeType type) {
@@ -121,67 +82,36 @@ public class BoardState
         return type == NodeType.GOAL;
     }
     
-    private NodeType getNodeType(char c)
-	{
-		switch(c)
-		{
-			case ' ':
-			{       
-				return NodeType.SPACE;
-			}
-			case '$':
-			{
-				return NodeType.BLOCK;
-			}
-			case '*':
-			{
-				return NodeType.BLOCK_ON_GOAL;
-			}
-			case '+':
-			{
-				return NodeType.PLAYER_ON_GOAL;
-			}
-			case '.':
-			{
-				return NodeType.GOAL;
-			}
-			case '@':
-			{
-				return NodeType.PLAYER;
-			}
-			case '#':
-			default:
-			{
-				return NodeType.WALL;
-			}
-		}
-	}
-    
-    public NodeType getNode(int x, int y)
+    public NodeType getNode(int row, int col)
     {
-            return Map.get(x).get(y);
+        if(row < 0 || row >= Map.size())
+            return NodeType.INVALID;
+        if(col < 0 || col >= Map.get(row).size())
+            return NodeType.INVALID;
+        
+        return Map.get(row).get(col);
     }
 	
     public NodeType getNode(BoardPosition pos)
     {
-        return Map.get(pos.Row).get(pos.Column);
+        return getNode(pos.Row, pos.Column);
     }
     
-    public List<BoardPosition> getNeighbours(int x, int y)
+    public List<BoardPosition> getNeighbours(int row, int col)
     {
         List<BoardPosition> positions = new ArrayList<>();
         // UP
-        if(x > 0)
-         positions.add(new BoardPosition(x-1,y));
+        if(row > 0)
+         positions.add(new BoardPosition(row-1,col));
         // Down
-        if(x < Map.size()-1)
-         positions.add(new BoardPosition(x+1,y));
+        if(row < Map.size()-1)
+         positions.add(new BoardPosition(row+1,col));
         // LEFT
-        if(y > 0)
-         positions.add(new BoardPosition(x,y-1));
+        if(col > 0)
+         positions.add(new BoardPosition(row,col-1));
         //RIGHT
-        if(y < Map.get(x).size()-1)
-         positions.add(new BoardPosition(x,y+1));
+        if(col < Map.get(row).size()-1)
+         positions.add(new BoardPosition(row,col+1));
         return positions;
     }
     
@@ -192,10 +122,10 @@ public class BoardState
     
     public int getColumnsCount(int r)
     {
-        int size = Map.get(r).size();
+        int size = Map.size();
         if(r < 0 || r >= size)
             return -1;
-        return size;
+        return Map.get(r).size();
     }
     
     public List<BoardPosition> getNeighbours(BoardPosition pos)
@@ -211,6 +141,144 @@ public class BoardState
     public Set<BoardPosition> getGoalNodes()
     {
         return Goals;
+    }
+    
+    
+    /***
+     * Moves the player to target position. Resetting the old position to its normal value.
+     * Throws exception if the move is invalid.
+     * 
+     * Todo: Maybe add function to move player in a direction?
+     * @param row
+     * @param col
+     */
+    public void movePlayerTo(int row, int col)
+    {
+    	if(row < 0 || row >= Map.size())
+    		throw new IllegalArgumentException("Position is out of bounds (x = " + row + ")");
+    
+    	int diff = col - CurrentNode.Column + row - CurrentNode.Row;
+    	if(Math.abs(diff) > 1)
+    		throw new IllegalArgumentException("Can't move player more than one coordinate");
+    	
+    	NodeType type = Map.get(row).get(col);
+		if(type == NodeType.BLOCK || type == NodeType.BLOCK_ON_GOAL)
+		{
+			// Check if block can be pushed	(and if so do so)	
+			if(diff > 0) 
+			{
+				if(row > CurrentNode.Row) // South
+					pushBlock(row, col, row+1, col);					
+				else
+					pushBlock(row, col, row, col+1); // East
+			}
+			else { 
+				if(row < CurrentNode.Row) // North
+					pushBlock(row, col, row-1, col);
+				else
+					pushBlock(row, col, row, col-1); // West
+					
+			}
+		
+		} else if(type != NodeType.SPACE) {
+			// Wall or other invalid move
+			throw new IllegalArgumentException("Invalid move");			
+		}
+		
+		// Set new position
+		Map.get(row).set(col, type == NodeType.GOAL ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER);    	
+    	
+		// Reset old position
+    	NodeType playerType = Map.get(CurrentNode.Row).get(CurrentNode.Column);
+		Map.get(CurrentNode.Row).set(CurrentNode.Column, (playerType == NodeType.PLAYER) ? NodeType.SPACE : NodeType.GOAL);
+		CurrentNode = new BoardPosition(row, col);
+	
+    }
+    
+    private void pushBlock(int row, int col, int newrow, int newcol) {
+    	NodeType orig = Map.get(row).get(col);
+    	NodeType dest = Map.get(newrow).get(newcol);
+    	
+    	if(orig != NodeType.BLOCK && orig != NodeType.BLOCK_ON_GOAL)
+    		throw new IllegalArgumentException("Push was called to push non-block: " + orig.toString());
+    	if(dest != NodeType.GOAL && dest != NodeType.SPACE)
+    		throw new IllegalArgumentException("Can't push block, something is in the way: " + dest.toString());    	
+    	
+    	Map.get(row).set(col, (orig == NodeType.BLOCK_ON_GOAL) ? NodeType.GOAL : NodeType.SPACE);
+    	
+    	Map.get(newrow).set(newcol, (dest == NodeType.GOAL) ? NodeType.BLOCK_ON_GOAL : NodeType.BLOCK);
+    }
+    
+    /***
+     * Moves the player to target position. Resetting the old position to its normal value
+     * @param p
+     */
+    public void movePlayerTo(BoardPosition p)
+    {
+    	movePlayerTo(p.Row, p.Column);
+    }
+    
+    /***
+     * Basic check if the game is won. Checks if all goals are occupied by a block.
+     * @return
+     */
+    public boolean isWin() {
+    	for(BoardPosition goal : Goals)
+    	{
+    		if(getNode(goal) != NodeType.BLOCK_ON_GOAL)
+    			return false;
+    	}
+    	return true;
+	}
+
+    public Direction getDirection(BoardPosition from, BoardPosition to)
+	{
+	    if( from.Row-1 == to.Row && from.Column == to.Column )
+	    {
+	        return Direction.UP;
+	    }
+	    if(from.Row+1 == to.Row && from.Column == to.Column)
+	    {
+	        return Direction.DOWN;
+	    }
+	    if(from.Column-1 == to.Column && from.Row == to.Row)
+	    {
+	        return Direction.LEFT;
+	    }
+	    if(from.Column+1 == to.Column && from.Row == to.Row)
+	    {
+	        return Direction.RIGHT;
+	    }
+	    return Direction.NONE;
+	}
+    
+    @Override
+    public String toString() {
+    	StringBuilder builder = new StringBuilder();
+    	for(List<NodeType> row : Map) {
+    		for(NodeType t : row)
+    			builder.append(Constants.GetCharFromNodeType(t));
+    		builder.append('\n');
+    	}
+    	
+    	return builder.toString();   		
+    }
+    
+  	public List<BoardPosition> getBlockNodes()
+    {
+        List<BoardPosition> blocks = new ArrayList<>();
+        for(int i = 0; i < Map.size(); i++)
+        {
+            for(int j = 0; j < Map.get(i).size(); j ++)
+            {
+                NodeType type = getNode(i,j);
+                if( type == NodeType.BLOCK || type == NodeType.BLOCK_ON_GOAL )
+                {
+                    blocks.add(new BoardPosition(i, j));
+                }
+            }
+        }
+        return blocks;
     }
     
 
