@@ -42,38 +42,53 @@ public class AStar_Path implements ISearchAlgorithmPath{
     				NodeType nodeType=state.getNode(row, column);
     				if(nodeType== NodeType.SPACE || nodeType == NodeType.GOAL); 
     					//nMap.put(arg0, arg1)
-    				nodeMap.get(row).add(new AStar_Node(Math.abs((row-goal.Row)+(column-goal.Column))));
+    					nodeMap.get(row).add(new AStar_Node(Math.abs((row-goal.Row)+(column-goal.Column))));
     		}
     		}
     		
     		
     		while(!openSet.isEmpty()){
     			AStar_Node current = (AStar_Node) openSet.poll();
-    			if(current.bp == destination){
+    			if(current.bp == goal){
     				//TODO
     			}
     			closedSet.add(current);
-    	//		List<BoardPosition> neighbourPositions = state.getNeighbours()
-    			
+    			List<BoardPosition> neighbourPositions = state.getNeighbours(current.bp);
+    			for(BoardPosition neighbour : neighbourPositions){
+    				AStar_Node neighbourNode=nodeMap.get(neighbour.Row).get(neighbour.Column);
+    				int tentative_g_score = current.g+1;
+    				if(closedSet.contains(neighbourNode) && (tentative_g_score >= neighbourNode.g)){
+    					//Continue
+    				}if(!closedSet.contains(neighbourNode) || (tentative_g_score < neighbourNode.g)){
+    					neighbourNode.parent=current;
+    					neighbourNode.g=tentative_g_score;
+    					neighbourNode.f=neighbourNode.g+neighbourNode.h;
+    					if(!openSet.contains(neighbourNode)){
+    						openSet.add(neighbourNode);
+    					}
+    				}
+    					
+    			}
     				
     			
     		}
     		
     		return null;
         }
-		return path;
+		
         
 
 	}
 	
 	public void reconstruct_path(Path came_from, BoardPosition current_node){
-		//TODO
+		if(current_node)
 	}
 	
 	private class AStar_Node implements Comparable{
 		int g=1; //total cost of getting to this node
 		int h; //estimated time to reach the finish from this node
 		int f; //g+h
+		AStar_Node parent;
 		BoardPosition bp;
 		
 		private AStar_Node(int hCost){
