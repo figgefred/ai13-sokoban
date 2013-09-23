@@ -130,9 +130,43 @@ public class BoardStateTest {
 
 	}
 	
-	@Test
-	public void testBadMovement()
+	@Test(expected= IllegalArgumentException.class) 
+	public void testBadMovementWall() throws IOException
 	{		
+		BoardState board = getBoardFromFile("testing/badmovetest");
+		assertEquals(NodeType.PLAYER, board.getNode(2, 4));
+		board.movePlayerTo(2, 3);
+		System.out.println(board.toString());
+		fail("should have thrown exception");
+	}
 	
+	@Test(expected= IllegalArgumentException.class) 
+	public void testBadMovementBlockPush() throws IOException
+	{		
+		BoardState board = getBoardFromFile("testing/badmovetest");
+		assertEquals(NodeType.PLAYER, board.getNode(2, 4));
+		board.movePlayerTo(3, 4);
+		System.out.println(board.toString());
+		fail("should have thrown exception");
+	}
+	
+	@Test(expected= IllegalArgumentException.class) 
+	public void testBadMovementBlockPush2() throws IOException
+	{		
+		BoardState board = getBoardFromFile("testing/badmovetest");
+		assertEquals(NodeType.PLAYER, board.getNode(2, 4));
+		board.movePlayerTo(1, 4);
+		System.out.println(board.toString());
+		fail("should have thrown exception");
+	}
+	
+	@Test(expected= IllegalArgumentException.class) 
+	public void testBadMovementBlockPush3() throws IOException
+	{		
+		BoardState board = getBoardFromFile("testing/badmovetest");
+		assertEquals(NodeType.PLAYER, board.getNode(2, 4));
+		board.movePlayerTo(2, 5);
+		System.out.println(board.toString());
+		fail("should have thrown exception");
 	}
 }

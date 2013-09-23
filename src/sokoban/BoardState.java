@@ -165,18 +165,19 @@ public class BoardState
 		if(type == NodeType.BLOCK || type == NodeType.BLOCK_ON_GOAL)
 		{
 			// Check if block can be pushed	(and if so do so)	
-			if(diff > 0) // North, west
+			if(diff > 0) 
 			{
-				if(row > CurrentNode.Row) // North
-					pushBlock(row, col, row, col+1);
+				if(row > CurrentNode.Row) // South
+					pushBlock(row, col, row+1, col);					
 				else
-					pushBlock(row, col, row+1, col);
+					pushBlock(row, col, row, col+1); // East
 			}
-			else { // south, east
-				if(row < CurrentNode.Row) // South
-					pushBlock(row, col, row, col-1);
-				else
+			else { 
+				if(row < CurrentNode.Row) // North
 					pushBlock(row, col, row-1, col);
+				else
+					pushBlock(row, col, row, col-1); // West
+					
 			}
 		
 		} else if(type != NodeType.SPACE) {
@@ -203,9 +204,9 @@ public class BoardState
     	if(dest != NodeType.GOAL && dest != NodeType.SPACE)
     		throw new IllegalArgumentException("Can't push block, something is in the way: " + dest.toString());    	
     	
-    	Map.get(col).set(row, (orig == NodeType.BLOCK_ON_GOAL) ? NodeType.GOAL : NodeType.SPACE);
+    	Map.get(row).set(col, (orig == NodeType.BLOCK_ON_GOAL) ? NodeType.GOAL : NodeType.SPACE);
     	
-    	Map.get(newcol).set(newrow, (dest == NodeType.GOAL) ? NodeType.BLOCK_ON_GOAL : NodeType.BLOCK);
+    	Map.get(newrow).set(newcol, (dest == NodeType.GOAL) ? NodeType.BLOCK_ON_GOAL : NodeType.BLOCK);
     }
     
     /***
