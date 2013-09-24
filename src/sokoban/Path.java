@@ -36,7 +36,7 @@ public class Path {
     public Path(List<BoardPosition> nodes, boolean reversedList)
     {
         this.Nodes = nodes;
-        if(reversedList)
+        if(reversedList && Nodes != null)
             Collections.reverse(Nodes);        
     }  
     

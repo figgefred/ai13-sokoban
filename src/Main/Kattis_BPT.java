@@ -53,15 +53,19 @@ public class Kattis_BPT {
                 {
                     System.out.println("");
                 }
-                
-                Path p = null;
-                for(BoardPosition goal: state.getGoalNodes())
+                else
                 {
-                    p = player.findPath(state.getPlayerNode(), goal);
-                    if(p != null)
-                        break;
+                    Path p = null;
+                    for(BoardPosition goal: state.getGoalNodes())
+                    {
+                        p = player.findPath(state.getPlayerNode(), goal);
+                        if(p == null)
+                            continue;
+                        if(p.getPath() != null && p.getPath().size() > 0)
+                            break;
+                    }
+                    System.out.println(p.toString());
                 }
-                System.out.println(p.toString());
                 
     }
    
