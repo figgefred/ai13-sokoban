@@ -10,10 +10,12 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import sokoban.Algorithms.BFS_Path;
+import sokoban.Algorithms.*;
 import sokoban.BoardPosition;
 import sokoban.BoardState;
+import sokoban.Path;
 import sokoban.Player;
+import sokoban.types.NodeType;
 
 /**
  *
@@ -40,20 +42,26 @@ public class Kattis_BPT {
                 }
                 tmp = null;
                 
+                //ISearchAlgorithmPath pathSearcher = new BFS_Path();
+                //ISearchAlgorithmPath pathSearcher = new AStar_Path();
+                ISearchAlgorithmPath pathSearcher = new AStar2_Path();
+                                
                 BoardState state = new BoardState(input);
-                Player player = new Player(state, new BFS_Path());
-                String output = player.findPath(state.getPlayerNode(), state.getGoalNodes());
-                
-                
-                for(int r = 0; r < state.getRowsCount(); r++)
+                Player player = new Player(state, pathSearcher);
+               
+                if(state.getNode((state.getPlayerNode())) == NodeType.PLAYER_ON_GOAL)
                 {
-                    
-                    
-                    
+                    System.out.println("");
                 }
                 
-                
-                System.out.println(output);
+                Path p = null;
+                for(BoardPosition goal: state.getGoalNodes())
+                {
+                    p = player.findPath(state.getPlayerNode(), goal);
+                    if(p != null)
+                        break;
+                }
+                System.out.println(p.toString());
                 
     }
    
