@@ -21,16 +21,13 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) throws IOException {
-                
-		//ISearchAlgorithmPath pathSearcher = new Greedy_Path();
-		ISearchAlgorithmPath pathSearcher = new AStar2_Path();
 
 		//BufferedReader br = new BufferedReader(
 		//new InputStreamReader(System.in));
 		
-		//FileReader rawInput = new FileReader("all.slc");
+		FileReader rawInput = new FileReader("all.slc");
 		//FileReader rawInput = new FileReader("sample.slc");
-		FileReader rawInput = new FileReader("twenty.slc"); //the first twenty maps
+		//FileReader rawInput = new FileReader("twenty.slc"); //the first twenty maps
 
 		BufferedReader br = new BufferedReader(rawInput);
 		String tmp = br.readLine();
@@ -55,44 +52,49 @@ public class Main {
 		
 		int levelNumber = 1;
                 
+                //ISearchAlgorithmPath pathSearcher = new BFS_Path();
+                ISearchAlgorithmPath pathSearcher = new GreedyBFS_Path();
+                //ISearchAlgorithmPath pathSearcher = new AStar_Path();
+                //ISearchAlgorithmPath pathSearcher = new AStar2_Path();
+                
 		for(List<String> level: levelBuffer)
 		{			
-			if(VERBOSE)
-			{
-				for(String line: level)
-				{
-					System.out.println(line);
-				}
-			}
-			BoardState b = new BoardState(level);
-                        
-                        Player player = new Player(b, pathSearcher);
-            
-            for(BoardPosition goal: b.getGoalNodes())
-            {
-    			Path output = player.findPath(b.getPlayerNode(), goal);
-    			
-    			System.out.println("Level " + levelNumber + ": " + output);
-    			if(output != null)
-    				break;
-            }
-                        if(VERBOSE)
-                        {
-                            StringBuilder sb = new StringBuilder();
-                            for(int i = 0; i < b.getRowsCount(); i++)
+                    if(VERBOSE)
+                    {
+                            for(String line: level)
                             {
-                                for(int j = 0; j < b.getColumnsCount(i); j++)
-                                {
-                                    sb.append(Constants.GetTypeAsString(b.getNode(i, j)));
-                                }
-                                sb.append("\n");
+                                    System.out.println(line);
                             }
-                            System.out.println("###########DEBUG##############");
-                            System.out.println(sb.toString());
-                            System.out.println("###########DEBUG##############");
+                    }
+                    BoardState b = new BoardState(level);    
+                    Player player = new Player(b, pathSearcher);
+                    Path path = null;
+                    for(BoardPosition goal: b.getGoalNodes())
+                    {
+                        path = player.findPath(b.getPlayerNode(), goal);
+                        if(path == null)
+                            continue;
+                        if(path.getPath() != null && path.getPath().size() > 0)
+                            break;
+                    }
+                    System.out.println("Level " + levelNumber + ": " + path);
+                    if(VERBOSE)
+                    {
+                        StringBuilder sb = new StringBuilder();
+                        for(int i = 0; i < b.getRowsCount(); i++)
+                        {
+                            for(int j = 0; j < b.getColumnsCount(i); j++)
+                            {
+                                sb.append(Constants.GetTypeAsString(b.getNode(i, j)));
+                            }
+                            sb.append("\n");
                         }
-			levelNumber++;
-		}
+                        System.out.println("###########DEBUG##############");
+                        System.out.println(sb.toString());
+                        System.out.println("###########DEBUG##############");
+                    }
+                    levelNumber++;
+            }
 	}
 } // End Main
 
