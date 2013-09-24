@@ -16,6 +16,8 @@ import sokoban.BoardPosition;
 import sokoban.BoardState;
 import sokoban.Constants;
 import sokoban.Path;
+import sokoban.Algorithms.ExploreConditions.IExploreCondition;
+import sokoban.types.Direction;
 import sokoban.types.NodeType;
 
 /**
@@ -24,6 +26,13 @@ import sokoban.types.NodeType;
  */
 public class BFS_Path implements ISearchAlgorithmPath {
     
+	private IExploreCondition Cond;
+	
+	public BFS_Path(IExploreCondition cond)
+	{
+		Cond = cond;
+	}
+	
     @Override
     public Path getPath(BoardState state, BoardPosition pStart, BoardPosition destination) {
         if(pStart == null || destination == null)
@@ -31,61 +40,55 @@ public class BFS_Path implements ISearchAlgorithmPath {
             return null;
         }
         Map<BoardPosition, BoardPosition> path = new HashMap<BoardPosition, BoardPosition>();
-        Queue<BoardPosition> queue = new LinkedList<BoardPosition>();
-        
-        boolean[][] visited = new boolean[state.getRowsCount()][];
-        for(int i = 0; i < visited.length; i++)
-        {
-            int size = state.getColumnsCount(i);
-            /*if(size < 0)
-                size = 0;*/
-            visited[i] = new boolean[size];
-        }
-        
-        //System.out.println("Test: pos= " + pStart);
-        //System.out.println("Test: coordinates pointing at= " + state.getNode(pStart));
-        //System.out.println("Test: visited has= " + visited[pStart.Row].length + " columns");
-        //System.out.println("Test: map has= " + state.getColumnsCount(pStart.Row) + " columns");
-        
-        if( !visited[pStart.Row][pStart.Column])
-        {
-            visited[pStart.Row][pStart.Column] = true;
-        }
+        Queue<BoardPosition> queue = new LinkedList<BoardPosition>();        
         
         queue.add(pStart);
         BoardPosition goalReached = null;
+        HashMap<BoardPosition, BoardState> oldStates = new HashMap<BoardPosition, BoardState>();
+        Set<Integer> repeatedStates = new HashSet<Integer>();
         
-        while(!queue.isEmpty())
+        oldStates.put(pStart, state);
+        repeatedStates.add(state.hashCode());
+        
+        while(!queue.isEmpty() )
         {
             BoardPosition p = queue.poll();
+            BoardState s = oldStates.get(p);
+            
             if(p.equals(destination))
             {
                 goalReached = p;
                 break;
-//                continue;
             }
-
-            List<BoardPosition> neighbours = state.getNeighbours(p);
+            List<BoardPosition> neighbours = s.getNeighbours(p);
             for(BoardPosition p2: neighbours)
             {
-                // SOMETHING
-                if( !visited[p2.Row][p2.Column] )
-                {
-                    visited[p2.Row][p2.Column] = true;
-                    if(isNoneBlockingNode(state, p2))
+
+                	BoardState newState = (BoardState)s.clone();
+                	boolean blabla = newState.moveBlockTo(p.Row, p.Column, s.getDirection(p, p2));
+                	
+                	if(Cond.explore(s, p, p2))
                     {
-                        queue.add(p2);
-                        // p2 came from p
-                        path.put(p2, p);
-                    }
+                    	if(blabla && !repeatedStates.contains(newState.hashCode()))
+                    	{
+                    		repeatedStates.add(newState.hashCode());
+                        	oldStates.put(p2, newState);
+                        	
+                            queue.add(p2);
+
+                            // p2 came from p
+                            path.put(p2, p);
+                    	}
+//                    }
                 }
             }
         }
+
+        
         if(goalReached == null)
         {
             return new Path(null, false);
         }
-
         List<BoardPosition> nodes = new ArrayList<>();
         BoardPosition p1 = goalReached;
         while(p1 != null)
@@ -150,7 +153,7 @@ public class BFS_Path implements ISearchAlgorithmPath {
                 if( !visited[p2.Row][p2.Column] )
                 {
                     visited[p2.Row][p2.Column] = true;
-                    if(isNoneBlockingNode(state, p2))
+                    if(Cond.explore(state, p, p2))
                     {
                         queue.add(p2);
                         // p2 came from p

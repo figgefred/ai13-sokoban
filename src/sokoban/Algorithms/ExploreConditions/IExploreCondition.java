@@ -13,6 +13,7 @@ import sokoban.BoardState;
  */
 public interface IExploreCondition {
     
+	public void setSpecialNode(BoardPosition special);
     public boolean explore(BoardState state, BoardPosition from, BoardPosition to);
     
 }

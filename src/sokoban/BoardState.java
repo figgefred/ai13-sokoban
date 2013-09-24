@@ -177,9 +177,24 @@ public class BoardState implements Cloneable
     
     public boolean isBlockingNode(BoardPosition position) {
     	NodeType type = getNode(position);    	
-    	return (type != NodeType.INVALID && type != NodeType.GOAL && type != NodeType.SPACE && type != NodeType.PLAYER && type != NodeType.PLAYER_ON_GOAL);
+    	return (type != NodeType.INVALID && type != NodeType.GOAL && type != NodeType.SPACE && type != NodeType.PLAYER); //&& type != NodeType.PLAYER_ON_GOAL);
     }
     
+    public boolean isBlock(int r, int c)
+    {
+    	NodeType type = getNode(r, c);
+        if(type == NodeType.INVALID)
+            System.err.println("Referring to position " + r + ", " + c + " which refers to INVALID type");
+        
+        return 
+               type == NodeType.BLOCK ||
+               type == NodeType.BLOCK_ON_GOAL;
+    }
+    
+	public boolean isBlock(BoardPosition b) {
+		
+		return isBlock(b.Row, b.Column);
+	}
     
     public int getRowsCount()
     {
@@ -205,6 +220,33 @@ public class BoardState implements Cloneable
         return Goals;
     }
     
+    public boolean moveBlockTo(int fromRow, int fromCol, Direction dir)
+    {
+    	try
+    	{
+	    	switch(dir)
+	    	{
+	    	case UP:
+	    		pushBlock(fromRow, fromCol, fromRow - 1, fromCol);
+	    		break;
+	    	case DOWN:
+	    		pushBlock(fromRow, fromCol, fromRow + 1, fromCol);
+	    		break;
+	    	case LEFT:
+	    		pushBlock(fromRow, fromCol, fromRow, fromCol - 1);
+	    		break;
+	    	case RIGHT:
+	    		pushBlock(fromRow, fromCol, fromRow, fromCol + 1);
+	    		break;
+			default:
+				break;
+	    	}
+    	} catch(IllegalArgumentException ex)
+    	{
+    		return false;
+    	}
+    	return true;
+    }
     
     /***
      * Moves the player to target position. Resetting the old position to its normal value.
@@ -418,6 +460,20 @@ public class BoardState implements Cloneable
 		
 		return new BoardState(buffer);
 	}
-    
+	
+	public int hashCode()
+	{
+		List<BoardPosition> positions = getBlockNodes();
+		//int weight = 1;
+		int incrementedWeight = 1;
+		int val = 0;
+		for(BoardPosition pos: positions)
+		{
+			val += incrementedWeight*pos.hashCode();
+			incrementedWeight *= 4;
+		}
+		return val;
+	}
+
 
 }

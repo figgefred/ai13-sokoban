@@ -20,14 +20,28 @@ public class Player {
     private ISearchAlgorithmPath DefaultPathSearcher;
     
     // Kolla om man kan vinna , kanske greedy bfs?
-    private ISearchAlgorithmPath BlockPathChecker;
+    private ISearchAlgorithmPath BlockPathSearcher;
 
     private BoardState CurrentBoardState;
     
-    public Player(BoardState initalState, ISearchAlgorithmPath pathSearcher)
+    public Player(BoardState initalState, ISearchAlgorithmPath blockPathSearcher,  ISearchAlgorithmPath pathSearcher)
     {
         CurrentBoardState = initalState;
         DefaultPathSearcher = pathSearcher;
+        BlockPathSearcher = blockPathSearcher;
+    }
+    
+    public Path pushBlockPath(BoardPosition start, BoardPosition goal)
+    {
+        Path p = BlockPathSearcher.getPath(CurrentBoardState, start, goal);
+        
+        if(p == null)
+        {
+        	ArrayList<BoardPosition> nodes = null;
+        	return new Path(nodes);
+        }
+        
+        return p;
     }
     
     public Path findPath(BoardPosition start, BoardPosition goal)

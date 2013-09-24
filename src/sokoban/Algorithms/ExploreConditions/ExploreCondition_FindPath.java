@@ -25,5 +25,11 @@ public class ExploreCondition_FindPath implements IExploreCondition {
         return State.isNoneBlockingNode(to);
     }
 
+	@Override
+	public void setSpecialNode(BoardPosition special) {
+		// Nothing
+		return;
+	}
+
     
 }
