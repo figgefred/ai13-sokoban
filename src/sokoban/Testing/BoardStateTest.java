@@ -17,25 +17,7 @@ import sokoban.types.NodeType;
 
 public class BoardStateTest {
 	
-	private BoardState getBoardFromFile(String filename) throws IOException
-	{
-		FileReader rawInput = new FileReader(filename);
-		BufferedReader br = new BufferedReader(rawInput);
-		
-		List<String> buffer = new ArrayList<>();
-		
-		while(true)
-		{
-			String tmp = br.readLine();
-			if(tmp == null)
-				break;
-			buffer.add(tmp);			
-		}
-		br.close();
-	
-		
-		return new BoardState(buffer);
-	}
+
 
 	/*
 	 * Testing using the following board:
@@ -48,7 +30,7 @@ public class BoardStateTest {
 	 */	
 	@Test
 	public void testBasicParsing() throws IOException {
-		BoardState board = getBoardFromFile("testing/parsetest");
+		BoardState board = BoardState.getBoardFromFile("testing/parsetest");
 		assertEquals(NodeType.WALL,board.getNode(0, 0));
 		assertEquals(NodeType.SPACE, board.getNode(1, 1));
 		assertEquals(NodeType.BLOCK_ON_GOAL, board.getNode(2, 4));
@@ -60,7 +42,7 @@ public class BoardStateTest {
 	
 	@Test
 	public void testBasicMovement() throws IOException {		
-		BoardState board = getBoardFromFile("testing/movetest1");
+		BoardState board = BoardState.getBoardFromFile("testing/movetest1");
 		assertEquals(NodeType.PLAYER, board.getNode(2, 4));
 		System.out.println(board.toString());
 		
@@ -88,7 +70,7 @@ public class BoardStateTest {
 	
 	@Test
 	public void testPushMovement() throws IOException {
-		BoardState board = getBoardFromFile("testing/pushtest1");		
+		BoardState board = BoardState.getBoardFromFile("testing/pushtest1");		
 		assertEquals(NodeType.PLAYER, board.getNode(3, 4));
 		System.out.println(board.toString());
 		
@@ -133,7 +115,7 @@ public class BoardStateTest {
 	@Test(expected= IllegalArgumentException.class) 
 	public void testBadMovementWall() throws IOException
 	{		
-		BoardState board = getBoardFromFile("testing/badmovetest");
+		BoardState board = BoardState.getBoardFromFile("testing/badmovetest");
 		assertEquals(NodeType.PLAYER, board.getNode(2, 4));
 		board.movePlayerTo(2, 3);
 		System.out.println(board.toString());
@@ -143,7 +125,7 @@ public class BoardStateTest {
 	@Test(expected= IllegalArgumentException.class) 
 	public void testBadMovementBlockPush() throws IOException
 	{		
-		BoardState board = getBoardFromFile("testing/badmovetest");
+		BoardState board = BoardState.getBoardFromFile("testing/badmovetest");
 		assertEquals(NodeType.PLAYER, board.getNode(2, 4));
 		board.movePlayerTo(3, 4);
 		System.out.println(board.toString());
@@ -153,7 +135,7 @@ public class BoardStateTest {
 	@Test(expected= IllegalArgumentException.class) 
 	public void testBadMovementBlockPush2() throws IOException
 	{		
-		BoardState board = getBoardFromFile("testing/badmovetest");
+		BoardState board = BoardState.getBoardFromFile("testing/badmovetest");
 		assertEquals(NodeType.PLAYER, board.getNode(2, 4));
 		board.movePlayerTo(1, 4);
 		System.out.println(board.toString());
@@ -163,7 +145,7 @@ public class BoardStateTest {
 	@Test(expected= IllegalArgumentException.class) 
 	public void testBadMovementBlockPush3() throws IOException
 	{		
-		BoardState board = getBoardFromFile("testing/badmovetest");
+		BoardState board = BoardState.getBoardFromFile("testing/badmovetest");
 		
 		board.movePlayerTo(2, 5);
 		System.out.println(board.toString());
@@ -172,7 +154,7 @@ public class BoardStateTest {
 	
 	@Test
 	public void testClone() throws IOException {
-		BoardState board = getBoardFromFile("testing/movetest1");
+		BoardState board = BoardState.getBoardFromFile("testing/movetest1");
 		assertEquals(NodeType.PLAYER, board.getNode(2, 4));
 		
 		BoardState board2 = (BoardState) board.clone();

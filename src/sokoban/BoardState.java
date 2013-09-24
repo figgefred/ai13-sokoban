@@ -6,6 +6,10 @@ package sokoban;
 
 import sokoban.types.Direction;
 import sokoban.types.NodeType;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -86,7 +90,7 @@ public class BoardState implements Cloneable
     
     private boolean isGoalType(NodeType type)
     {
-        return type == NodeType.GOAL;
+        return type == NodeType.GOAL || type == NodeType.BLOCK_ON_GOAL;
     }
     
     public NodeType getNode(int row, int col)
@@ -127,6 +131,56 @@ public class BoardState implements Cloneable
         return positions;
     }
     
+    public List<BoardPosition> getPushingPositions(BoardPosition pos) {
+    	return getPushingPositions(pos.Row, pos.Column);
+    }
+    
+    /***
+     * Returns neighbour positions which can be used to push this (assumed) block. 
+     * @param row
+     * @param col
+     * @return
+     */
+    public List<BoardPosition> getPushingPositions(int row, int col)
+    {
+    	NodeType node = getNode(row, col);
+    	 if(node != NodeType.BLOCK && node != NodeType.BLOCK_ON_GOAL)
+    		 throw new IllegalArgumentException("Cant get pushing positions for non blocks: ("+row+" "+col+ " " + node + ")");
+    	 
+		 List<BoardPosition> positions = new ArrayList<>();
+		 // UP and DOWN
+		 if(row > 0 && row < Map.size()-1) { 
+			BoardPosition down = new BoardPosition(row+1,col);       
+			BoardPosition up = new BoardPosition(row-1,col);
+			if(!isBlockingNode(down) && !isBlockingNode(up))
+			{
+				positions.add(up);
+				positions.add(down);
+			}
+		 }
+		 
+		 // LEFT //RIGHT
+		 if(col > 0 && col < Map.get(row).size()-1) {
+			BoardPosition left = new BoardPosition(row,col+1);
+			BoardPosition right = new BoardPosition(row,col-1);	
+			
+			if(!isBlockingNode(left) && !isBlockingNode(right))
+			{
+				positions.add(left);
+				positions.add(right);
+			}
+		 	
+		 }
+		 
+		 return positions;
+    }
+    
+    public boolean isBlockingNode(BoardPosition position) {
+    	NodeType type = getNode(position);    	
+    	return (type != NodeType.INVALID && type != NodeType.GOAL && type != NodeType.SPACE && type != NodeType.PLAYER && type != NodeType.PLAYER_ON_GOAL);
+    }
+    
+    
     public int getRowsCount()
     {
         return Map.size();
@@ -162,6 +216,9 @@ public class BoardState implements Cloneable
      */
     public void movePlayerTo(int row, int col)
     {
+    	if(new BoardPosition(row, col).equals(CurrentNode))
+    		return;
+    	
     	if(row < 0 || row >= Map.size())
     		throw new IllegalArgumentException("Position is out of bounds (x = " + row + ")");
     
@@ -188,9 +245,9 @@ public class BoardState implements Cloneable
 					
 			}
 		
-		} else if(type != NodeType.SPACE) {
+		} else if(type != NodeType.SPACE && type != NodeType.GOAL) {
 			// Wall or other invalid move
-			throw new IllegalArgumentException("Invalid move");			
+			throw new IllegalArgumentException("Invalid move: \n" + CurrentNode + "\n  " + row + " " + col + " is " + type);			
 		}
 		
 		// Set new position
@@ -198,9 +255,17 @@ public class BoardState implements Cloneable
     	
 		// Reset old position
     	NodeType playerType = Map.get(CurrentNode.Row).get(CurrentNode.Column);
-		Map.get(CurrentNode.Row).set(CurrentNode.Column, (playerType == NodeType.PLAYER) ? NodeType.SPACE : NodeType.GOAL);
-		CurrentNode = new BoardPosition(row, col);
-	
+		Map.get(CurrentNode.Row).set(CurrentNode.Column, (playerType == NodeType.PLAYER_ON_GOAL) ? NodeType.GOAL : NodeType.SPACE);
+		CurrentNode = new BoardPosition(row, col);	
+    }
+    
+    public void movePlayer(Path path) {
+    	for(BoardPosition pos : path.getPath())
+    	{
+    		if(pos.equals(CurrentNode))
+    			continue;
+    		movePlayerTo(pos);
+    	}
     }
     
     private void pushBlock(int row, int col, int newrow, int newcol) {
@@ -294,13 +359,33 @@ public class BoardState implements Cloneable
   		BoardState newState = new BoardState();
   		newState.CurrentNode = new BoardPosition(CurrentNode.Row, CurrentNode.Column);
   		 // yay casts...
-  		newState.Goals = (Set<BoardPosition>) ((HashSet<BoardPosition>) Goals).clone();
+  		newState.Goals = Goals;
   		for(List<NodeType> row : Map)
   			newState.Map.add((List<NodeType>) ((ArrayList<NodeType>) row).clone()); 	
   		
   		return newState;
   	}
 
+  	
+	public static BoardState getBoardFromFile(String filename) throws IOException
+	{
+		FileReader rawInput = new FileReader(filename);
+		BufferedReader br = new BufferedReader(rawInput);
+		
+		List<String> buffer = new ArrayList<>();
+		
+		while(true)
+		{
+			String tmp = br.readLine();
+			if(tmp == null)
+				break;
+			buffer.add(tmp);			
+		}
+		br.close();
+	
+		
+		return new BoardState(buffer);
+	}
     
 
 }

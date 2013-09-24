@@ -17,6 +17,10 @@ import sokoban.types.Direction;
 public class Path {
     private List<BoardPosition> Nodes;    
     
+    public Path() {
+    	this(new ArrayList<BoardPosition>(), false);
+    }
+    
     // Lazyconstructor för paths med endast en position (dvs ett steg)
     public Path(BoardPosition start) {
     	this(new ArrayList<BoardPosition>(), false);
@@ -75,11 +79,34 @@ public class Path {
     	return new Path(steps);
     }
     
+    /***
+     * Clones this path and appends given position to it.
+     * @param path
+     * @return
+     */
+    public Path cloneAndAppend(Path path)
+    {
+    	if(this.Nodes == null)
+    		return new Path(path.Nodes);
+    	ArrayList<BoardPosition> steps = (ArrayList<BoardPosition>)((ArrayList<BoardPosition>) this.Nodes).clone();
+    	steps.addAll(path.getPath());
+    	return new Path(steps);
+    }
+    
+    public void append(BoardPosition pos) {
+    	this.Nodes.add(pos);
+    }
+    
     @Override
     public String toString()
     {
+    	if(Nodes == null)
+    		return "";
+    	
         StringBuilder sb = new StringBuilder();
         BoardPosition firstNode = null;
+        
+        
         
         for(BoardPosition n: Nodes)
         {
