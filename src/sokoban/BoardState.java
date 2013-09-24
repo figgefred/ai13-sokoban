@@ -296,14 +296,46 @@ public class BoardState implements Cloneable
      * @return
      */
     public boolean isWin() {
-    	for(BoardPosition goal : Goals)
-    	{
-    		if(getNode(goal) != NodeType.BLOCK_ON_GOAL)
-    			return false;
-    	}
-    	return true;
-	}
+    for(BoardPosition goal : Goals)
+    {
+            if(getNode(goal) != NodeType.BLOCK_ON_GOAL)
+                    return false;
+    }
+    return true;
+    }
+    
+    public boolean isSpaceNode(int r, int c) {
+        NodeType type = getNode(r, c);
+        if(type == NodeType.INVALID)
+            System.err.println("Referring to position " + r + ", " + c + " which refers to INVALID type");
+        
+        return 
+               type == NodeType.GOAL ||
+                type == NodeType.SPACE;
+    }
 
+    public boolean isSpaceNode(BoardPosition p) {
+        return isSpaceNode(p.Row, p.Column);
+    }
+    
+    public boolean isNoneBlockingNode(int r, int c)
+    {
+        NodeType type = getNode(r, c);
+        if(type == NodeType.INVALID)
+            System.err.println("Referring to position " + r + ", " + c + " which refers to INVALID type");
+        
+        return 
+               type != NodeType.INVALID &&
+               type != NodeType.WALL &&
+               type != NodeType.BLOCK &&
+               type != NodeType.BLOCK_ON_GOAL;
+    }
+    
+    public boolean isNoneBlockingNode(BoardPosition p)
+    {
+        return isNoneBlockingNode(p.Row, p.Column);
+    }
+    
     public Direction getDirection(BoardPosition from, BoardPosition to)
 	{
 	    if( from.Row-1 == to.Row && from.Column == to.Column )

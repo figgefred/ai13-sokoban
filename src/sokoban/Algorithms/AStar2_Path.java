@@ -79,11 +79,7 @@ public class AStar2_Path implements ISearchAlgorithmPath{
         	
         	for(BoardPosition neighbour: neighbours)
         	{
-                if(!isNoneBlockingNode(state, neighbour))
-                	continue;
-                
-                
-                double tentative_g = nodeCosts.getKey() + 1;
+                        double tentative_g = nodeCosts.getKey() + 1;
         		
         		SimpleEntry<Double, Double> neighbourCosts = costs.get(neighbour);
         		double to_g = (neighbourCosts != null ? neighbourCosts.getKey() : Double.MAX_VALUE);
@@ -91,7 +87,7 @@ public class AStar2_Path implements ISearchAlgorithmPath{
         		if (closedSet.contains(neighbour.hashCode()) && tentative_g >= to_g)
                 	continue;
         		
-        		if(!openSet.contains(neighbour) || tentative_g < to_g)
+        		if( isNoneBlockingNode(state, neighbour) && (!openSet.contains(neighbour) || tentative_g < to_g) )
         		{
         			cameFrom.put(neighbour, node);
         			costs.put(neighbour, new SimpleEntry<>(tentative_g, getFValue(tentative_g, cost(neighbour, destination))));
