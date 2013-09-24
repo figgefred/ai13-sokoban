@@ -35,6 +35,8 @@ public class Path {
     // Lite konstigt med att reversea listan här? eller förekommer det ofta? idk
     public Path(List<BoardPosition> nodes, boolean reversedList)
     {
+        if(nodes == null)
+            throw new IllegalArgumentException("Path list with nodes is null");
         this.Nodes = nodes;
         if(reversedList && Nodes != null)
             Collections.reverse(Nodes);        

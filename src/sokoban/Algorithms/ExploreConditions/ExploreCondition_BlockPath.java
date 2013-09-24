@@ -12,24 +12,10 @@ import sokoban.BoardState;
  * @author figgefred
  */
 public class ExploreCondition_BlockPath implements IExploreCondition {
-    
-    private BoardState State;
-    private BoardPosition SpecialNode;
-    
-    public ExploreCondition_BlockPath(BoardState state)
-    {
-        State = state;
-    }
-    
+        
     @Override
     public boolean explore(BoardState state, BoardPosition from, BoardPosition to) {
-        return ( State.isNoneBlockingNode(to) && BoardEvaluations.isSpaceToMove(state, from, to, SpecialNode) );
+        return ( state.isNoneBlockingNode(to) && BoardEvaluations.isSpaceToMove(state, from, to) );
     }
-
-	@Override
-	public void setSpecialNode(BoardPosition special) {
-		SpecialNode = special;
-		
-	}
     
 }

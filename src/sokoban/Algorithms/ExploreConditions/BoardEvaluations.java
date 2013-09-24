@@ -14,7 +14,7 @@ import sokoban.types.Direction;
  */
 public class BoardEvaluations {
     
-    public static boolean isSpaceToMove(BoardState state, BoardPosition from, BoardPosition to, BoardPosition oldBlockPos)
+    public static boolean isSpaceToMove(BoardState state, BoardPosition from, BoardPosition to)
     {
         Direction dir = state.getDirection(from, to);
         boolean hasSpaceArea = false;

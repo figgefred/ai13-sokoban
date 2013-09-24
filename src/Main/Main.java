@@ -52,10 +52,13 @@ public class Main {
 		
 		int levelNumber = 1;
                 
-                //ISearchAlgorithmPath pathSearcher = new BFS_Path();
-                ISearchAlgorithmPath pathSearcher = new GreedyBFS_Path();
-                //ISearchAlgorithmPath pathSearcher = new AStar_Path();
-                //ISearchAlgorithmPath pathSearcher = new AStar2_Path();
+                //ISearchAlgorithmPath playerPathSearcher = new BFS_Path();
+                //ISearchAlgorithmPath playerPathSearcher = new GreedyBFS_Path();
+                //ISearchAlgorithmPath playerPathSearcher = new AStar_Path();
+                //ISearchAlgorithmPath playerPathSearcher = new AStar2_Path();
+                
+                ISearchAlgorithmPath playerPathSearcher = new BFS_MovePlayer();              // ALgorithm for searching paths for player
+                ISearchAlgorithmPath blockPathSearcher = new BFS_PushBlock(playerPathSearcher);  // Algorithms for searching paths for blocks
                 
 		for(List<String> level: levelBuffer)
 		{			
@@ -67,7 +70,7 @@ public class Main {
                             }
                     }
                     BoardState b = new BoardState(level);    
-                    Player player = new Player(b, pathSearcher);
+                    Player player = new Player(b, blockPathSearcher, playerPathSearcher);
                     Path path = null;
                     for(BoardPosition goal: b.getGoalNodes())
                     {

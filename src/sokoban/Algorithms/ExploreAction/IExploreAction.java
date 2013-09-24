@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package sokoban.Algorithms.ExploreConditions;
+package sokoban.Algorithms.ExploreAction;
 
 import sokoban.BoardPosition;
 import sokoban.BoardState;
@@ -11,8 +11,8 @@ import sokoban.BoardState;
  *
  * @author figgefred
  */
-public interface IExploreCondition {
+public interface IExploreAction {
     
-    public boolean explore(BoardState state, BoardPosition from, BoardPosition to);
+    boolean doAction(BoardState state, BoardPosition from, BoardPosition to);
     
 }

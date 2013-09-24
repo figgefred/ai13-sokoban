@@ -46,7 +46,7 @@ public class Main_BFSPush {
 		int levelNumber = 1;
                 
         
-        for(List<String> level: levelBuffer)
+            for(List<String> level: levelBuffer)
 		{
             for(String line: level)
             {
@@ -54,26 +54,32 @@ public class Main_BFSPush {
             }
             
             BoardState b = new BoardState(level);
-
-    		IExploreCondition pushCondition = new ExploreCondition_BlockPath(b);
-    		IExploreCondition playerPathCondition = new ExploreCondition_FindPath(b);
-    		
-            ISearchAlgorithmPath blockPathSearcher = new BFS_PushBlock(pushCondition, playerPathCondition);
-            ISearchAlgorithmPath playerPathSearcher = new BFS_Path(playerPathCondition);
+    	
+            ISearchAlgorithmPath playerPathSearcher = new BFS_MovePlayer();              // ALgorithm for searching paths for player
+            ISearchAlgorithmPath blockPathSearcher = new BFS_PushBlock(playerPathSearcher);  // Algorithms for searching paths for blocks
             Player player = new Player(b, blockPathSearcher, playerPathSearcher);
-
-            Path path = null;
             
-            for(BoardPosition goal: b.getGoalNodes())
+            Path path = null;
+//            BoardPosition posi = b.getBlockNodes().iterator().next();
+            int count = 0;
+            while( !b.isWin() && count < 1)
             {
-                //path = player.findPath(b.getPlayerNode(), goal);
-                path = player.pushBlockPath(b.getBlockNodes().iterator().next(), goal);
-                if(path == null)
-                    continue;
-                if(path.getPath() != null && path.getPath().size() > 0)
-                    break;
+                count ++;
+                for(BoardPosition posi: b.getBlockNodes())
+                {
+                    for(BoardPosition goal: b.getGoalNodes())
+                    {
+                        //path = player.findPath(b.getPlayerNode(), goal);
+                        path = player.pushBlockPath(posi, goal);
+                        if(path == null)
+                            continue;
+                        if(path.getPath() != null && path.getPath().size() > 0)
+                            break;
+                    }
+                }
+                System.out.println("Level " + levelNumber++ +": " + path);
             }
-			System.out.println("Level " + levelNumber++ +": " + path);
-		}
 	}
+    }
+
 }

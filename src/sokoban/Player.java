@@ -6,6 +6,7 @@ package sokoban;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import sokoban.Algorithms.ISearchAlgorithmPath;
 import sokoban.types.NodeType;
@@ -37,7 +38,7 @@ public class Player {
         
         if(p == null)
         {
-        	ArrayList<BoardPosition> nodes = null;
+        	ArrayList<BoardPosition> nodes = new ArrayList<BoardPosition>();
         	return new Path(nodes);
         }
         
@@ -50,7 +51,7 @@ public class Player {
         
         if(p == null)
         {
-        	ArrayList<BoardPosition> nodes = null;
+        	ArrayList<BoardPosition> nodes = new ArrayList<BoardPosition>();
         	return new Path(nodes);
         }
         
@@ -62,7 +63,7 @@ public class Player {
         Path p = DefaultPathSearcher.getPath(CurrentBoardState, start, destinations);   
         if(p == null)
         {
-        	ArrayList<BoardPosition> nodes = null;
+        	List<BoardPosition> nodes = new ArrayList<BoardPosition>();
         	return new Path(nodes);
         }
         return p;
