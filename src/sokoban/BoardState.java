@@ -18,18 +18,25 @@ import sokoban.Algorithms.ISearchAlgorithmPath;
  *
  * @author figgefred
  */
-public class BoardState 
+public class BoardState implements Cloneable
 {
     // Game board
     private List<List<NodeType>> Map = new ArrayList<>();
     private Set<BoardPosition> Goals;
     private BoardPosition CurrentNode;
     
+
+    
     public BoardState(List<String> rows)
     {    
         // Init board
         buildBoard(rows);
     }
+    
+    public BoardState() {
+    	
+    }
+    
     
     private void buildBoard(List<String> rows)
     {
@@ -97,21 +104,26 @@ public class BoardState
         return getNode(pos.Row, pos.Column);
     }
     
+    public List<BoardPosition> getNeighbours(BoardPosition pos)
+    {
+        return getNeighbours(pos.Row, pos.Column);
+    }
+    
     public List<BoardPosition> getNeighbours(int row, int col)
     {
         List<BoardPosition> positions = new ArrayList<>();
         // UP
         if(row > 0)
-         positions.add(new BoardPosition(row-1,col));
+        	positions.add(new BoardPosition(row-1,col));
         // Down
         if(row < Map.size()-1)
-         positions.add(new BoardPosition(row+1,col));
+        	positions.add(new BoardPosition(row+1,col));
         // LEFT
         if(col > 0)
-         positions.add(new BoardPosition(row,col-1));
+        	positions.add(new BoardPosition(row,col-1));
         //RIGHT
         if(col < Map.get(row).size()-1)
-         positions.add(new BoardPosition(row,col+1));
+        	positions.add(new BoardPosition(row,col+1));
         return positions;
     }
     
@@ -126,12 +138,8 @@ public class BoardState
         if(r < 0 || r >= size)
             return -1;
         return Map.get(r).size();
-    }
-    
-    public List<BoardPosition> getNeighbours(BoardPosition pos)
-    {
-        return getNeighbours(pos.Row, pos.Column);
-    }
+    }   
+
     
     public BoardPosition getPlayerNode()
     {
@@ -280,6 +288,19 @@ public class BoardState
         }
         return blocks;
     }
+  	
+  	@Override
+  	public Object clone() {
+  		BoardState newState = new BoardState();
+  		newState.CurrentNode = new BoardPosition(CurrentNode.Row, CurrentNode.Column);
+  		 // yay casts...
+  		newState.Goals = (Set<BoardPosition>) ((HashSet<BoardPosition>) Goals).clone();
+  		for(List<NodeType> row : Map)
+  			newState.Map.add((List<NodeType>) ((ArrayList<NodeType>) row).clone()); 	
+  		
+  		return newState;
+  	}
+
     
 
 }

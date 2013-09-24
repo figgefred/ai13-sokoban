@@ -4,6 +4,7 @@
  */
 package sokoban;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import sokoban.types.Direction;
@@ -14,20 +15,27 @@ import sokoban.types.Direction;
  * @author figgefred
  */
 public class Path {
-    private List<BoardPosition> Nodes;
-    private String StringOutput;
+    private List<BoardPosition> Nodes;    
+    
+    // Lazyconstructor för paths med endast en position (dvs ett steg)
+    public Path(BoardPosition start) {
+    	this(new ArrayList<BoardPosition>(), false);
+    	this.Nodes.add(start);
+    }    
     
     public Path(List<BoardPosition> nodes)
     {
         this(nodes, false);
     }
     
+    // Lite konstigt med att reversea listan här? eller förekommer det ofta? idk
     public Path(List<BoardPosition> nodes, boolean reversedList)
     {
         this.Nodes = nodes;
         if(reversedList)
-            Collections.reverse(Nodes);
-    }
+            Collections.reverse(Nodes);        
+    }  
+    
     
     public BoardPosition get(int index)
     {
@@ -38,9 +46,33 @@ public class Path {
         return Nodes.get(index);
     }
     
+    public BoardPosition last() {
+    	return Nodes.get(Nodes.size() -1);    
+    }
+    
+    public BoardPosition first() {
+    	return get(0);
+    }
+    
+    public boolean contains(BoardPosition pos) {
+    	return Nodes.contains(pos);
+    }
+    
     public List<BoardPosition> getPath()
     {
         return Nodes;
+    }
+    
+    /**
+     * Clones this path and appends given position to it.
+     * @param pos
+     * @return
+     */
+    public Path cloneAndAppend(BoardPosition pos)
+    {
+    	ArrayList<BoardPosition> steps = (ArrayList<BoardPosition>)((ArrayList<BoardPosition>) this.Nodes).clone();
+    	steps.add(pos);
+    	return new Path(steps);
     }
     
     @Override

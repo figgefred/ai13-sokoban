@@ -164,9 +164,27 @@ public class BoardStateTest {
 	public void testBadMovementBlockPush3() throws IOException
 	{		
 		BoardState board = getBoardFromFile("testing/badmovetest");
-		assertEquals(NodeType.PLAYER, board.getNode(2, 4));
+		
 		board.movePlayerTo(2, 5);
 		System.out.println(board.toString());
 		fail("should have thrown exception");
+	}
+	
+	@Test
+	public void testClone() throws IOException {
+		BoardState board = getBoardFromFile("testing/movetest1");
+		assertEquals(NodeType.PLAYER, board.getNode(2, 4));
+		
+		BoardState board2 = (BoardState) board.clone();
+		assertEquals(board.getGoalNodes(), board2.getGoalNodes());
+		board2.movePlayerTo(2, 3);
+		
+		System.out.println(board2.getPlayerNode());
+		System.out.println(board.getPlayerNode());
+		System.out.println(board2);
+		System.out.println(board);
+		assertTrue(!board.toString().equals(board2.toString()));
+		assertNotSame(board2.getPlayerNode(), board.getPlayerNode());
+		
 	}
 }

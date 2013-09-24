@@ -18,10 +18,13 @@ public class BoardPosition
     
     @Override
     public boolean equals(Object o)
-    {
+    {    	
         if(o instanceof BoardPosition)
         {
-            return this.hashCode() == o.hashCode();
+        	BoardPosition b = (BoardPosition) o;
+        	return b.Row == Row && b.Column == Column;
+        	// nja
+            //return this.hashCode() == o.hashCode();
         }
         return false;
     }
