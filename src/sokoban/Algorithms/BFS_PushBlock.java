@@ -6,6 +6,9 @@ package sokoban.Algorithms;
 
 import java.awt.print.Book;
 import java.util.*;
+import sokoban.Algorithms.ExploreAction.ExploreAction_BlockPath;
+import sokoban.Algorithms.ExploreAction.ExploreAction_Path;
+import sokoban.Algorithms.ExploreAction.IExploreAction;
 import sokoban.BoardPosition;
 import sokoban.BoardState;
 import sokoban.Path;
@@ -22,20 +25,26 @@ import sokoban.types.NodeType;
  */
 public class BFS_PushBlock implements ISearchAlgorithmPath {
 
-	private ISearchAlgorithmPath playerPathSearch;
-	private ISearchAlgorithmPath blockPathSearch;
-	
-	private BoardPosition CurrentPstart;
-	
-	public BFS_PushBlock(IExploreCondition blockPathFindingCond, IExploreCondition playerPathFindingCond) {
-		this(blockPathFindingCond, playerPathFindingCond, null);
-	}
+	private ISearchAlgorithmPath PlayerPathSearch;
+	private BFS_BaseImpl BlockPathSearch;
 
-	public BFS_PushBlock(IExploreCondition blockPathFindingCond, IExploreCondition playerPathFindingCond, ISearchAlgorithmPath tmp) {
-		if (tmp == null)
-			playerPathSearch = new BFS_Path(playerPathFindingCond);
-		playerPathSearch = tmp;
-		blockPathSearch = new BFS_Path(blockPathFindingCond);
+        public BFS_PushBlock(ISearchAlgorithmPath playerPathSearch) {
+            this(playerPathSearch, new ExploreCondition_BlockPath(), new ExploreAction_BlockPath());
+        }
+        
+        public BFS_PushBlock(ISearchAlgorithmPath playerPathSearch, IExploreCondition blockPathCond) {
+            this(playerPathSearch, blockPathCond, new ExploreAction_BlockPath());
+        }
+        
+	public BFS_PushBlock(ISearchAlgorithmPath playerPathSearch, IExploreCondition blockPathCond, IExploreAction action) {
+	
+            if(playerPathSearch == null)
+                throw new IllegalArgumentException("Player path searcher algorithm is null.");
+            if(blockPathCond == null)
+                throw new IllegalArgumentException("Condition of block path searcher is null.");
+            
+            PlayerPathSearch = playerPathSearch;
+            BlockPathSearch = new BFS_BaseImpl(action, blockPathCond);
 	}
 	
 	@Override
@@ -46,10 +55,8 @@ public class BFS_PushBlock implements ISearchAlgorithmPath {
 					"Is not a pushable block on this node: " + initialPosition);
 		}
 		Path path = null;
-
-		CurrentPstart = initialPosition;
 		do {
-			path = blockPathSearch.getPath(state, initialPosition, destination);
+			path = BlockPathSearch.getPath(state, initialPosition, destination);
 			break;
 			/*
 			if (blockPath == null) // Ok cant find block path..
@@ -77,50 +84,12 @@ public class BFS_PushBlock implements ISearchAlgorithmPath {
 
 	@Override
 	public Path getPath(BoardState state, BoardPosition pStart, Set<BoardPosition> destinations) {
-		
-		if (!state.isBlock(pStart)) {
-			throw new IllegalArgumentException(
-					"Is not a pushable block on this node: " + pStart);
-		}
-		Path path = null;
-		CurrentPstart = pStart;
-		do {
-			Path blockPath = blockPathSearch.getPath(state, pStart, destinations);
-			System.out.println("Blockpath: " + blockPath);
-			return blockPath;
-			//break;
-			/*
-			if (blockPath == null) // Ok cant find block path..
-				break;
-			System.out.println("DEBUG: Found path " + blockPath);
-			path = getPlayerPushPath(blockPath, state);
-			if (path != null) // YEA we found a path for the player to push
-								// block
-			{
-				System.out.println("DEBUG: Found path incl. player path "
-						+ path);
-				break;
-			} else {
-				visited = initVisitedMatrix(state);
-				int iEnd = blockPath.getPath().size() - 1;
-				for (int i = 1; i < iEnd; i++) {
-					visited[blockPath.get(i).Row][blockPath.get(i).Column] = true;
-				}
-			}
-			*/
-		} while (true);
-		
-		//return path;
-	}
+            throw new UnsupportedOperationException("Not yet supported!");	
+        }
+        
 
-	
 
-	private boolean isSpaceNode(BoardState state, int pRow, int pCol) {
-		// TODO Auto-generated method stub
-		return !isNoneBlockingNode(state, new BoardPosition(pRow, pCol));
-	}
-
-	private boolean isNoneBlockingNode(BoardState state, BoardPosition p)
+/*	private boolean isNoneBlockingNode(BoardState state, BoardPosition p)
     {
         NodeType type = state.getNode(p);
         if(type == NodeType.INVALID)
@@ -131,5 +100,5 @@ public class BFS_PushBlock implements ISearchAlgorithmPath {
                type != NodeType.WALL &&
                type != NodeType.BLOCK &&
                type != NodeType.BLOCK_ON_GOAL;
-    }
+    }*/
 }

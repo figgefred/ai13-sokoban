@@ -472,6 +472,7 @@ public class BoardState implements Cloneable
 			val += incrementedWeight*pos.hashCode();
 			incrementedWeight *= 4;
 		}
+                val += 1234*CurrentNode.hashCode();
 		return val;
 	}
 
