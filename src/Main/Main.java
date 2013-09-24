@@ -9,9 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import sokoban.Algorithms.AStar_Path;
-import sokoban.Algorithms.BFS_Path;
-import sokoban.Algorithms.ISearchAlgorithmPath;
+import sokoban.Algorithms.*;
 import sokoban.*;
 
 
@@ -24,8 +22,8 @@ public class Main {
 	 */
 	public static void main(String[] args) throws IOException {
                 
-		ISearchAlgorithmPath pathSearcher = new BFS_Path();
-		//ISearchAlgorithmPath pathSearcher = new AStar_Path();
+		//ISearchAlgorithmPath pathSearcher = new Greedy_Path();
+		ISearchAlgorithmPath pathSearcher = new AStar2_Path();
 
 		//BufferedReader br = new BufferedReader(
 		//new InputStreamReader(System.in));
@@ -69,9 +67,15 @@ public class Main {
 			BoardState b = new BoardState(level);
                         
                         Player player = new Player(b, pathSearcher);
-                        
-			String output = player.findPath(b.getPlayerNode(), b.getGoalNodes());
-			System.out.println("Level " + levelNumber + ": " + output);
+            
+            for(BoardPosition goal: b.getGoalNodes())
+            {
+    			Path output = player.findPath(b.getPlayerNode(), goal);
+    			
+    			System.out.println("Level " + levelNumber + ": " + output);
+    			if(output != null)
+    				break;
+            }
                         if(VERBOSE)
                         {
                             StringBuilder sb = new StringBuilder();

@@ -4,6 +4,7 @@
  */
 package sokoban;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import sokoban.Algorithms.ISearchAlgorithmPath;
@@ -29,21 +30,28 @@ public class Player {
         DefaultPathSearcher = pathSearcher;
     }
     
-    public String findPath(BoardPosition start, BoardPosition goal)
+    public Path findPath(BoardPosition start, BoardPosition goal)
     {
-        Set<BoardPosition> destination = new HashSet<>();
-        destination.add(goal);
-        return findPath(start, destination);
+        Path p = DefaultPathSearcher.getPath(CurrentBoardState, start, goal);
+        
+        if(p == null)
+        {
+        	ArrayList<BoardPosition> nodes = null;
+        	return new Path(nodes);
+        }
+        
+        return p;
     }
     
-    public String findPath(BoardPosition start, Set<BoardPosition> destinations)
+    public Path findPath(BoardPosition start, Set<BoardPosition> destinations)
     {
-        if(CurrentBoardState.getNode(start) == NodeType.PLAYER_ON_GOAL)
-            return "";
-        Path p = DefaultPathSearcher.getPath(CurrentBoardState, start, destinations);
+        Path p = DefaultPathSearcher.getPath(CurrentBoardState, start, destinations);   
         if(p == null)
-            return "no path";
-        return p.toString();
+        {
+        	ArrayList<BoardPosition> nodes = null;
+        	return new Path(nodes);
+        }
+        return p;
     }  
     
     public void setCurrentBoardState(BoardState state)

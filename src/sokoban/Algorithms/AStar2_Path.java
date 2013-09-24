@@ -18,20 +18,11 @@ public class AStar2_Path implements ISearchAlgorithmPath{
 	@Override
 	public Path getPath(BoardState state, BoardPosition initialPosition, BoardPosition destination)
 	{
-		Set<BoardPosition> position = new HashSet<>();
-        position.add(destination);
-        return getPath(state, initialPosition, position);
-	}
-
-	@Override
-	public Path getPath(BoardState state, BoardPosition initialPosition, Set<BoardPosition> destinations)
-	{
 		openSet = new LinkedList<BoardPosition>();
 		closedSet = new ArrayList<Integer>();
 		costs = new HashMap<BoardPosition, SimpleEntry<Double, Double>>(); // g sparas som key, f som value
 		cameFrom = new HashMap<BoardPosition, BoardPosition>();
-		
-		BoardPosition destination = destinations.iterator().next();
+
 		boolean done = false;
 		costs.put(initialPosition, new SimpleEntry<>(0.0, cost(initialPosition, destination)));
 		cameFrom.put(initialPosition, null);
@@ -49,7 +40,7 @@ public class AStar2_Path implements ISearchAlgorithmPath{
         		ArrayList<BoardPosition> nodes = reconstruct_path(destination);
         		nodes.add(0, destination);
         		path = new Path(nodes, true);
-        		break;
+        		return path;
         	}
         	
         	SimpleEntry<Double, Double> nodeCosts = costs.get(node);
@@ -81,8 +72,7 @@ public class AStar2_Path implements ISearchAlgorithmPath{
         }
         		
 		
-		return path;
-
+		return null;
 	}
 	
 	private ArrayList<BoardPosition> reconstruct_path(BoardPosition goal)
@@ -119,4 +109,11 @@ public class AStar2_Path implements ISearchAlgorithmPath{
     	return 1 * (dx + dy);
     //	return Math.sqrt(Math.pow(n.Row - destination.Column, 2) + Math.pow(n.Column - destination.Column, 2));
     }
+
+	@Override
+	public Path getPath(BoardState state, BoardPosition initialPosition,
+			Set<BoardPosition> destination) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
