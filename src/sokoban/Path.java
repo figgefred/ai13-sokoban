@@ -100,13 +100,12 @@ public class Path {
     @Override
     public String toString()
     {
-    	if(Nodes == null)
-    		return "";
+        String noPath = "no path";
+    	if(Nodes == null || Nodes.size() == 0)
+    		return noPath;
     	
         StringBuilder sb = new StringBuilder();
         BoardPosition firstNode = null;
-        
-        
         
         for(BoardPosition n: Nodes)
         {
