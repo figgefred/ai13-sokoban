@@ -4,45 +4,46 @@ import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
 
 import javax.swing.plaf.basic.BasicOptionPaneUI;
+import sokoban.Algorithms.ExploreAction.IExploreAction;
+import sokoban.Algorithms.ExploreConditions.IExploreCondition;
 
 import sokoban.BoardPosition;
 import sokoban.BoardState;
 import sokoban.Path;
 import sokoban.types.AlgorithmType;
+import static sokoban.types.AlgorithmType.GREEDY_BFS;
 import sokoban.types.NodeType;
 
-public class AStar2_Path implements ISearchAlgorithmPath{
+public class AStar2_Impl extends BaseImpl{
+    
     private Queue<BoardPosition> openSet;
     private ArrayList<Integer> closedSet;
     
-	private final double ConstantWeight;
-	private final double EstimateWeight;
+    private final double ConstantWeight;
+    private final double EstimateWeight;
     
     private HashMap<BoardPosition, SimpleEntry<Double, Double>> costs;
     private HashMap<BoardPosition, BoardPosition> cameFrom;
-
-    public AStar2_Path()
-    {
-    	this(AlgorithmType.A_STAR);
-    }
     
-    public AStar2_Path(AlgorithmType aType)
+    protected AStar2_Impl(AlgorithmType aType, IExploreCondition cond, IExploreAction action)
     {
     	switch(aType)
     	{
 	    	case GREEDY_BFS:
 	    	{
-	    		ConstantWeight = 0;
-	    		EstimateWeight = 1;
-	    		break;
+                    ConstantWeight = 0;
+                    EstimateWeight = 1;
+                    break;
 	    	}
 	    	default:
 	    	{
-	    		ConstantWeight =1;
-	    		EstimateWeight =1;
-	    		break;
+                    ConstantWeight =1;
+                    EstimateWeight =1;
+                    break;
 	    	}
     	}
+        Cond = cond;
+        Action = action;
     }
     
 	@Override
@@ -85,9 +86,9 @@ public class AStar2_Path implements ISearchAlgorithmPath{
         		double to_g = (neighbourCosts != null ? neighbourCosts.getKey() : Double.MAX_VALUE);
         		
         		if (closedSet.contains(neighbour.hashCode()) && tentative_g >= to_g)
-                	continue;
+                            continue;
         		
-        		if( isNoneBlockingNode(state, neighbour) && (!openSet.contains(neighbour) || tentative_g < to_g) )
+        		if( Cond.explore(state, node, neighbour) && (!openSet.contains(neighbour) || tentative_g < to_g) )
         		{
         			cameFrom.put(neighbour, node);
         			costs.put(neighbour, new SimpleEntry<>(tentative_g, getFValue(tentative_g, cost(neighbour, destination))));

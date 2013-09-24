@@ -2,12 +2,14 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package sokoban.Algorithms;
+package deprecated;
 
 import java.util.Set;
+import sokoban.Algorithms.BFS_BaseImpl;
 import sokoban.Algorithms.ExploreAction.ExploreAction_Path;
-import sokoban.Algorithms.ExploreConditions.ExploreCondition_FindPath;
+import sokoban.Algorithms.ExploreConditions.ExploreCondition_BFS_FindPath;
 import sokoban.Algorithms.ExploreConditions.IExploreCondition;
+import sokoban.Algorithms.ISearchAlgorithmPath;
 import sokoban.BoardPosition;
 import sokoban.BoardState;
 import sokoban.Path;
@@ -21,10 +23,10 @@ public class BFS_MovePlayer implements ISearchAlgorithmPath {
     private BFS_BaseImpl playerSearcher;
     
     public BFS_MovePlayer() {
-        this(new ExploreCondition_FindPath());
+        this(new ExploreCondition_BFS_FindPath());
     }
     
-    public BFS_MovePlayer(IExploreCondition cond) {
+    public BFS_MovePlayer(IExploreCondition cond, IExploreAction action) {
         if(cond == null)
             throw new IllegalArgumentException("Condition is null.");
         playerSearcher = new BFS_BaseImpl(new ExploreAction_Path(), cond);

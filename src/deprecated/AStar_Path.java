@@ -1,10 +1,11 @@
-package sokoban.Algorithms;
+package deprecated;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
+import sokoban.Algorithms.ISearchAlgorithmPath;
 
 import sokoban.BoardPosition;
 import sokoban.BoardState;

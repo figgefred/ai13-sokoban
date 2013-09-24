@@ -22,12 +22,9 @@ import sokoban.Algorithms.ExploreConditions.IExploreCondition;
  *
  * @author figgefred
  */
-public class BFS_BaseImpl {
-    
-    private IExploreCondition Cond;
-    private IExploreAction Action;
+public class BFS_BaseImpl extends BaseImpl {
 
-    public BFS_BaseImpl(IExploreAction action, IExploreCondition cond)
+    public BFS_BaseImpl(IExploreCondition cond, IExploreAction action)
     {
         Cond = cond;
         Action = action;
@@ -83,14 +80,13 @@ public class BFS_BaseImpl {
             BoardPosition p = queue.poll();
             BoardState s = oldStates.get(p);
         
-            //System.out.println("VIEWED STATE: ");
-            //System.out.println(s);
+          //  System.out.println("VIEWED STATE: ");
+          //  System.out.println(s);
             
             int previousHash = s.hashCode();
             if(p.equals(destination))
             {
-                goalReached = p;
-                break;
+                return p;
             }
             List<BoardPosition> neighbours = s.getNeighbours(p);
             for(BoardPosition p2: neighbours)
@@ -111,6 +107,11 @@ public class BFS_BaseImpl {
             }
         }
         return goalReached;
+    }
+
+    @Override
+    public Path getPath(BoardState state, BoardPosition initialPosition, Set<BoardPosition> destinations) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

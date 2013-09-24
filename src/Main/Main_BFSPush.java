@@ -12,15 +12,17 @@ import sokoban.BoardState;
 import sokoban.Path;
 import sokoban.Player;
 import sokoban.Algorithms.*;
-import sokoban.Algorithms.ExploreConditions.ExploreCondition_BlockPath;
-import sokoban.Algorithms.ExploreConditions.ExploreCondition_FindPath;
+import sokoban.Algorithms.ExploreConditions.ExploreCondition_BFS_BlockPath;
+import sokoban.Algorithms.ExploreConditions.ExploreCondition_BFS_FindPath;
 import sokoban.Algorithms.ExploreConditions.IExploreCondition;
+import sokoban.types.AlgorithmType;
 
 public class Main_BFSPush {
 
 	public static void main(String[] arg) throws IOException
 	{
-		FileReader rawInput = new FileReader("sample.slc"); //the first twenty maps
+		//FileReader rawInput = new FileReader("sample.slc"); //the first twenty maps
+            FileReader rawInput = new FileReader("test.slc"); //the first twenty maps
 
 		BufferedReader br = new BufferedReader(rawInput);
 		String tmp = br.readLine();
@@ -55,8 +57,12 @@ public class Main_BFSPush {
             
             BoardState b = new BoardState(level);
     	
-            ISearchAlgorithmPath playerPathSearcher = new BFS_MovePlayer();              // ALgorithm for searching paths for player
-            ISearchAlgorithmPath blockPathSearcher = new BFS_PushBlock(playerPathSearcher);  // Algorithms for searching paths for blocks
+            //ISearchAlgorithmPath playerPathSearcher = new BFS_MovePlayer();              // ALgorithm for searching paths for player
+            //ISearchAlgorithmPath blockPathSearcher = new BFS_PushBlock(playerPathSearcher);  // Algorithms for searching paths for blocks
+            
+            ISearchAlgorithmPath playerPathSearcher = new PlayerPath(AlgorithmType.GREEDY_BFS);              // ALgorithm for searching paths for player
+            ISearchAlgorithmPath blockPathSearcher = new BlockPath(AlgorithmType.BFS, playerPathSearcher);              // ALgorithm for searching paths for player
+            
             Player player = new Player(b, blockPathSearcher, playerPathSearcher);
             
             Path path = null;
