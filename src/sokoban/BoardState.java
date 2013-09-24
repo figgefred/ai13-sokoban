@@ -290,10 +290,10 @@ public class BoardState implements Cloneable
 		} else if(type != NodeType.SPACE && type != NodeType.GOAL) {
 			// Wall or other invalid move
 			throw new IllegalArgumentException("Invalid move: \n" + CurrentNode + "\n  " + row + " " + col + " is " + type);			
+		} else {			
+			// Set new position (otherwise push will)
+			Map.get(row).set(col, type == NodeType.GOAL ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER);
 		}
-		
-		// Set new position
-		Map.get(row).set(col, type == NodeType.GOAL ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER);    	
     	
 		// Reset old position
     	NodeType playerType = Map.get(CurrentNode.Row).get(CurrentNode.Column);
@@ -319,7 +319,7 @@ public class BoardState implements Cloneable
     	if(dest != NodeType.GOAL && dest != NodeType.SPACE)
     		throw new IllegalArgumentException("Can't push block, something is in the way: " + dest.toString());    	
     	
-    	Map.get(row).set(col, (orig == NodeType.BLOCK_ON_GOAL) ? NodeType.GOAL : NodeType.SPACE);
+    	Map.get(row).set(col, (orig == NodeType.BLOCK_ON_GOAL) ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER);
     	
     	Map.get(newrow).set(newcol, (dest == NodeType.GOAL) ? NodeType.BLOCK_ON_GOAL : NodeType.BLOCK);
     }
@@ -332,18 +332,18 @@ public class BoardState implements Cloneable
     {
     	movePlayerTo(p.Row, p.Column);
     }
-    
+   
     /***
      * Basic check if the game is won. Checks if all goals are occupied by a block.
      * @return
      */
     public boolean isWin() {
-    for(BoardPosition goal : Goals)
-    {
-            if(getNode(goal) != NodeType.BLOCK_ON_GOAL)
-                    return false;
-    }
-    return true;
+	    for(BoardPosition goal : Goals)
+	    {
+	            if(getNode(goal) != NodeType.BLOCK_ON_GOAL)
+	                    return false;
+	    }
+	    return true;
     }
     
     public boolean isSpaceNode(int r, int c) {
