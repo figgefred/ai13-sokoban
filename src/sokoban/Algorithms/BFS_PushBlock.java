@@ -17,6 +17,10 @@ import sokoban.Algorithms.ExploreConditions.ExploreCondition_BlockPath;
 import sokoban.Algorithms.ExploreConditions.ExploreCondition_FindPath;
 import sokoban.Algorithms.ExploreConditions.IExploreCondition;
 import sokoban.types.Direction;
+import static sokoban.types.Direction.DOWN;
+import static sokoban.types.Direction.LEFT;
+import static sokoban.types.Direction.RIGHT;
+import static sokoban.types.Direction.UP;
 import sokoban.types.NodeType;
 
 /**
@@ -55,30 +59,21 @@ public class BFS_PushBlock implements ISearchAlgorithmPath {
 					"Is not a pushable block on this node: " + initialPosition);
 		}
 		Path path = null;
+                BoardState newState = (BoardState) state.clone();
 		do {
-			path = BlockPathSearch.getPath(state, initialPosition, destination);
-			break;
-			/*
-			if (blockPath == null) // Ok cant find block path..
-				break;
-			System.out.println("DEBUG: Found path " + blockPath);
-			path = getPlayerPushPath(blockPath, state);
-			if (path != null) // YEA we found a path for the player to push
-								// block
-			{
-				System.out.println("DEBUG: Found path incl. player path "
-						+ path);
-				break;
-			} else {
-				visited = initVisitedMatrix(state);
-				int iEnd = blockPath.getPath().size() - 1;
-				for (int i = 1; i < iEnd; i++) {
-					visited[blockPath.get(i).Row][blockPath.get(i).Column] = true;
-				}
-			}
-			*/
-		} while (true);
-		
+                    Path blockPath = BlockPathSearch.getPath(state, initialPosition, destination);
+                    if (blockPath == null || blockPath.getPath() == null || blockPath.getPath().size() == 0) // Ok cant find block path..
+                        break;
+                    System.out.println("DEBUG: Found path " + blockPath);
+                    path = getPlayerPushPath(blockPath, state);
+                    if (path != null) // YEA we found a path for the player to push block
+                    {
+                        System.out.println("DEBUG: Found path incl. player path " + path);
+                    }
+                    else {
+                        newState.setNodeType(NodeType.WALL, blockPath.get(0));
+                    }
+		} while (path == null);
 		return path;
 	}
 
@@ -87,18 +82,83 @@ public class BFS_PushBlock implements ISearchAlgorithmPath {
             throw new UnsupportedOperationException("Not yet supported!");	
         }
         
+        public Path getPlayerPushPath(Path blockPath, BoardState state){
+            
+            Path playerToBlockPath=new Path();
+            Direction dir = null;
 
+            for(int i = 0; i < blockPath.getPath().size(); i++){
+                BoardPosition playerPos = state.getPlayerNode();
+                Path playerToBlockSegment = new Path();
+                int nextIndex=i+1;
+                if(nextIndex==blockPath.getPath().size())
+                        break;
+                Direction nextDir = state.getDirection(blockPath.get(i), blockPath.get(nextIndex));
+                if(dir!=nextDir){ //If a change in direction
+                        BoardPosition playerNewPos=null;
+                        if(i!=0){ 
+                                playerNewPos=blockPath.get(i-1);
 
-/*	private boolean isNoneBlockingNode(BoardState state, BoardPosition p)
-    {
-        NodeType type = state.getNode(p);
-        if(type == NodeType.INVALID)
-            System.err.println("Referring to position " + p + " which refers to INVALID type");
+                                Path straight = PlayerPathSearch.getPath(state, playerPos, playerNewPos);
+                                playerToBlockPath=playerToBlockPath.cloneAndAppend(straight);
+
+                        //	state.movePlayer(playerToBlockSegment);
+                        //	playerToBlockPath=playerToBlockPath.cloneAndAppend(playerToBlockSegment);
+                        //	System.out.println(playerToBlockPath);
+                        //	System.out.println("append segment: "+playerToBlockPath);
+
+                                playerToBlockSegment=new Path();
+                                playerPos = state.getPlayerNode();
+                        }
+                        playerToBlockSegment = getPlayerPath(nextDir, state, blockPath.get(i), playerPos);
+                }
+                dir=nextDir;
+
+                if(playerToBlockSegment!=null){
+                        state.movePlayer(playerToBlockSegment);
+                        playerToBlockPath=playerToBlockPath.cloneAndAppend(playerToBlockSegment);
+                }	
+                playerToBlockPath.append(blockPath.last());
+            }
+
+        return playerToBlockPath;
+    }
         
-        return 
-               type != NodeType.INVALID &&
-               type != NodeType.WALL &&
-               type != NodeType.BLOCK &&
-               type != NodeType.BLOCK_ON_GOAL;
-    }*/
+        private Path getPlayerPath(Direction dir, BoardState state, BoardPosition currentBlockFragment, BoardPosition playerPosition) {
+
+            BoardPosition newPlayerPos = null;
+            Path playerToBlockSegment = null;
+
+            switch(dir){
+                case UP:
+                {
+                    newPlayerPos=new BoardPosition(currentBlockFragment.Row+1, currentBlockFragment.Column);
+                    playerToBlockSegment = PlayerPathSearch.getPath(state, playerPosition, newPlayerPos);
+                    break;
+                }
+                case DOWN:
+                {
+                    newPlayerPos=new BoardPosition(currentBlockFragment.Row-1, currentBlockFragment.Column);
+                    playerToBlockSegment = PlayerPathSearch.getPath(state, playerPosition, newPlayerPos);
+
+                    break;
+                }
+                case LEFT:
+                {
+                    newPlayerPos=new BoardPosition(currentBlockFragment.Row, (currentBlockFragment.Column)+1);
+                    playerToBlockSegment = PlayerPathSearch.getPath(state, playerPosition, newPlayerPos);
+                    break;
+                }
+                case RIGHT:
+                {
+                    newPlayerPos=new BoardPosition(currentBlockFragment.Row-1, currentBlockFragment.Column-1);
+                    playerToBlockSegment = PlayerPathSearch.getPath(state, playerPosition, newPlayerPos);
+                    break;
+                }default:
+                {
+                    System.out.println("Ingen match");
+                }
+            }
+            return playerToBlockSegment;
+        }
 }

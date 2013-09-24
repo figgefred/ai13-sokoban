@@ -45,7 +45,7 @@ public class BFS_BaseImpl {
         
         if(goalReached == null)
         {
-            return new Path(null, false);
+            return new Path(new ArrayList<BoardPosition>(), false);
         }
         
         // Evaluate the path from goal to start node

@@ -304,9 +304,11 @@ public class BoardState implements Cloneable
     public void movePlayer(Path path) {
     	for(BoardPosition pos : path.getPath())
     	{
-    		if(pos.equals(CurrentNode))
+//    		if(pos != null && pos.equals(CurrentNode))
+                if(pos.equals(CurrentNode))
     			continue;
-    		movePlayerTo(pos);
+//                else if(pos != null)
+                 movePlayerTo(pos);
     	}
     }
     
@@ -427,6 +429,21 @@ public class BoardState implements Cloneable
         }
         return blocks;
     }
+        
+        public boolean setNodeType(NodeType type, BoardPosition pos)
+        {
+            return setNodeType(type, pos.Row, pos.Column);
+        }
+        
+        public boolean setNodeType(NodeType type, int r, int c)
+        {
+            if( !((r >= 0 && r < getRowsCount()) && (c >= 0 && c < getColumnsCount(r))) )
+            {
+                return false;
+            }
+            Map.get(r).set(c, type);
+            return true;
+        }
   	
   	@Override
   	public Object clone() {
