@@ -56,9 +56,16 @@ public class Player {
 			// now do pathfinding to see if player can reach it..
 			for(BoardPosition candidate : candidates)
 			{
-				Path toPush = pathfinder.getPath(board, playerPos, candidate);
+				Path toPush;
+				if(candidate.equals(playerPos))
+					toPush = new Path();
+				else
+					toPush = pathfinder.getPath(board, playerPos, candidate);		
+				
 				if(toPush == null) // no path found
-					continue;
+					continue;				
+				
+				toPush.getPath().remove(playerPos); // remove duplicate player pos (was causing null)
 				toPush.append(blockPos);
 				
 				BoardState newBoard = (BoardState) board.clone();
@@ -85,7 +92,7 @@ public class Player {
 		{
 			System.out.println("Searching at depth " + depth + "...");
 			Path answer = searchForGlory(initialState, new Path(), depth);
-			if(answer != null) {
+			if(answer != null) {			
 				System.out.println(answer);
 				break;
 			}
@@ -93,7 +100,7 @@ public class Player {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		BoardState board = BoardState.getBoardFromFile("testing/firstplaytest");
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest2");
 		System.out.println(board);
 		Player noob = new Player(board);
 		noob.play();
