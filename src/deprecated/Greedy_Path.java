@@ -1,7 +1,8 @@
-package sokoban.Algorithms;
+package deprecated;
 
 import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
+import sokoban.Algorithms.ISearchAlgorithmPath;
 
 import sokoban.BoardPosition;
 import sokoban.BoardState;
