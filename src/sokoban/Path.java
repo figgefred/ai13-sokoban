@@ -91,6 +91,9 @@ public class Path {
     	if(this.Nodes == null)
     		return new Path(path.Nodes);
     	ArrayList<BoardPosition> steps = (ArrayList<BoardPosition>)((ArrayList<BoardPosition>) this.Nodes).clone();
+    	List<BoardPosition> toAppend = path.getPath();
+    	if(steps.size() > 0 && toAppend.size() > 0 && steps.get(steps.size()-1).equals(toAppend.get(0)))
+    		steps.remove(steps.size()-1);
     	steps.addAll(path.getPath());
     	return new Path(steps);
     }
