@@ -10,11 +10,13 @@ import sokoban.types.NodeType;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import sokoban.Algorithms.ISearchAlgorithmPath;
 
@@ -29,12 +31,23 @@ public class BoardState implements Cloneable
     private Set<BoardPosition> Goals;
     private BoardPosition CurrentNode;
     
-
     
     public BoardState(List<String> rows)
+    {
+    	this(rows, true);
+    }    
+    
+    public BoardState(List<String> rows, boolean initZobrist)
     {    
         // Init board
         buildBoard(rows);
+        if(initZobrist) {
+        	int cols = Integer.MIN_VALUE;
+        	for(List<NodeType> row : Map)
+        		cols = Math.max(row.size(), cols);
+        		
+        	initZobristTable(Map.size(), cols);
+        }
     }
     
     public BoardState() {
@@ -177,7 +190,7 @@ public class BoardState implements Cloneable
     
     public boolean isBlockingNode(BoardPosition position) {
     	NodeType type = getNode(position);    	
-    	return (type != NodeType.INVALID && type != NodeType.GOAL && type != NodeType.SPACE && type != NodeType.PLAYER); //&& type != NodeType.PLAYER_ON_GOAL);
+    	return (type != NodeType.INVALID && type != NodeType.GOAL && type != NodeType.SPACE && type != NodeType.PLAYER && type != NodeType.PLAYER_ON_GOAL); //&& type != NodeType.PLAYER_ON_GOAL);
     }
     
     public boolean isBlock(int r, int c)
@@ -478,20 +491,94 @@ public class BoardState implements Cloneable
 		return new BoardState(buffer);
 	}
 	
+	
+	/**
+	 * Se: http://en.wikipedia.org/wiki/Zobrist_hashing
+	 */
+	private Integer zobrist_hash = null;
+	private static int zobrist_table[][][];
+
+	public static void initZobristTable(int rows, int cols) {		
+		NodeType[] vals = NodeType.values();
+		zobrist_table = new int[rows][cols][vals.length];
+		Random random = new Random();
+		
+		for(int row = 0; row < rows; ++row)
+			for(int col = 0; col < cols; ++col)
+				for(int i = 0; i < vals.length; ++i)
+					zobrist_table[row][col][i] = random.nextInt();
+		
+	}
+	
+	@Override
 	public int hashCode()
 	{
-		List<BoardPosition> positions = getBlockNodes();
-		//int weight = 1;
-		int incrementedWeight = 1;
-		int val = 0;
-		for(BoardPosition pos: positions)
-		{
-			val += incrementedWeight*pos.hashCode();
-			incrementedWeight *= 4;
+		/*
+		if(zobrist_hash != null)
+			return zobrist_hash;
+		*/
+	
+		NodeType[] vals = NodeType.values();
+		zobrist_hash = 0;
+		for(int row = 0; row < Map.size(); ++row) {
+			for(int col = 0; col < Map.get(row).size(); ++col)
+			{
+				NodeType type = getNode(row, col);
+				int val = 0;
+				typeloop:
+				for(; val < vals.length; val++)
+					if(type == vals[val]) 						
+						break typeloop;					
+				
+				zobrist_hash ^= zobrist_table[row][col][val]; 
+			}
 		}
-                val += 1234*CurrentNode.hashCode();
-		return val;
+		
+		//System.out.println(zobrist_hash);
+		return zobrist_hash;
 	}
+	
+	public boolean isInCorner(BoardPosition position) {
+		
+		BoardPosition north = new BoardPosition(position.Row-1, position.Column);
+		BoardPosition east = new BoardPosition(position.Row, position.Column+1);
+		BoardPosition south = new BoardPosition(position.Row+1, position.Column);
+		BoardPosition west = new BoardPosition(position.Row, position.Column-1);
+		
+		if(getNode(north) == NodeType.WALL && getNode(east) == NodeType.WALL)
+			return true;
+		
+		if(getNode(north) == NodeType.WALL && getNode(west) == NodeType.WALL)
+			return true;
+		
+		if(getNode(south) == NodeType.WALL && getNode(west) == NodeType.WALL)
+			return true;
+		
+		if(getNode(south) == NodeType.WALL && getNode(east) == NodeType.WALL)
+			return true;
+		
+		
+		return false;
+	}
+	
+	public boolean equals(Object o) {
+		if(!(o instanceof BoardState))
+			return false;
+		
+		BoardState b = (BoardState) o;
+		
+		for(int row = 0; row < Map.size(); ++row) {
+			for(int col = 0; col < Map.get(row).size(); ++col)
+			{
+				if(getNode(row, col) != b.getNode(row, col))
+					return false;
+			}
+		}
+		
+		return true;
+		
+	}
+	
 
 
 }

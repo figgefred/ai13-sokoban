@@ -8,7 +8,7 @@ public class BoardPosition
 {
     public final int Row;
     public final int Column;
-    private Integer MyHash = null;
+    //private Integer MyHash = null;
     
     public BoardPosition(int row, int col)
     {
@@ -32,15 +32,20 @@ public class BoardPosition
     @Override
     public int hashCode()
     {
+    	/*
         if(MyHash == null)
         {
-            MyHash = 12345*Row*Row + Column;
-        }
-        return MyHash;
+            MyHash = 17*(Row+1)*(Row+1) + 13*(Column+2);
+        }*/
+        return 17*(Row+1)*(Row+1) + 13*(Column+2);
     }
     
     @Override
     public String toString() {
     	return "Row: " + Row + ", col: " + Column;
+    }
+    
+    public int DistanceTo(BoardPosition b) {
+    	return Math.abs(Row - b.Row) + Math.abs(Column - b.Column);
     }
 }
