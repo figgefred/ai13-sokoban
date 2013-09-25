@@ -4,24 +4,20 @@
  */
 package sokoban.Tethik;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+
 import sokoban.BoardPosition;
 import sokoban.Constants;
 import sokoban.Path;
 import sokoban.types.Direction;
 import sokoban.types.NodeType;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import sokoban.Algorithms.ISearchAlgorithmPath;
 
 /**
  *
@@ -177,7 +173,7 @@ public class BoardState implements Cloneable
      */
     public List<BoardPosition> getPushingPositions(int row, int col)
     {
-    	NodeType node = getNode(row, col);
+    	//NodeType node = getNode(row, col);
     	/* 
     	if(node != NodeType.BLOCK && node != NodeType.BLOCK_ON_GOAL)
     		 throw new IllegalArgumentException("Cant get pushing positions for non blocks: ("+row+" "+col+ " " + node + ")");
@@ -204,16 +200,18 @@ public class BoardState implements Cloneable
 			{
 				positions.add(left);
 				positions.add(right);
-			}
-		 	
+			}		 	
 		 }
 		 
 		 return positions;
     }
     
-    public boolean isBlockingNode(BoardPosition position) {
-    	NodeType type = getNode(position);    	
-    	return (type != NodeType.INVALID && type != NodeType.GOAL && type != NodeType.SPACE && type != NodeType.PLAYER && type != NodeType.PLAYER_ON_GOAL); //&& type != NodeType.PLAYER_ON_GOAL);
+    public boolean isBlockingNode(NodeType type) {
+    	return (type != NodeType.INVALID && type != NodeType.GOAL && type != NodeType.SPACE && type != NodeType.PLAYER && type != NodeType.PLAYER_ON_GOAL);
+    }
+    
+    public boolean isBlockingNode(BoardPosition position) {    	
+    	return isBlockingNode(getNode(position));
     }
     
     public boolean isBlock(int r, int c)
@@ -481,7 +479,8 @@ public class BoardState implements Cloneable
             return true;
         }
   	
-  	@Override
+  	@SuppressWarnings("unchecked")
+	@Override
   	public Object clone() {
   		BoardState newState = new BoardState();
   		newState.CurrentNode = new BoardPosition(CurrentNode.Row, CurrentNode.Column);

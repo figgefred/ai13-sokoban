@@ -40,12 +40,15 @@ public class Player {
         	System.out.println(node.path.getPath().size() + ", " + node.getHeuristicValue() + ", " + closedSet.size() + ", " + node.board.hashCode());
         	System.out.println(node.board);
         	
+        	if(node.getHeuristicValue() == Integer.MIN_VALUE)
+        		return null;
+        	
         	if(node.board.isWin())
         	{       		
         		return node;
         	}       	        	
         	
-        	Integer tentative_g = node.getHeuristicValue() + 10;
+        	//Integer tentative_g = node.getHeuristicValue() + 1;
         	
         	for(Move neighbour: node.getNextMoves())
         	{	       		                		
@@ -58,7 +61,7 @@ public class Player {
         		//System.out.println(tentative_g);
         		
         		
-        		if (closedSet.contains(neighbour.board) || to_g > tentative_g) {        			
+        		if (closedSet.contains(neighbour.board) || to_g == Integer.MIN_VALUE) { // || to_g > tentative_g) {        			
                 	continue;
         		}
         		
