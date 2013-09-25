@@ -1,20 +1,12 @@
 package sokoban.Tethik;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
-import sokoban.BoardPosition;
 import sokoban.BoardState;
 import sokoban.Path;
-import sokoban.Algorithms.AStar_Path;
-import sokoban.Algorithms.BaseImpl;
-import sokoban.Algorithms.ISearchAlgorithmPath;
-import sokoban.types.NodeType;
 
 /***
  * A* variant on boardstate
@@ -27,16 +19,11 @@ public class Player {
     private HashSet<BoardState> closedSet;
     private HashSet<BoardState> toVisitSet;
     
-	private final double ConstantWeight;
-	private final double EstimateWeight;
-
 	private BoardState initialState;
 	
 	public Player(BoardState initialState)
 	{		
 		this.initialState = initialState;
-		ConstantWeight = 0;
-		EstimateWeight = 0;
 	}
 
 	public Move getVictoryPath(Move initialPosition)
@@ -46,7 +33,6 @@ public class Player {
 		toVisitSet = new HashSet<BoardState>();
     	openSet.add(initialPosition);
     	
-    	int c = 0;
         while(!openSet.isEmpty())
         {
         	Move node = openSet.poll();

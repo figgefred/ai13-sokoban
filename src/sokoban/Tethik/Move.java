@@ -6,8 +6,6 @@ import java.util.List;
 import sokoban.BoardPosition;
 import sokoban.BoardState;
 import sokoban.Path;
-import sokoban.Algorithms.AStar_Path;
-import sokoban.Algorithms.BaseImpl;
 import sokoban.types.NodeType;
 
 public class Move implements Comparable<Move> {

@@ -2,20 +2,13 @@ package sokoban.Tethik;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.Set;
 
-import sokoban.Algorithms.ExploreAction.ExploreAction_Path;
-import sokoban.Algorithms.ExploreAction.IExploreAction;
-import sokoban.Algorithms.ExploreConditions.ExploreCondition_BFS_FindPath;
-import sokoban.Algorithms.ExploreConditions.IExploreCondition;
-import sokoban.types.AlgorithmType;
-import sokoban.types.NodeType;
 import sokoban.BoardPosition;
 import sokoban.BoardState;
 import sokoban.Path;
+import sokoban.types.NodeType;
 
 public class PathFinder {
     
@@ -170,7 +163,7 @@ public class PathFinder {
         return ConstantWeight*currentCost + EstimateWeight*estimateCostLeft;
     }
     
-	private class AStar_Node implements Comparable{
+	private class AStar_Node implements Comparable<AStar_Node> {
 		int g=1; //total cost of getting to this node
 		int h; //estimated time to reach the finish from this node
 		int f; //g+h
@@ -186,8 +179,7 @@ public class PathFinder {
 		}
 	
 		@Override
-		public int compareTo(Object o) {
-			AStar_Node n = (AStar_Node) o;
+		public int compareTo(AStar_Node n) {
 			return this.f- n.f;
 		}
 	}
