@@ -1,15 +1,22 @@
 package sokoban.Algorithms;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
+import sokoban.Algorithms.ExploreAction.ExploreAction_Path;
+import sokoban.Algorithms.ExploreAction.IExploreAction;
+import sokoban.Algorithms.ExploreConditions.ExploreCondition_BFS_FindPath;
+import sokoban.Algorithms.ExploreConditions.IExploreCondition;
 import sokoban.Algorithms.ISearchAlgorithmPath;
 
 import sokoban.BoardPosition;
 import sokoban.BoardState;
 import sokoban.Path;
+import sokoban.types.AlgorithmType;
+import static sokoban.types.AlgorithmType.GREEDY_BFS;
 import sokoban.types.NodeType;
 
 /**
@@ -18,18 +25,50 @@ import sokoban.types.NodeType;
  * @author Yvonne Le
  */
 
-public class AStar_Path implements ISearchAlgorithmPath{
-	private PriorityQueue<AStar_Node> openSet;
-	private Hashtable<BoardPosition,AStar_Node> closedSet;
+public class AStar_Path extends BaseImpl {
+	
+        private PriorityQueue<AStar_Node> openSet;
+	private HashMap<BoardPosition,AStar_Node> closedSet;
 	private List<List<AStar_Node>> nodeMap;
 
+        private int ConstantWeight;
+        private int EstimateWeight;
+        
+        public AStar_Path()
+        {
+            this(AlgorithmType.A_STAR, new ExploreCondition_BFS_FindPath(), new ExploreAction_Path());
+        }
+        
+        protected AStar_Path(AlgorithmType aType, IExploreCondition cond, IExploreAction action)
+        {
+            switch(aType)
+            {
+                    case GREEDY_BFS:
+                    {
+                        ConstantWeight = 0;
+                        EstimateWeight = 1;
+                        Type = aType;
+                        break;
+                    }
+                    default:
+                    {
+                        ConstantWeight =1;
+                        EstimateWeight =1;
+                        Type = AlgorithmType.A_STAR;
+                        break;
+                    }
+            }
+            Cond = cond;
+            Action = action;
+        }
+        
 	@Override
 	public Path getPath(BoardState state, BoardPosition initialPosition,
 			BoardPosition goal) {
 
             openSet=new PriorityQueue<AStar_Node>();
             nodeMap = new ArrayList<List<AStar_Node>>();
-            closedSet=new Hashtable<BoardPosition, AStar_Node>();
+            closedSet=new HashMap<BoardPosition, AStar_Node>();
 
             //build nodeMap
             for(int row=0; row<state.getRowsCount(); row++){
@@ -57,22 +96,22 @@ public class AStar_Path implements ISearchAlgorithmPath{
 
                     List<BoardPosition> neighbourPositions = state.getNeighbours(current.bp);
                     for(BoardPosition neighbour : neighbourPositions){
-                            AStar_Node neighbourNode=nodeMap.get(neighbour.Row).get(neighbour.Column);
-                            if(neighbourNode!=null){
-                                    int tentative_g_score = current.g+1;
-                                    if(closedSet.contains(neighbourNode) &&(tentative_g_score >= neighbourNode.g)){
-                                            continue;
-                                    }if(!openSet.contains(neighbourNode) || (tentative_g_score < neighbourNode.g)){
-                                            neighbourNode.parent=current;
-                                            neighbourNode.g=tentative_g_score;
-                                            neighbourNode.f=neighbourNode.g+neighbourNode.h;
-                                            if(!openSet.contains(neighbourNode)){
-                                                    openSet.add(neighbourNode);
-                                            }
-
-                                    }
+                        AStar_Node neighbourNode=nodeMap.get(neighbour.Row).get(neighbour.Column);
+                        if(neighbourNode!=null){
+                            int tentative_g_score = current.g+1;
+                            if(closedSet.containsValue(neighbourNode) &&(tentative_g_score >= neighbourNode.g)){
+                                continue;
+                            }
+                            if(!openSet.contains(neighbourNode) || (tentative_g_score < neighbourNode.g)){
+                                neighbourNode.parent=current;
+                                neighbourNode.g=tentative_g_score;
+                                neighbourNode.f = getFValue(neighbourNode.g, neighbourNode.h);
+                                if(!openSet.contains(neighbourNode)){
+                                    openSet.add(neighbourNode);
+                                }
 
                             }
+                        }
                     }
 
             }
@@ -86,7 +125,7 @@ public class AStar_Path implements ISearchAlgorithmPath{
 		for(BoardPosition goal: destination){
 			openSet=new PriorityQueue<AStar_Node>();
 			nodeMap = new ArrayList<List<AStar_Node>>();
-			closedSet=new Hashtable<BoardPosition, AStar_Node>();
+			closedSet=new HashMap<BoardPosition, AStar_Node>();
 
 			//build nodeMap
 			for(int row=0; row<state.getRowsCount(); row++){
@@ -121,7 +160,7 @@ public class AStar_Path implements ISearchAlgorithmPath{
 					AStar_Node neighbourNode=nodeMap.get(neighbour.Row).get(neighbour.Column);
 					if(neighbourNode!=null){
 						int tentative_g_score = current.g+1;
-						if(closedSet.contains(neighbourNode) &&(tentative_g_score >= neighbourNode.g)){
+						if(closedSet.containsValue(neighbourNode) &&(tentative_g_score >= neighbourNode.g)){
 							continue;
 						}if(!openSet.contains(neighbourNode) || (tentative_g_score < neighbourNode.g)){
 							neighbourNode.parent=current;
@@ -159,6 +198,11 @@ public class AStar_Path implements ISearchAlgorithmPath{
 		return new Path(pathList,true);
 	}
 
+        private int getFValue(int currentCost, int estimateCostLeft)
+        {
+            return ConstantWeight*currentCost + EstimateWeight*estimateCostLeft;
+        }
+        
 	private class AStar_Node implements Comparable{
 		int g=1; //total cost of getting to this node
 		int h; //estimated time to reach the finish from this node
