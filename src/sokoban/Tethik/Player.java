@@ -25,10 +25,10 @@ public class Player {
 	private BaseImpl pathfinder = new AStar_Path();
 	private Queue<Move> openSet;
     private HashSet<BoardState> closedSet;
+    private HashSet<BoardState> toVisitSet;
     
 	private final double ConstantWeight;
 	private final double EstimateWeight;
-  
 
 	private BoardState initialState;
 	
@@ -43,13 +43,14 @@ public class Player {
 	{
 		openSet = new PriorityQueue<Move>();
 		closedSet = new HashSet<BoardState>();
+		toVisitSet = new HashSet<BoardState>();
     	openSet.add(initialPosition);
     	
     	int c = 0;
         while(!openSet.isEmpty())
         {
         	Move node = openSet.poll();
-        	System.out.println(openSet.size());
+        	System.out.println(openSet.size() + " " + toVisitSet.size());
         	System.out.println(node.path.getPath().size() + ", " + node.getHeuristicValue() + ", " + closedSet.size() + ", " + node.board.hashCode());
         	System.out.println(node.board);
         	
@@ -58,26 +59,29 @@ public class Player {
         		return node;
         	}       	        	
         	
-        	Integer tentative_g = node.getHeuristicValue() + 1;
+        	Integer tentative_g = node.getHeuristicValue() + 10;
         	
         	for(Move neighbour: node.getNextMoves())
         	{	       		                		
         		if(neighbour.board.isWin())
         			return neighbour;
-        		Integer to_g = neighbour.getHeuristicValue() - 200;
+        		Integer to_g = neighbour.getHeuristicValue();
         		
         		//System.out.println(neighbour.board);
         		//System.out.println(to_g);
         		//System.out.println(tentative_g);
         		
         		
-        		if (closedSet.contains(neighbour.board) || to_g > 1000 || to_g < -1000) {        			
+        		if (closedSet.contains(neighbour.board) || to_g > tentative_g) {        			
                 	continue;
         		}
         		
-        		// && tentative_g > to_g)
-        		        			
-    			openSet.add(neighbour);
+        		
+        		if(!toVisitSet.contains(neighbour.board))
+        		{        		        			
+        			openSet.add(neighbour);
+        			toVisitSet.add(neighbour.board);
+        		}
         		        		
         	}
         	
@@ -85,6 +89,7 @@ public class Player {
         	if(closedSet.contains(node.board)) {        		
         		System.err.println("hash collision!");
         	}
+        	toVisitSet.remove(node.board);
         	closedSet.add(node.board);
         	
         	 /*      	
@@ -151,8 +156,7 @@ public class Player {
 			for(BoardPosition block : blocks)
 			{
 				
-				if(board.getNode(block) == NodeType.BLOCK_ON_GOAL) {
-					val += 100;
+				if(board.getNode(block) == NodeType.BLOCK_ON_GOAL) {					
 					continue;
 				}
 				
@@ -165,14 +169,16 @@ public class Player {
 				for(BoardPosition goal : board.getGoalNodes())					
 				{
 					if(board.getNode(goal) == NodeType.BLOCK_ON_GOAL)
+					{						
 						continue;
+					}
 					
 					mindistToGoal = Math.min(mindistToGoal, block.DistanceTo(goal));
 				}
 				val -= mindistToGoal;
 			}
-			
-			return val;
+			heuristic_value = val;
+			return heuristic_value;
 			/*
 			int val = 0;
 			List<BoardPosition> blocks = board.getBlockNodes();
@@ -301,7 +307,11 @@ public class Player {
 
 		@Override
 		public int compareTo(Move o) {			
-			return o.getHeuristicValue() - this.getHeuristicValue();
+			if(o.getHeuristicValue() > this.getHeuristicValue())
+				return 1;
+			else if(o.getHeuristicValue() < this.getHeuristicValue())
+				return -1;
+			return 0;
 		}
 	}
 
