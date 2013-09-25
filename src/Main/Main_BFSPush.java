@@ -70,11 +70,13 @@ public class Main_BFSPush {
             Path path = null;
 //            BoardPosition posi = b.getBlockNodes().iterator().next();
             int count = 0;
+            List<Path> paths = null;
             while( !b.isWin() && count < 100)
             {
                 count ++;
                 List<BoardPosition> posis = b.getBlockNodes();
                 Collections.shuffle(posis);
+                paths = new ArrayList<Path>();
                 for(BoardPosition posi: posis)
                 {
                     System.out.println("pushs");
@@ -100,11 +102,18 @@ public class Main_BFSPush {
                                 System.out.println(b);
                             }
                         }
+                        paths.add(path);
                     }
                     
                 }
-                System.out.println("Level " + levelNumber++ +": " + path);
             }
+            StringBuilder sb = new StringBuilder();
+            sb.append(paths.get(0));
+            for(int i = 1; i < paths.size(); i++)
+            {
+                sb.append(" | ").append(paths.get(i));
+            }
+            System.out.println("Level " + levelNumber++ +":\n\t" + sb.toString());
 	}
     }
 
