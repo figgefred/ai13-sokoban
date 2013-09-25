@@ -4,6 +4,8 @@
  */
 package Main;
 
+import deprecated.BFS_PushBlock;
+import deprecated.BFS_MovePlayer;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;

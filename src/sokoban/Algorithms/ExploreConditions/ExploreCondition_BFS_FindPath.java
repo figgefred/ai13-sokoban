@@ -11,7 +11,7 @@ import sokoban.BoardState;
  *
  * @author figgefred
  */
-public class ExploreCondition_FindPath implements IExploreCondition {
+public class ExploreCondition_BFS_FindPath implements IExploreCondition {
    
     @Override
     public boolean explore(BoardState state, BoardPosition from, BoardPosition to) {

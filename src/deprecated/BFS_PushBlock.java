@@ -2,10 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package sokoban.Algorithms;
+package deprecated;
 
 import java.awt.print.Book;
 import java.util.*;
+import sokoban.Algorithms.BFS_BaseImpl;
 import sokoban.Algorithms.ExploreAction.ExploreAction_BlockPath;
 import sokoban.Algorithms.ExploreAction.ExploreAction_Path;
 import sokoban.Algorithms.ExploreAction.IExploreAction;
@@ -13,9 +14,10 @@ import sokoban.BoardPosition;
 import sokoban.BoardState;
 import sokoban.Path;
 import sokoban.Algorithms.ExploreConditions.BoardEvaluations;
-import sokoban.Algorithms.ExploreConditions.ExploreCondition_BlockPath;
-import sokoban.Algorithms.ExploreConditions.ExploreCondition_FindPath;
+import sokoban.Algorithms.ExploreConditions.ExploreCondition_BFS_BlockPath;
+import sokoban.Algorithms.ExploreConditions.ExploreCondition_BFS_FindPath;
 import sokoban.Algorithms.ExploreConditions.IExploreCondition;
+import sokoban.Algorithms.ISearchAlgorithmPath;
 import sokoban.types.Direction;
 import static sokoban.types.Direction.DOWN;
 import static sokoban.types.Direction.LEFT;
@@ -33,7 +35,7 @@ public class BFS_PushBlock implements ISearchAlgorithmPath {
 	private BFS_BaseImpl BlockPathSearch;
 
         public BFS_PushBlock(ISearchAlgorithmPath playerPathSearch) {
-            this(playerPathSearch, new ExploreCondition_BlockPath(), new ExploreAction_BlockPath());
+            this(playerPathSearch, new ExploreCondition_BFS_BlockPath(), new ExploreAction_BlockPath());
         }
         
         public BFS_PushBlock(ISearchAlgorithmPath playerPathSearch, IExploreCondition blockPathCond) {

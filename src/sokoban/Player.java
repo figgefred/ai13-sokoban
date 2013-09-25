@@ -38,8 +38,8 @@ public class Player {
         
         if(p == null)
         {
-        	ArrayList<BoardPosition> nodes = new ArrayList<BoardPosition>();
-        	return new Path(nodes);
+            ArrayList<BoardPosition> nodes = new ArrayList<BoardPosition>();
+            return new Path(nodes);
         }
         
         return p;

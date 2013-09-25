@@ -8,6 +8,7 @@ import java.util.Set;
 import sokoban.BoardPosition;
 import sokoban.BoardState;
 import sokoban.Path;
+import sokoban.types.AlgorithmType;
 
 /**
  *
@@ -17,4 +18,5 @@ public interface ISearchAlgorithmPath
 {
     public Path getPath(BoardState state, BoardPosition initialPosition, BoardPosition destination);
     public Path getPath(BoardState state, BoardPosition initialPosition, Set<BoardPosition> destination);
+    public AlgorithmType[] getAlgorithmType();
 }
