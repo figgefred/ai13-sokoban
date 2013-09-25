@@ -23,8 +23,8 @@ public class Main_BFSPush {
 	public static void main(String[] arg) throws IOException
 	{
 		//FileReader rawInput = new FileReader("sample.slc"); //the first twenty maps
-            //FileReader rawInput = new FileReader("test.slc"); //the first twenty maps
-            FileReader rawInput = new FileReader("testing/simpleplaytest5"); //the first twenty maps
+            FileReader rawInput = new FileReader("test.slc"); //the first twenty maps
+            //FileReader rawInput = new FileReader("testing/simpleplaytest5"); //the first twenty maps
 
 		BufferedReader br = new BufferedReader(rawInput);
 		String tmp = br.readLine();
