@@ -102,48 +102,46 @@ public class BlockPathFinder {
 					}
 				}
 			}
+		}
 	
-	
-	
-			openSet.add(nodeMap.get(initialPosition.Row).get(initialPosition.Column));
-	
-	
-			while(!openSet.isEmpty()){
-				AStar_Node current = (AStar_Node) openSet.poll();
+		openSet.add(nodeMap.get(initialPosition.Row).get(initialPosition.Column));
+
+
+		while(!openSet.isEmpty()){
+			AStar_Node current = (AStar_Node) openSet.poll();
+			for(BoardPosition goal: destination){
 				if(current.bp.Row == goal.Row && current.bp.Column==goal.Column){
 					return reconstruct_path(current);
 				}
-				closedSet.put(current.bp, current);
-	
-				List<BoardPosition> neighbourPositions = state.getPushingPositions(current.bp);
-				for(BoardPosition neighbour : neighbourPositions){
-					AStar_Node neighbourNode=nodeMap.get(neighbour.Row).get(neighbour.Column);
-					if(neighbourNode!=null){
-						int tentative_g_score = current.g+1;
-						if(closedSet.containsValue(neighbourNode) &&(tentative_g_score >= neighbourNode.g)){
-							continue;
-						}if(!openSet.contains(neighbourNode) || (tentative_g_score < neighbourNode.g)){
-							neighbourNode.parent=current;
-							neighbourNode.g=tentative_g_score;
-							neighbourNode.f=neighbourNode.g+neighbourNode.h;
-							if(!openSet.contains(neighbourNode)){
-								openSet.add(neighbourNode);
-							}
-	
-						}
-	
-					}
-				}
-	
 			}
-	
-	
-			return null;
-	
-	
+			closedSet.put(current.bp, current);
+
+			List<BoardPosition> neighbourPositions = state.getPushingPositions(current.bp);
+			for(BoardPosition neighbour : neighbourPositions){
+				AStar_Node neighbourNode=nodeMap.get(neighbour.Row).get(neighbour.Column);
+				if(neighbourNode!=null){
+					int tentative_g_score = current.g+1;
+					if(closedSet.containsValue(neighbourNode) &&(tentative_g_score >= neighbourNode.g)){
+						continue;
+					}if(!openSet.contains(neighbourNode) || (tentative_g_score < neighbourNode.g)){
+						neighbourNode.parent=current;
+						neighbourNode.g=tentative_g_score;
+						neighbourNode.f=neighbourNode.g+neighbourNode.h;
+						if(!openSet.contains(neighbourNode)){
+							openSet.add(neighbourNode);
+						}
+
+					}
+
+				}
+			}
+
 		}
-	
+
+
 		return null;
+	
+	
 	}
 
 	public Path reconstruct_path(AStar_Node current_node){
