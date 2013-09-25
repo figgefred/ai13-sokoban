@@ -23,7 +23,7 @@ import sokoban.Algorithms.ExploreConditions.IExploreCondition;
  * @author figgefred
  */
 public class BFS_BaseImpl extends BaseImpl {
-
+    
     public BFS_BaseImpl(IExploreCondition cond, IExploreAction action)
     {
         Cond = cond;
@@ -80,8 +80,8 @@ public class BFS_BaseImpl extends BaseImpl {
             BoardPosition p = queue.poll();
             BoardState s = oldStates.get(p);
         
-          //  System.out.println("VIEWED STATE: ");
-          //  System.out.println(s);
+        //    System.out.println("VIEWED STATE: ");
+        //    System.out.println(s);
             
             int previousHash = s.hashCode();
             if(p.equals(destination))

@@ -16,7 +16,7 @@ import sokoban.types.AlgorithmType;
  *
  * @author figgefred
  */
-public abstract class BaseImpl {
+public abstract class BaseImpl  {
     
     protected IExploreCondition Cond;
     protected IExploreAction Action;
@@ -24,6 +24,7 @@ public abstract class BaseImpl {
     
     public abstract Path getPath(BoardState state, BoardPosition initialPosition, BoardPosition destination);
     public abstract Path getPath(BoardState state, BoardPosition initialPosition, Set<BoardPosition> destinations);
+    
     public AlgorithmType getAlgorithmType()
     {
         return Type;
