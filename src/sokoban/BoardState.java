@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,6 +19,9 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
+
 import sokoban.Algorithms.ISearchAlgorithmPath;
 
 /**
@@ -48,10 +52,11 @@ public class BoardState implements Cloneable
         		
         	initZobristTable(Map.size(), cols);
         }
+        hashCode();
     }
     
     public BoardState() {
-    	
+    	hashCode();
     }
     
     
@@ -304,13 +309,35 @@ public class BoardState implements Cloneable
 			// Wall or other invalid move
 			throw new IllegalArgumentException("Invalid move: \n" + CurrentNode + "\n  " + row + " " + col + " is " + type);			
 		} else {			
+			// Update hash
+			if(type == NodeType.GOAL)
+			{
+				updateHashCode(row, col, NodeType.GOAL, NodeType.PLAYER_ON_GOAL);
+			}
+			else
+			{
+				updateHashCode(row, col, NodeType.SPACE, NodeType.PLAYER);
+			}
+			
 			// Set new position (otherwise push will)
 			Map.get(row).set(col, type == NodeType.GOAL ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER);
 		}
+		
     	
 		// Reset old position
     	NodeType playerType = Map.get(CurrentNode.Row).get(CurrentNode.Column);
 		Map.get(CurrentNode.Row).set(CurrentNode.Column, (playerType == NodeType.PLAYER_ON_GOAL) ? NodeType.GOAL : NodeType.SPACE);
+
+		// Update hash
+		if(playerType == NodeType.PLAYER_ON_GOAL)
+		{
+			updateHashCode(CurrentNode.Row, CurrentNode.Column, NodeType.PLAYER_ON_GOAL, NodeType.GOAL);
+		}
+		else
+		{
+			updateHashCode(CurrentNode.Row, CurrentNode.Column, NodeType.PLAYER, NodeType.SPACE);
+		}
+		
 		CurrentNode = new BoardPosition(row, col);	
     }
     
@@ -333,6 +360,24 @@ public class BoardState implements Cloneable
     		throw new IllegalArgumentException("Push was called to push non-block: " + orig.toString());
     	if(dest != NodeType.GOAL && dest != NodeType.SPACE)
     		throw new IllegalArgumentException("Can't push block, something is in the way: " + dest.toString());    	
+    	
+    	if(orig == NodeType.BLOCK_ON_GOAL)
+    	{
+    		updateHashCode(row, col, NodeType.BLOCK_ON_GOAL, NodeType.PLAYER_ON_GOAL);
+    	}
+    	else // Is block
+    	{
+    		updateHashCode(row, col, NodeType.BLOCK, NodeType.PLAYER);
+    	}
+    	
+    	if(dest == NodeType.GOAL)
+    	{
+    		updateHashCode(newrow, newcol, NodeType.GOAL, NodeType.BLOCK_ON_GOAL);
+    	}
+    	else // Is space
+    	{
+    		updateHashCode(newrow, newcol, NodeType.SPACE, NodeType.BLOCK);
+    	}
     	
     	Map.get(row).set(col, (orig == NodeType.BLOCK_ON_GOAL) ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER);
     	
@@ -470,8 +515,12 @@ public class BoardState implements Cloneable
   		return newState;
   	}
 
+  	public static BoardState getBoardFromFile(String filename) throws IOException
+  	{
+  		return getBoardFromFile(filename, true);
+  	}
   	
-	public static BoardState getBoardFromFile(String filename) throws IOException
+	public static BoardState getBoardFromFile(String filename, boolean initHash) throws IOException
 	{
 		FileReader rawInput = new FileReader(filename);
 		BufferedReader br = new BufferedReader(rawInput);
@@ -488,7 +537,7 @@ public class BoardState implements Cloneable
 		br.close();
 	
 		
-		return new BoardState(buffer);
+		return new BoardState(buffer, initHash);
 	}
 	
 	
@@ -513,10 +562,8 @@ public class BoardState implements Cloneable
 	@Override
 	public int hashCode()
 	{
-		/*
 		if(zobrist_hash != null)
 			return zobrist_hash;
-		*/
 	
 		NodeType[] vals = NodeType.values();
 		zobrist_hash = 0;
@@ -524,18 +571,23 @@ public class BoardState implements Cloneable
 			for(int col = 0; col < Map.get(row).size(); ++col)
 			{
 				NodeType type = getNode(row, col);
-				int val = 0;
-				typeloop:
-				for(; val < vals.length; val++)
-					if(type == vals[val]) 						
-						break typeloop;					
 				
-				zobrist_hash ^= zobrist_table[row][col][val]; 
+				zobrist_hash ^= zobrist_table[row][col][type.getIndex()];//val]; 
 			}
 		}
 		
 		//System.out.println(zobrist_hash);
 		return zobrist_hash;
+	}
+	
+	public void updateHashCode(int row, int col, NodeType oldType, NodeType newType)
+	{
+
+//		System.out.println(Arrays.toString(zobrist_table[row][col]));
+		// XOra ut oldType
+		zobrist_hash ^= zobrist_table[row][col][oldType.getIndex()];
+		// XOra in newType
+		zobrist_hash ^= zobrist_table[row][col][newType.getIndex()];
 	}
 	
 	public boolean isInCorner(BoardPosition position) {
