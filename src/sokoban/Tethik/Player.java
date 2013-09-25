@@ -12,6 +12,7 @@ import sokoban.BoardPosition;
 import sokoban.BoardState;
 import sokoban.Path;
 import sokoban.Algorithms.AStar_Path;
+import sokoban.Algorithms.BaseImpl;
 import sokoban.Algorithms.ISearchAlgorithmPath;
 import sokoban.types.NodeType;
 
@@ -21,7 +22,7 @@ import sokoban.types.NodeType;
  *
  */
 public class Player {	
-	private ISearchAlgorithmPath pathfinder = new AStar_Path();
+	private BaseImpl pathfinder = new AStar_Path();
 	private Queue<Move> openSet;
     private HashSet<BoardState> closedSet;
     
@@ -123,7 +124,7 @@ public class Player {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BoardState board = BoardState.getBoardFromFile("testing/level3");
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
 		
 		System.out.println(board);
 		Player noob = new Player(board);
@@ -144,7 +145,8 @@ public class Player {
 				return heuristic_value;
 			}
 			
-			int val = -path.getPath().size();
+			//int val = -path.getPath().size();
+			int val = 0;
 			List<BoardPosition> blocks = board.getBlockNodes();
 			for(BoardPosition block : blocks)
 			{
@@ -158,6 +160,16 @@ public class Player {
 					heuristic_value = Integer.MIN_VALUE;
 					return heuristic_value;					
 				}
+				
+				int mindistToGoal = Integer.MAX_VALUE;
+				for(BoardPosition goal : board.getGoalNodes())					
+				{
+					if(board.getNode(goal) == NodeType.BLOCK_ON_GOAL)
+						continue;
+					
+					mindistToGoal = Math.min(mindistToGoal, block.DistanceTo(goal));
+				}
+				val -= mindistToGoal;
 			}
 			
 			return val;
@@ -203,7 +215,6 @@ public class Player {
 						val++;
 				}
 				
-				
 				int mindistToGoal = Integer.MAX_VALUE;
 				for(BoardPosition goal : board.getGoalNodes())					
 				{
@@ -212,7 +223,8 @@ public class Player {
 					
 					mindistToGoal = Math.min(mindistToGoal, block.DistanceTo(goal));
 				}
-				val -= mindistToGoal;		
+				val -= mindistToGoal;
+						
 				
 				
 			}
