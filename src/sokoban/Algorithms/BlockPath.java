@@ -85,11 +85,11 @@ public class BlockPath implements ISearchAlgorithmPath {
 		Path path = null;
                 BoardState newState = (BoardState) state.clone();
 		do {
-                    path = BlockPathSearch.getPath(state, initialPosition, destination);
-                    if (true || path == null || path.getPath() == null || path.getPath().size() == 0) // Ok cant find block path..
+                    path = BlockPathSearch.getPath(newState, initialPosition, destination);
+                    if (path == null || path.getPath() == null || path.getPath().size() == 0) // Ok cant find block path..
                         break;
                     System.out.println("DEBUG: Found path " + path);
-                    path = getPlayerPushPath(path, state);
+                    path = getPlayerPushPath(path, newState);
                     if (path == null || path.getPath() == null || path.getPath().size() == 0) // YEA we found a path for the player to push block
                     {
                         System.out.println("DEBUG: Found path incl. player path " + path);
@@ -124,7 +124,9 @@ public class BlockPath implements ISearchAlgorithmPath {
                 Path playerToBlockSegment = new Path();
                 int nextIndex=i+1;
                 if(nextIndex==blockPath.getPath().size())
+                {
                         break;
+                }
                 Direction nextDir = state.getDirection(blockPath.get(i), blockPath.get(nextIndex));
                 if(dir!=nextDir){ //If a change in direction
                         BoardPosition playerNewPos=null;
@@ -150,7 +152,8 @@ public class BlockPath implements ISearchAlgorithmPath {
                         state.movePlayer(playerToBlockSegment);
                         playerToBlockPath=playerToBlockPath.cloneAndAppend(playerToBlockSegment);
                 }	
-                playerToBlockPath.append(blockPath.last());
+                //playerToBlockPath.append(blockPath.last());
+                playerToBlockPath.append(blockPath.getPath().get(blockPath.getPath().size()-2));
             }
 
         return playerToBlockPath;
@@ -182,7 +185,7 @@ public class BlockPath implements ISearchAlgorithmPath {
             }
             case RIGHT:
             {
-                newPlayerPos=new BoardPosition(currentBlockFragment.Row-1, currentBlockFragment.Column-1);
+                newPlayerPos=new BoardPosition(currentBlockFragment.Row, currentBlockFragment.Column-1);
                 playerToBlockSegment = PlayerPathSearch.getPath(state, playerPosition, newPlayerPos);
                 break;
             }default:

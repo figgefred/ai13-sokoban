@@ -33,12 +33,14 @@ public class AStar2_Impl extends BaseImpl{
 	    	{
                     ConstantWeight = 0;
                     EstimateWeight = 1;
+                    Type = aType;
                     break;
 	    	}
 	    	default:
 	    	{
                     ConstantWeight =1;
                     EstimateWeight =1;
+                    Type = AlgorithmType.A_STAR;
                     break;
 	    	}
     	}

@@ -103,7 +103,7 @@ public class BoardState implements Cloneable
     
     private boolean isGoalType(NodeType type)
     {
-        return type == NodeType.GOAL || type == NodeType.BLOCK_ON_GOAL;
+        return type == NodeType.GOAL || type == NodeType.BLOCK_ON_GOAL || type == NodeType.PLAYER_ON_GOAL;
     }
     
     public NodeType getNode(int row, int col)
@@ -235,30 +235,38 @@ public class BoardState implements Cloneable
     
     public boolean moveBlockTo(int fromRow, int fromCol, Direction dir)
     {
-    	try
-    	{
-	    	switch(dir)
-	    	{
-	    	case UP:
-	    		pushBlock(fromRow, fromCol, fromRow - 1, fromCol);
-	    		break;
-	    	case DOWN:
-	    		pushBlock(fromRow, fromCol, fromRow + 1, fromCol);
-	    		break;
-	    	case LEFT:
-	    		pushBlock(fromRow, fromCol, fromRow, fromCol - 1);
-	    		break;
-	    	case RIGHT:
-	    		pushBlock(fromRow, fromCol, fromRow, fromCol + 1);
-	    		break;
-			default:
-				break;
-	    	}
-    	} catch(IllegalArgumentException ex)
-    	{
-    		return false;
-    	}
-    	return true;
+        int row = -1;
+        int col = -1;
+        switch(dir)
+        {
+        case UP:
+                row = fromRow-1;
+                col = fromCol;
+                break;
+        case DOWN:
+                row = fromRow+1;
+                col = fromCol;
+                break;
+        case LEFT:
+                row = fromRow;
+                col = fromCol-1;
+                break;
+        case RIGHT:
+                row = fromRow;
+                col = fromCol+1;
+        default:
+                break;
+        }
+        if( (row >= 0 && row < getRowsCount()) && col>= 0 && col < getColumnsCount(row))
+        {
+            if( isBlock(fromRow, fromCol) && isSpaceNode(row, col) )
+            {
+               Map.get(row).set(col, (isGoalType(getNode(row, col))?NodeType.BLOCK_ON_GOAL: NodeType.BLOCK));
+               Map.get(fromRow).set(fromCol, (isGoalType(getNode(fromRow, fromCol))?NodeType.GOAL: NodeType.SPACE));
+               return true;
+            }
+        }
+    	return false;
     }
     
     /***
@@ -368,7 +376,8 @@ public class BoardState implements Cloneable
         
         return 
                type == NodeType.GOAL ||
-                type == NodeType.SPACE;
+                type == NodeType.SPACE || 
+                type == NodeType.PLAYER_ON_GOAL;
     }
 
     public boolean isSpaceNode(BoardPosition p) {
