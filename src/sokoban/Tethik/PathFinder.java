@@ -1,5 +1,6 @@
 package sokoban.Tethik;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -80,7 +81,7 @@ public class PathFinder {
         return null;
 	}
 
-	
+	/*
 	public Path getPath(BoardState state, BoardPosition initialPosition, Set<BoardPosition> destination) {
 	
 		for(BoardPosition goal: destination){
@@ -146,6 +147,7 @@ public class PathFinder {
 	
 		return null;
 	}
+	*/
 
 	public Path reconstruct_path(AStar_Node current_node){
 		List<BoardPosition> pathList=new ArrayList<BoardPosition>();
@@ -179,8 +181,16 @@ public class PathFinder {
 	
 		@Override
 		public int compareTo(AStar_Node n) {
-			return this.f- n.f;
+			return n.f - this.f;
 		}
+	}
+	
+	public static void main(String[] args) throws IOException {
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest");
+		System.out.println(board);
+		PathFinder pathfinder = new PathFinder();
+		Path path = pathfinder.getPath(board, board.getPlayerNode(), new BoardPosition(2, 4));	
+		System.out.println(path);
 	}
     
 

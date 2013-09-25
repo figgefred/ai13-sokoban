@@ -80,12 +80,7 @@ public class Player {
         	}
         	toVisitSet.remove(node.board);
         	closedSet.add(node.board);
-        	
-        	 /*      	
-        	if(c == 2)
-        		return null;
-        	c++; */
-        	
+
         }
         
         System.out.println("No path found?");        		
@@ -119,7 +114,7 @@ public class Player {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
+		BoardState board = BoardState.getBoardFromFile("testing/level3");
 		
 		System.out.println(board);
 		Player noob = new Player(board);

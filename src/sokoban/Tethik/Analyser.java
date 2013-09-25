@@ -162,7 +162,6 @@ public class Analyser {
 			return Integer.MIN_VALUE;
 		}
 		
-		//int val = -path.getPath().size();
 		int val = 0;
 		List<BoardPosition> blocks = board.getBlockNodes();
 		for(BoardPosition block : blocks)
@@ -188,72 +187,11 @@ public class Analyser {
 			val -= mindistToGoal;
 		}
 		return val;
-		/*
-		int val = 0;
-		List<BoardPosition> blocks = board.getBlockNodes();
-		for(BoardPosition block : blocks)
-		{
-			
-			if(board.getNode(block) == NodeType.BLOCK_ON_GOAL) {
-				val += 100;
-				continue;
-			}
-			
-			if(board.isInCorner(block)) {
-				heuristic_value = Integer.MIN_VALUE;
-				return heuristic_value;					
-			}
-			
-			/*
-			// check if we can move this block
-			boolean movable = false;
-			for(BoardPosition candidate : board.getPushingPositions(block))
-			{
-				if(candidate.equals(board.getPlayerNode()))
-					movable = true;
-				else
-					movable = pathfinder.getPath(board, board.getPlayerNode(), candidate) == null;		
-			
-				if(movable)
-					break;
-			}
-			
-			if(!movable) {
-				val += Integer.MAX_VALUE / blocks.size();
-				continue;
-			}*/
-			
-			/*
-			for(BoardPosition goal : board.getNeighbours(block))					
-			{
-				if(board.getNode(goal) == NodeType.WALL)
-					val++;
-			}
-			
-			int mindistToGoal = Integer.MAX_VALUE;
-			for(BoardPosition goal : board.getGoalNodes())					
-			{
-				if(board.getNode(goal) == NodeType.BLOCK_ON_GOAL)
-					continue;
-				
-				mindistToGoal = Math.min(mindistToGoal, block.DistanceTo(goal));
-			}
-			val -= mindistToGoal;
-					
-			
-			
-		}
 		
-		/*
-		val += path.getPath().size();
-		
-		heuristic_value = val; // * number_of_blocks_not_in_goal;
-		return heuristic_value;
-		*/
 	}
 	
 	public static void main(String[] args) throws IOException {
-		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
+		BoardState board = BoardState.getBoardFromFile("testing/pushtest2");
 		System.out.println(board);
 		Analyser analyser = new Analyser(board);
 		System.out.println(analyser);
