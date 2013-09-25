@@ -52,11 +52,11 @@ public class BoardState implements Cloneable
         		
         	initZobristTable(Map.size(), cols);
         }
-        hashCode();
+        //hashCode();
     }
     
     public BoardState() {
-    	hashCode();
+    	//hashCode();
     }
     
     
@@ -194,8 +194,9 @@ public class BoardState implements Cloneable
     }
     
     public boolean isBlockingNode(BoardPosition position) {
-    	NodeType type = getNode(position);    	
-    	return (type != NodeType.INVALID && type != NodeType.GOAL && type != NodeType.SPACE && type != NodeType.PLAYER && type != NodeType.PLAYER_ON_GOAL); //&& type != NodeType.PLAYER_ON_GOAL);
+    	NodeType type = getNode(position);
+    	return (type == NodeType.BLOCK || type == NodeType.WALL || type == NodeType.BLOCK_ON_GOAL);
+    			//(type != NodeType.INVALID && type != NodeType.GOAL && type != NodeType.SPACE && type != NodeType.PLAYER && type != NodeType.PLAYER_ON_GOAL);
     }
     
     public boolean isBlock(int r, int c)
@@ -516,6 +517,8 @@ public class BoardState implements Cloneable
   	public Object clone() {
   		BoardState newState = new BoardState();
   		newState.CurrentNode = new BoardPosition(CurrentNode.Row, CurrentNode.Column);
+  		newState.zobrist_hash = zobrist_hash;
+  		
   		 // yay casts...
   		newState.Goals = Goals;
   		for(List<NodeType> row : Map)
@@ -589,9 +592,10 @@ public class BoardState implements Cloneable
 		return zobrist_hash;
 	}
 	
-	public void updateHashCode(int row, int col, NodeType oldType, NodeType newType)
+	private void updateHashCode(int row, int col, NodeType oldType, NodeType newType)
 	{
-
+		if(zobrist_hash == null)
+			return;
 //		System.out.println(Arrays.toString(zobrist_table[row][col]));
 		// XOra ut oldType
 		zobrist_hash ^= zobrist_table[row][col][oldType.getIndex()];
