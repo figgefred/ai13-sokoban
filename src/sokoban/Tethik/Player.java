@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
-import sokoban.BoardState;
+//import sokoban.BoardState;
 import sokoban.Path;
 
 /***
@@ -98,6 +98,7 @@ public class Player {
 		Move initial = new Move();
 		initial.board = initialState;
 		initial.path = new Path();
+		Move.initPreanalyser(initialState);
 		
 		
 		Move win = getVictoryPath(initial);

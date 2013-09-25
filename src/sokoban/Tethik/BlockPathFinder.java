@@ -7,12 +7,10 @@ import java.util.PriorityQueue;
 import java.util.Set;
 
 import sokoban.BoardPosition;
-//import sokoban.BoardState;
 import sokoban.Path;
 import sokoban.types.NodeType;
 
-public class PathFinder {
-    
+public class BlockPathFinder {
 	private PriorityQueue<AStar_Node> openSet;
 	private HashMap<BoardPosition,AStar_Node> closedSet;
 	private List<List<AStar_Node>> nodeMap;
@@ -21,7 +19,7 @@ public class PathFinder {
 	private int EstimateWeight;
 
     
-    public PathFinder() {
+    public BlockPathFinder() {
     	ConstantWeight = 0;
         EstimateWeight = 1;
     }
@@ -56,7 +54,7 @@ public class PathFinder {
             }
             closedSet.put(current.bp, current);
 
-            List<BoardPosition> neighbourPositions = board.getNeighbours(current.bp);
+            List<BoardPosition> neighbourPositions = board.getPushingPositions(current.bp);
             for(BoardPosition neighbour : neighbourPositions){
                 AStar_Node neighbourNode=nodeMap.get(neighbour.Row).get(neighbour.Column);
                 if(neighbourNode!=null){
@@ -94,7 +92,8 @@ public class PathFinder {
 				for(int column=0; column <state.getColumnsCount(row); column++){
 	
 					NodeType nodeType=state.getNode(row, column);
-					if(nodeType==NodeType.SPACE || nodeType == NodeType.GOAL ||nodeType==NodeType.PLAYER || nodeType==NodeType.PLAYER_ON_GOAL){
+					if(nodeType==NodeType.SPACE || nodeType == NodeType.GOAL 
+							||nodeType==NodeType.PLAYER || nodeType==NodeType.PLAYER_ON_GOAL){
 						nodeMap.get(row).add(column,new AStar_Node(Math.abs((row-goal.Row)+Math.abs(column-goal.Column)), new BoardPosition(row, column)));
 	
 					}else{
@@ -116,7 +115,7 @@ public class PathFinder {
 				}
 				closedSet.put(current.bp, current);
 	
-				List<BoardPosition> neighbourPositions = state.getNeighbours(current.bp);
+				List<BoardPosition> neighbourPositions = state.getPushingPositions(current.bp);
 				for(BoardPosition neighbour : neighbourPositions){
 					AStar_Node neighbourNode=nodeMap.get(neighbour.Row).get(neighbour.Column);
 					if(neighbourNode!=null){
@@ -182,6 +181,5 @@ public class PathFinder {
 			return this.f- n.f;
 		}
 	}
-    
-
+	
 }

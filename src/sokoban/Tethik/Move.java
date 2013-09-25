@@ -4,15 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sokoban.BoardPosition;
-import sokoban.BoardState;
+//import sokoban.BoardState;
 import sokoban.Path;
 import sokoban.types.NodeType;
 
 public class Move implements Comparable<Move> {
 	private static PathFinder pathfinder = new PathFinder();
+	private static PreAnalyser analyser = null;
 	public BoardState board;
 	public Path path;
 	private Integer heuristic_value = null;
+	
+	public static void initPreanalyser(BoardState board) {
+		analyser = new PreAnalyser(board);
+	}
 	
 	public int getHeuristicValue() {
 		if(heuristic_value != null)
@@ -33,7 +38,8 @@ public class Move implements Comparable<Move> {
 				continue;
 			}
 			
-			if(board.isInCorner(block)) {
+			//board.isInCorner(block) || 
+			if(analyser.isBadPosition(block)) {
 				heuristic_value = Integer.MIN_VALUE;
 				return heuristic_value;					
 			}
