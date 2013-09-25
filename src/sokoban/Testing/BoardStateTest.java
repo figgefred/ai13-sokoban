@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import org.junit.Test;
 
 import sokoban.BoardState;
+import sokoban.types.Direction;
 import sokoban.types.NodeType;
 
 public class BoardStateTest {
@@ -110,6 +111,47 @@ public class BoardStateTest {
 		assertEquals(NodeType.SPACE, board.getNode(4, 4));
 		assertEquals(NodeType.SPACE, board.getNode(3, 3));
 
+	}
+	
+	@Test
+	public void testHashMovePlayerFunction() throws IOException {
+		BoardState board = BoardState.getBoardFromFile("testing/hash/test1");
+		BoardState board2 = BoardState.getBoardFromFile("testing/hash/test2", false);
+		
+		System.out.println("Flyttar spelaren till 3,3");
+		board.movePlayerTo(3, 3);
+		
+		System.out.println("Flytta spelaren till 3,2");
+		board.movePlayerTo(3, 2);
+		
+		assertEquals(board.hashCode(), board2.hashCode());
+		
+	}
+	
+	@Test
+	public void testHashPushBlockFunction() throws IOException {
+		BoardState board = BoardState.getBoardFromFile("testing/hash/test1");
+		BoardState board2 = BoardState.getBoardFromFile("testing/hash/test3", false);
+		BoardState board3 = BoardState.getBoardFromFile("testing/hash/test4", false);
+		BoardState board4 = BoardState.getBoardFromFile("testing/hash/test5", false);
+		BoardState board5 = BoardState.getBoardFromFile("testing/hash/test6", false);
+		
+		board.movePlayerTo(4, 4);
+		
+		System.out.println("Board 1 : " + board.hashCode());
+		System.out.println("Board 2 : " + board2.hashCode());
+		
+		assertEquals(board.hashCode(), board2.hashCode());
+		
+		board.movePlayerTo(3, 4);
+		assertEquals(board.hashCode(), board3.hashCode());
+		
+		board.movePlayerTo(2, 4);
+		assertEquals(board.hashCode(), board4.hashCode());
+		
+		board.movePlayerTo(3, 4);
+		board.movePlayerTo(3, 5);
+		assertEquals(board.hashCode(), board5.hashCode());
 	}
 	
 	@Test(expected= IllegalArgumentException.class) 
