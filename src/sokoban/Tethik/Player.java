@@ -16,6 +16,7 @@ public class Player {
 	private Queue<Move> openSet;
     private HashSet<BoardState> closedSet;
     private HashSet<BoardState> toVisitSet;
+    private static boolean VERBOSE = true;
     
 	private BoardState initialState;
 	
@@ -35,16 +36,14 @@ public class Player {
         {
         	Move node = openSet.poll();
         	
+        	if(VERBOSE) {
+	        	System.out.println(openSet.size() + " " + toVisitSet.size());
+	        	System.out.println(node.path.getPath().size() + ", " + node.getHeuristicValue() + ", " + closedSet.size() + ", " + node.board.hashCode());
+	        	System.out.println(node.board);
+        	}
         	
-        	System.out.println(openSet.size() + " " + toVisitSet.size());
-        	System.out.println(node.path.getPath().size() + ", " + node.getHeuristicValue() + ", " + closedSet.size() + ", " + node.board.hashCode());
-        	System.out.println(node.board);
-        	
-        	
-        	if(node.board.isWin())
-        	{       		
-        		return node;
-        	}       	    
+        	if(node.board.isWin())        	
+        		return node;        	
         	
         	if(node.getHeuristicValue() == Integer.MIN_VALUE)
         		return null;
@@ -105,6 +104,8 @@ public class Player {
 		if(win != null) {
 			//System.out.println(win.board);
 			System.out.println(win.path);
+		} else {
+			System.out.println("No path?");
 		}
 		
 		/*
@@ -116,7 +117,7 @@ public class Player {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BoardState board = BoardState.getBoardFromFile("testing/swaptest");
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest9");
 		
 		System.out.println(board);
 		Player noob = new Player(board);

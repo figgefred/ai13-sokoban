@@ -113,7 +113,7 @@ public class Analyser {
 						continue;
 					
 					NodeType node = board.getNode(neighbour);
-					if(node == NodeType.WALL || node == NodeType.BLOCK_ON_GOAL || node == NodeType.INVALID) 
+					if(node == NodeType.WALL || node == NodeType.INVALID) 
 						continue;
 									
 					positions.add(neighbour);
@@ -183,6 +183,8 @@ public class Analyser {
 					board.getNode(row+1, col),
 					board.getNode(row+1, col+1)
 				};
+				
+				
 				
 				boolean atLeastOneIsBlock = false;
 				for(NodeType node : nodes)
@@ -258,7 +260,8 @@ public class Analyser {
 			return Integer.MIN_VALUE;
 		}
 		
-		//mapDistancesToGoal(board);
+		
+		mapDistancesToGoal(board);
 		
 		int val = 0;
 		List<BoardPosition> blocks = board.getBlockNodes();
@@ -274,11 +277,13 @@ public class Analyser {
 		
 		for(BoardPosition block : blocks)
 		{	
-			if(board.getNode(block) == NodeType.BLOCK_ON_GOAL) {
+			
+			if(board.getNode(block) == NodeType.BLOCK_ON_GOAL) {				
 				continue;
 			}
+						
 			
-			if(board.getNode(block) == NodeType.BLOCK && board.isInCorner(block))
+			if(board.isInCorner(block))
 				return Integer.MIN_VALUE;
 			
 
@@ -312,7 +317,7 @@ public class Analyser {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		BoardState board = BoardState.getBoardFromFile("testing/disttest3");
+		BoardState board = BoardState.getBoardFromFile("testing/firstplaytest");
 		System.out.println(board);
 		Analyser analyser = new Analyser(board);
 		System.out.println(analyser);
