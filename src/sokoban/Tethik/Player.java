@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
-//import sokoban.BoardState;
-import sokoban.Path;
 
 /***
  * A* variant on boardstate
@@ -36,9 +34,11 @@ public class Player {
         while(!openSet.isEmpty())
         {
         	Move node = openSet.poll();
+        	/*
         	System.out.println(openSet.size() + " " + toVisitSet.size());
         	System.out.println(node.path.getPath().size() + ", " + node.getHeuristicValue() + ", " + closedSet.size() + ", " + node.board.hashCode());
         	System.out.println(node.board);
+        	*/
         	
         	if(node.getHeuristicValue() == Integer.MIN_VALUE)
         		return null;
@@ -101,7 +101,7 @@ public class Player {
 		
 		Move win = getVictoryPath(initial);
 		if(win != null) {
-			System.out.println(win.board);
+			//System.out.println(win.board);
 			System.out.println(win.path);
 		}
 		
@@ -114,7 +114,7 @@ public class Player {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BoardState board = BoardState.getBoardFromFile("testing/level3");
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
 		
 		System.out.println(board);
 		Player noob = new Player(board);

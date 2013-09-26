@@ -13,12 +13,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import sokoban.BoardPosition;
-import sokoban.Constants;
-import sokoban.Path;
-import sokoban.types.Direction;
-import sokoban.types.NodeType;
-
 /**
  *
  * @author figgefred

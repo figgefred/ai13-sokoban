@@ -3,9 +3,6 @@ package sokoban.Tethik;
 import java.io.IOException;
 import java.util.List;
 
-import sokoban.BoardPosition;
-import sokoban.Path;
-import sokoban.types.NodeType;
 
 /***
  * PreAnalyser: analyse the board beforehand to calculate positions in which blocks will get stuck in.
@@ -23,6 +20,7 @@ public class Analyser {
 	private int rows;
 	private int cols;
 	private BlockPathFinder pathfinder = new BlockPathFinder();
+	private LiveAnalyser deadlockfinder = new LiveAnalyser();
 	
 	public Analyser(BoardState board)
 	{
@@ -96,6 +94,7 @@ public class Analyser {
 	 * Kanske borde abstraheras till vissa mönster?
 	 * @param board
 	 * @return
+	 * @deprecated Freds liveanalyser borde ta detta nu.
 	 */
 	private boolean has4x4Block(BoardState board) {
 		
@@ -157,6 +156,7 @@ public class Analyser {
 			return  Integer.MAX_VALUE;
 		}
 		
+		
 		if(has4x4Block(board))
 		{
 			return Integer.MIN_VALUE;
@@ -170,9 +170,10 @@ public class Analyser {
 				continue;
 			}
 			
-			if(isBadPosition(block)) {
+			if(deadlockfinder.isBadState(board, block)) {
 				return Integer.MIN_VALUE;					
 			}
+			
 			
 			int mindistToGoal = Integer.MAX_VALUE;
 			for(BoardPosition goal : board.getGoalNodes())					

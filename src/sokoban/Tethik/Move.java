@@ -3,10 +3,6 @@ package sokoban.Tethik;
 import java.util.ArrayList;
 import java.util.List;
 
-import sokoban.BoardPosition;
-//import sokoban.BoardState;
-import sokoban.Path;
-
 public class Move implements Comparable<Move> {
 	private static PathFinder pathfinder = new PathFinder();
 	private static Analyser analyser = null;

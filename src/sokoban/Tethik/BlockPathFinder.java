@@ -7,9 +7,6 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import sokoban.BoardPosition;
-import sokoban.Path;
-import sokoban.types.NodeType;
 
 public class BlockPathFinder {
 	private PriorityQueue<AStar_Node> openSet;
