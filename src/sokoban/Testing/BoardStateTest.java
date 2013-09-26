@@ -1,19 +1,15 @@
 package sokoban.Testing;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
 
 import org.junit.Test;
 
-import sokoban.BoardState;
-import sokoban.types.Direction;
+import sokoban.Tethik.BoardState;
 import sokoban.types.NodeType;
 
 public class BoardStateTest {
@@ -200,6 +196,7 @@ public class BoardStateTest {
 		assertEquals(NodeType.PLAYER, board.getNode(2, 4));
 		
 		BoardState board2 = (BoardState) board.clone();
+		assertEquals(board.hashCode(),board2.hashCode());
 		assertEquals(board.getGoalNodes(), board2.getGoalNodes());
 		board2.movePlayerTo(2, 3);
 		
@@ -209,6 +206,7 @@ public class BoardStateTest {
 		System.out.println(board);
 		assertTrue(!board.toString().equals(board2.toString()));
 		assertNotSame(board2.getPlayerNode(), board.getPlayerNode());
+		assertNotSame(board.hashCode(),board2.hashCode());
 		
 	}
 }
