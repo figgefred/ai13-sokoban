@@ -325,13 +325,35 @@ public class BoardState implements Cloneable
 			// Wall or other invalid move
 			throw new IllegalArgumentException("Invalid move: \n" + CurrentNode + "\n  " + row + " " + col + " is " + type);			
 		} else {			
+			// Update hash
+			if(type == NodeType.GOAL)
+			{
+				updateHashCode(row, col, NodeType.GOAL, NodeType.PLAYER_ON_GOAL);
+			}
+			else
+			{
+				updateHashCode(row, col, NodeType.SPACE, NodeType.PLAYER);
+			}
+			
 			// Set new position (otherwise push will)
 			Map.get(row).set(col, type == NodeType.GOAL ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER);
 		}
+		
     	
 		// Reset old position
     	NodeType playerType = Map.get(CurrentNode.Row).get(CurrentNode.Column);
 		Map.get(CurrentNode.Row).set(CurrentNode.Column, (playerType == NodeType.PLAYER_ON_GOAL) ? NodeType.GOAL : NodeType.SPACE);
+
+		// Update hash
+		if(playerType == NodeType.PLAYER_ON_GOAL)
+		{
+			updateHashCode(CurrentNode.Row, CurrentNode.Column, NodeType.PLAYER_ON_GOAL, NodeType.GOAL);
+		}
+		else
+		{
+			updateHashCode(CurrentNode.Row, CurrentNode.Column, NodeType.PLAYER, NodeType.SPACE);
+		}
+		
 		CurrentNode = new BoardPosition(row, col);	
     }
     
@@ -339,10 +361,10 @@ public class BoardState implements Cloneable
     	for(BoardPosition pos : path.getPath())
     	{
 //    		if(pos != null && pos.equals(CurrentNode))
-                if(pos.equals(CurrentNode))
+            if(pos.equals(CurrentNode))
     			continue;
 //                else if(pos != null)
-                 movePlayerTo(pos);
+             movePlayerTo(pos);
     	}
     }
     
@@ -354,6 +376,24 @@ public class BoardState implements Cloneable
     		throw new IllegalArgumentException("Push was called to push non-block: " + orig.toString());
     	if(dest != NodeType.GOAL && dest != NodeType.SPACE)
     		throw new IllegalArgumentException("Can't push block, something is in the way: " + dest.toString());    	
+    	
+    	if(orig == NodeType.BLOCK_ON_GOAL)
+    	{
+    		updateHashCode(row, col, NodeType.BLOCK_ON_GOAL, NodeType.PLAYER_ON_GOAL);
+    	}
+    	else // Is block
+    	{
+    		updateHashCode(row, col, NodeType.BLOCK, NodeType.PLAYER);
+    	}
+    	
+    	if(dest == NodeType.GOAL)
+    	{
+    		updateHashCode(newrow, newcol, NodeType.GOAL, NodeType.BLOCK_ON_GOAL);
+    	}
+    	else // Is space
+    	{
+    		updateHashCode(newrow, newcol, NodeType.SPACE, NodeType.BLOCK);
+    	}
     	
     	Map.get(row).set(col, (orig == NodeType.BLOCK_ON_GOAL) ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER);
     	
@@ -435,17 +475,7 @@ public class BoardState implements Cloneable
 	    return Direction.NONE;
 	}
     
-    @Override
-    public String toString() {
-    	StringBuilder builder = new StringBuilder();
-    	for(List<NodeType> row : Map) {
-    		for(NodeType t : row)
-    			builder.append(Constants.GetCharFromNodeType(t));
-    		builder.append('\n');
-    	}
-    	
-    	return builder.toString();   		
-    }
+
     
   	public List<BoardPosition> getBlockNodes()
     {
@@ -464,26 +494,28 @@ public class BoardState implements Cloneable
         return blocks;
     }
         
-        public boolean setNodeType(NodeType type, BoardPosition pos)
+    public boolean setNodeType(NodeType type, BoardPosition pos)
+    {
+        return setNodeType(type, pos.Row, pos.Column);
+    }
+    
+    public boolean setNodeType(NodeType type, int r, int c)
+    {
+        if( !((r >= 0 && r < getRowsCount()) && (c >= 0 && c < getColumnsCount(r))) )
         {
-            return setNodeType(type, pos.Row, pos.Column);
+            return false;
         }
-        
-        public boolean setNodeType(NodeType type, int r, int c)
-        {
-            if( !((r >= 0 && r < getRowsCount()) && (c >= 0 && c < getColumnsCount(r))) )
-            {
-                return false;
-            }
-            Map.get(r).set(c, type);
-            return true;
-        }
+        Map.get(r).set(c, type);
+        return true;
+    }
   	
   	@SuppressWarnings("unchecked")
 	@Override
   	public Object clone() {
   		BoardState newState = new BoardState();
   		newState.CurrentNode = new BoardPosition(CurrentNode.Row, CurrentNode.Column);
+  		newState.zobrist_hash = zobrist_hash;
+  		
   		 // yay casts...
   		newState.Goals = Goals;
   		for(List<NodeType> row : Map)
@@ -492,8 +524,12 @@ public class BoardState implements Cloneable
   		return newState;
   	}
 
+  	public static BoardState getBoardFromFile(String filename) throws IOException
+  	{
+  		return getBoardFromFile(filename, true);
+  	}
   	
-	public static BoardState getBoardFromFile(String filename) throws IOException
+	public static BoardState getBoardFromFile(String filename, boolean initHash) throws IOException
 	{
 		FileReader rawInput = new FileReader(filename);
 		BufferedReader br = new BufferedReader(rawInput);
@@ -510,7 +546,7 @@ public class BoardState implements Cloneable
 		br.close();
 	
 		
-		return new BoardState(buffer);
+		return new BoardState(buffer, initHash);
 	}
 	
 	
@@ -534,11 +570,10 @@ public class BoardState implements Cloneable
 	
 	@Override
 	public int hashCode()
-	{
-		/*
+	{		
 		if(zobrist_hash != null)
 			return zobrist_hash;
-		*/
+		
 	
 		NodeType[] vals = NodeType.values();
 		zobrist_hash = 0;
@@ -558,6 +593,17 @@ public class BoardState implements Cloneable
 		
 		//System.out.println(zobrist_hash);
 		return zobrist_hash;
+	}
+	
+	private void updateHashCode(int row, int col, NodeType oldType, NodeType newType)
+	{
+		if(zobrist_hash == null)
+			return;
+//		System.out.println(Arrays.toString(zobrist_table[row][col]));
+		// XOra ut oldType
+		zobrist_hash ^= zobrist_table[row][col][oldType.getIndex()];
+		// XOra in newType
+		zobrist_hash ^= zobrist_table[row][col][newType.getIndex()];
 	}
 	
 	public boolean isInCorner(BoardPosition position) {
@@ -583,6 +629,7 @@ public class BoardState implements Cloneable
 		return false;
 	}
 	
+	@Override
 	public boolean equals(Object o) {
 		if(!(o instanceof BoardState))
 			return false;
@@ -596,10 +643,20 @@ public class BoardState implements Cloneable
 					return false;
 			}
 		}
-		
-		return true;
-		
+		return true;		
 	}
+	
+    @Override
+    public String toString() {
+    	StringBuilder builder = new StringBuilder();
+    	for(List<NodeType> row : Map) {
+    		for(NodeType t : row)
+    			builder.append(Constants.GetCharFromNodeType(t));
+    		builder.append('\n');
+    	}
+    	
+    	return builder.toString();   		
+    }
 	
 
 
