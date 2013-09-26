@@ -55,7 +55,8 @@ public class Player {
         	{	       		                		
         		if(neighbour.board.isWin())
         			return neighbour;
-        		Integer to_g = neighbour.getHeuristicValue();
+        		
+        		Integer to_g = neighbour.getHeuristicValue();        		
         		
         		//System.out.println(neighbour.board);
         		//System.out.println(to_g);
@@ -115,7 +116,7 @@ public class Player {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest5");
+		BoardState board = BoardState.getBoardFromFile("testing/swaptest");
 		
 		System.out.println(board);
 		Player noob = new Player(board);

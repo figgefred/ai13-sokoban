@@ -1,7 +1,6 @@
 package sokoban.Tethik;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -265,6 +264,14 @@ public class Analyser {
 		List<BoardPosition> blocks = board.getBlockNodes();
 		int number_of_unsolved_blocks = 0;
 		int number_of_stuck_blocks = 0;
+		
+		Set<BoardPosition> goalNodes = new HashSet<BoardPosition>();
+		/*
+		for(BoardPosition goal : board.getGoalNodes()) {
+			if(board.getNode(goal) == NodeType.GOAL)
+				goalNodes.add(goal);
+		}*/
+		
 		for(BoardPosition block : blocks)
 		{	
 			if(board.getNode(block) == NodeType.BLOCK_ON_GOAL) {
@@ -274,15 +281,12 @@ public class Analyser {
 			if(board.getNode(block) == NodeType.BLOCK && board.isInCorner(block))
 				return Integer.MIN_VALUE;
 			
-			Set<BoardPosition> goalNodes = new HashSet<BoardPosition>();
-			for(BoardPosition goal : board.getGoalNodes()) {
-				if(board.getNode(goal) == NodeType.GOAL)
-					goalNodes.add(goal);
-			}
-			
+
+			/*
 			if(pathfinder.getPath(board, block, goalNodes) == null) {
-				number_of_stuck_blocks++;
+				number_of_stuck_blocks++;				
 			}
+			*/
 			
 			/*
 			if(deadlockfinder.isBadState(board, block)) {
@@ -298,8 +302,10 @@ public class Analyser {
 			val -= mindistToGoal;
 		}
 		
+		/*
 		if(number_of_stuck_blocks >= number_of_unsolved_blocks)
 			return Integer.MIN_VALUE;
+		*/
 		
 		return (int) (val * (Math.pow(2, number_of_unsolved_blocks)));
 		

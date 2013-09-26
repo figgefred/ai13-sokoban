@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import com.sun.corba.se.impl.orbutil.graph.Node;
-
 /**
  *
  * @author figgefred
@@ -37,7 +35,7 @@ public class BoardState implements Cloneable
     		{    			
     			NodeType type = map[row][col];
     			Map.get(row).add(type);
-    			if(type == NodeType.GOAL)
+    			if(type == NodeType.GOAL || type == NodeType.PLAYER_ON_GOAL || type == NodeType.BLOCK_ON_GOAL)
     				Goals.add(new BoardPosition(row, col));
     		}
     	}
