@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import com.sun.corba.se.impl.orbutil.graph.Node;
+
 /**
  *
  * @author figgefred
@@ -132,6 +134,29 @@ public class BoardState implements Cloneable
             }
         }
     }
+    
+	public boolean isInCorner(BoardPosition position) {
+		
+		BoardPosition north = new BoardPosition(position.Row-1, position.Column);
+		BoardPosition east = new BoardPosition(position.Row, position.Column+1);
+		BoardPosition south = new BoardPosition(position.Row+1, position.Column);
+		BoardPosition west = new BoardPosition(position.Row, position.Column-1);
+		
+		if(getNode(north) == NodeType.WALL && getNode(east) == NodeType.WALL)
+			return true;
+		
+		if(getNode(north) == NodeType.WALL && getNode(west) == NodeType.WALL)
+			return true;
+		
+		if(getNode(south) == NodeType.WALL && getNode(west) == NodeType.WALL)
+			return true;
+		
+		if(getNode(south) == NodeType.WALL && getNode(east) == NodeType.WALL)
+			return true;
+		
+		
+		return false;
+	}
        
     public NodeType getNode(int row, int col)
     {
@@ -168,6 +193,42 @@ public class BoardState implements Cloneable
         //RIGHT
         if(col < Map.get(row).size()-1)
         	positions.add(new BoardPosition(row,col+1));
+        return positions;
+    }
+    
+    public List<BoardPosition> getFromNeighbours(BoardPosition pos) {
+    	return getFromNeighbours(pos.Row, pos.Column);
+    }
+    
+    public List<BoardPosition> getFromNeighbours(int row, int col)
+    {
+        List<BoardPosition> positions = new ArrayList<>();
+        // UP
+        if(row > 1) {
+        	NodeType type = getNode(row-2,col);
+        	if(type != NodeType.WALL && type != NodeType.INVALID)
+        		positions.add(new BoardPosition(row-1,col));
+        }
+        // Down
+        if(row < Map.size()-2) {
+        	NodeType type = getNode(row+2,col);
+        	if(type != NodeType.WALL && type != NodeType.INVALID)
+        	positions.add(new BoardPosition(row+1,col));
+        }
+        // LEFT
+        if(col > 1) {
+        	NodeType type = getNode(row,col-2);
+        	if(type != NodeType.WALL && type != NodeType.INVALID)
+        		positions.add(new BoardPosition(row,col-1));
+        }
+        	
+        //RIGHT
+        if(col < Map.get(row).size()-2) {
+        	NodeType type = getNode(row,col+2);
+        	if(type != NodeType.WALL && type != NodeType.INVALID)
+        		positions.add(new BoardPosition(row,col+1));
+        
+        }
         return positions;
     }
     

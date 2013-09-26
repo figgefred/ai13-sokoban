@@ -90,8 +90,9 @@ public class BlockPathFinder {
 				for(int column=0; column <state.getColumnsCount(row); column++){
 	
 					NodeType nodeType=state.getNode(row, column);
-					if(nodeType==NodeType.SPACE || nodeType == NodeType.GOAL 
-							||nodeType==NodeType.PLAYER || nodeType==NodeType.PLAYER_ON_GOAL){
+					if(nodeType!=NodeType.WALL && nodeType != NodeType.INVALID) {
+						/*|| nodeType == NodeType.GOAL 
+							||nodeType==NodeType.PLAYER || nodeType==NodeType.PLAYER_ON_GOAL) {*/
 						nodeMap.get(row).add(column,new AStar_Node(Math.abs((row-goal.Row)+Math.abs(column-goal.Column)), new BoardPosition(row, column)));
 	
 					}else{

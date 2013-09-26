@@ -34,21 +34,22 @@ public class Player {
         while(!openSet.isEmpty())
         {
         	Move node = openSet.poll();
-        	/*
+        	
+        	
         	System.out.println(openSet.size() + " " + toVisitSet.size());
         	System.out.println(node.path.getPath().size() + ", " + node.getHeuristicValue() + ", " + closedSet.size() + ", " + node.board.hashCode());
         	System.out.println(node.board);
-        	*/
         	
-        	if(node.getHeuristicValue() == Integer.MIN_VALUE)
-        		return null;
         	
         	if(node.board.isWin())
         	{       		
         		return node;
-        	}       	        	
+        	}       	    
         	
-        	//Integer tentative_g = node.getHeuristicValue() + 1;
+        	if(node.getHeuristicValue() == Integer.MIN_VALUE)
+        		return null;
+        	
+        	Integer tentative_g = node.getHeuristicValue() + 100;
         	
         	for(Move neighbour: node.getNextMoves())
         	{	       		                		
@@ -61,7 +62,7 @@ public class Player {
         		//System.out.println(tentative_g);
         		
         		
-        		if (closedSet.contains(neighbour.board) || to_g == Integer.MIN_VALUE) { // || to_g > tentative_g) {        			
+        		if (closedSet.contains(neighbour.board) || to_g == Integer.MIN_VALUE) {        			
                 	continue;
         		}
         		
@@ -83,7 +84,7 @@ public class Player {
 
         }
         
-        System.out.println("No path found?");        		
+        //System.out.println("No path found?");        		
 		
 		return null;
 	}
@@ -114,7 +115,7 @@ public class Player {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest5");
 		
 		System.out.println(board);
 		Player noob = new Player(board);
