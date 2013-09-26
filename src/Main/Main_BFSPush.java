@@ -62,7 +62,7 @@ public class Main_BFSPush {
             //ISearchAlgorithmPath playerPathSearcher = new BFS_MovePlayer();              // ALgorithm for searching paths for player
             //ISearchAlgorithmPath blockPathSearcher = new BFS_PushBlock(playerPathSearcher);  // Algorithms for searching paths for blocks
             
-            ISearchAlgorithmPath playerPathSearcher = new PlayerPath(AlgorithmType.A_STAR);              // ALgorithm for searching paths for player
+            ISearchAlgorithmPath playerPathSearcher = new PlayerPath(AlgorithmType.BFS);              // ALgorithm for searching paths for player
             ISearchAlgorithmPath blockPathSearcher = new BlockPath(AlgorithmType.BFS, playerPathSearcher);              // ALgorithm for searching paths for player
             
             Player player = new Player(b, blockPathSearcher, playerPathSearcher);
@@ -111,6 +111,8 @@ public class Main_BFSPush {
             sb.append(paths.get(0));
             for(int i = 1; i < paths.size(); i++)
             {
+                if(paths.get(i).getPath().size() == 0)
+                    continue;
                 sb.append(" | ").append(paths.get(i));
             }
             System.out.println("Level " + levelNumber++ +":\n\t" + sb.toString());
