@@ -71,6 +71,31 @@ public class BoardState implements Cloneable
     	
     }
     
+  	public static BoardState getBoardFromFile(String filename) throws IOException
+  	{
+  		return getBoardFromFile(filename, true);
+  	}
+  	
+	public static BoardState getBoardFromFile(String filename, boolean initHash) throws IOException
+	{
+		FileReader rawInput = new FileReader(filename);
+		BufferedReader br = new BufferedReader(rawInput);
+		
+		List<String> buffer = new ArrayList<>();
+		
+		while(true)
+		{
+			String tmp = br.readLine();
+			if(tmp == null)
+				break;
+			buffer.add(tmp);			
+		}
+		br.close();
+	
+		
+		return new BoardState(buffer, initHash);
+	}
+    
     
     private void buildBoard(List<String> rows)
     {
@@ -100,12 +125,12 @@ public class BoardState implements Cloneable
                 */
                 NodeType type = Constants.GetNodeType(columns[cIndex]);
                 
-                if(isGoalType(type))
+                if(type == NodeType.GOAL || type == NodeType.BLOCK_ON_GOAL || type == NodeType.PLAYER_ON_GOAL)
                 {
                     Goals.add(p);
                 }
                 
-                if(isPlayerPosition(type))
+                if(type == NodeType.PLAYER || type == NodeType.PLAYER_ON_GOAL)
                 {
                     CurrentNode = p;                    
                 }
@@ -113,16 +138,7 @@ public class BoardState implements Cloneable
             }
         }
     }
-    
-    private boolean isPlayerPosition(NodeType type) {
-        return type == NodeType.PLAYER || type == NodeType.PLAYER_ON_GOAL;
-    }
-    
-    private boolean isGoalType(NodeType type)
-    {
-        return type == NodeType.GOAL || type == NodeType.BLOCK_ON_GOAL;
-    }
-    
+       
     public NodeType getNode(int row, int col)
     {
         if(row < 0 || row >= Map.size())
@@ -212,23 +228,7 @@ public class BoardState implements Cloneable
     
     public boolean isBlockingNode(BoardPosition position) {    	
     	return isBlockingNode(getNode(position));
-    }
-    
-    public boolean isBlock(int r, int c)
-    {
-    	NodeType type = getNode(r, c);
-        if(type == NodeType.INVALID)
-            System.err.println("Referring to position " + r + ", " + c + " which refers to INVALID type");
-        
-        return 
-               type == NodeType.BLOCK ||
-               type == NodeType.BLOCK_ON_GOAL;
-    }
-    
-	public boolean isBlock(BoardPosition b) {
-		
-		return isBlock(b.Row, b.Column);
-	}
+    }   
     
     public int getRowsCount()
     {
@@ -524,30 +524,7 @@ public class BoardState implements Cloneable
   		return newState;
   	}
 
-  	public static BoardState getBoardFromFile(String filename) throws IOException
-  	{
-  		return getBoardFromFile(filename, true);
-  	}
-  	
-	public static BoardState getBoardFromFile(String filename, boolean initHash) throws IOException
-	{
-		FileReader rawInput = new FileReader(filename);
-		BufferedReader br = new BufferedReader(rawInput);
-		
-		List<String> buffer = new ArrayList<>();
-		
-		while(true)
-		{
-			String tmp = br.readLine();
-			if(tmp == null)
-				break;
-			buffer.add(tmp);			
-		}
-		br.close();
-	
-		
-		return new BoardState(buffer, initHash);
-	}
+
 	
 	
 	/**
@@ -604,29 +581,6 @@ public class BoardState implements Cloneable
 		zobrist_hash ^= zobrist_table[row][col][oldType.getIndex()];
 		// XOra in newType
 		zobrist_hash ^= zobrist_table[row][col][newType.getIndex()];
-	}
-	
-	public boolean isInCorner(BoardPosition position) {
-		
-		BoardPosition north = new BoardPosition(position.Row-1, position.Column);
-		BoardPosition east = new BoardPosition(position.Row, position.Column+1);
-		BoardPosition south = new BoardPosition(position.Row+1, position.Column);
-		BoardPosition west = new BoardPosition(position.Row, position.Column-1);
-		
-		if(getNode(north) == NodeType.WALL && getNode(east) == NodeType.WALL)
-			return true;
-		
-		if(getNode(north) == NodeType.WALL && getNode(west) == NodeType.WALL)
-			return true;
-		
-		if(getNode(south) == NodeType.WALL && getNode(west) == NodeType.WALL)
-			return true;
-		
-		if(getNode(south) == NodeType.WALL && getNode(east) == NodeType.WALL)
-			return true;
-		
-		
-		return false;
 	}
 	
 	@Override
