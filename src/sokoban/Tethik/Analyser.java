@@ -1,6 +1,8 @@
 package sokoban.Tethik;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,13 +22,12 @@ public class Analyser {
 	
 	private boolean badTable[][];
 	private NodeType workbench[][];
-	private int distanceMatrix[][];
+	private int distanceMatrix[][][];
 	
 	private BoardState board;
 	private int rows;
 	private int cols;
 	private BlockPathFinder pathfinder = new BlockPathFinder();
-	private LiveAnalyser deadlockfinder = new LiveAnalyser();
 	
 	public Analyser(BoardState board)
 	{
@@ -35,7 +36,7 @@ public class Analyser {
 		// Hitta dåliga positions
 		analyse();
 		// Hitta distanser?
-		mapDistancesToGoal(new BoardState(workbench));
+		mapDistancesToGoals(new BoardState(workbench));
 	}
 	
 	private void constructTableAndWorkbench() {
@@ -47,7 +48,8 @@ public class Analyser {
 		
 		badTable = new boolean[rows][cols];
 		workbench = new NodeType[rows][cols];
-		distanceMatrix = new int[rows][cols];
+		;
+		distanceMatrix = new int[board.getGoalNodes().size()][rows][cols];
 		
 		for(int row = 0; row < rows; ++row)
 			for(int col = 0; col < cols; ++col) {
@@ -60,23 +62,30 @@ public class Analyser {
 					type = NodeType.GOAL;
 				
 				workbench[row][col] = type;
-				distanceMatrix[row][col] = Integer.MAX_VALUE;
 			}	
 	}
 	
-	private void mapDistancesToGoal(BoardState board)
+	private void mapDistancesToGoals(BoardState board)
 	{
-		for(int row = 0; row < rows; ++row)
-			for(int col = 0; col < cols; ++col) {
-				distanceMatrix[row][col] = Integer.MAX_VALUE;
-			}
+		int i = 0;
+		for(@SuppressWarnings("unused") BoardPosition goal : board.getGoalNodes()) {		
+			for(int row = 0; row < rows; ++row)
+				for(int col = 0; col < cols; ++col) {
+					distanceMatrix[i][row][col] = Integer.MAX_VALUE;
+				}
+			++i;
+		}
 		
 		Queue<BoardPosition> positions = new LinkedList<>();
 		Queue<Integer> distances = new LinkedList<Integer>();
 		Set<BoardPosition> visited = new HashSet<>();
 		
+		i = 0;
 		for(BoardPosition goal : board.getGoalNodes()) {
 		
+			if(board.getNode(goal) == NodeType.BLOCK_ON_GOAL)
+				continue;
+			
 			positions.clear();
 			distances.clear();
 			visited.clear();
@@ -89,7 +98,7 @@ public class Analyser {
 				continue;
 			}
 			
-			distanceMatrix[goal.Row][goal.Column] = 0;
+			distanceMatrix[i][goal.Row][goal.Column] = 0;
 			
 			// BFS
 			while(!positions.isEmpty()) {
@@ -98,15 +107,12 @@ public class Analyser {
 				int distance = distances.poll();
 				
 				// Uppdatera positions i matrisen
-				distanceMatrix[pos.Row][pos.Column] = Math.min(distanceMatrix[pos.Row][pos.Column], distance);
+				distanceMatrix[i][pos.Row][pos.Column] = distance;
 				
-				++distance;
-				
-				/*				
+				++distance;				
+					
 				if(board.getNode(pos) == NodeType.BLOCK || board.getNode(pos) == NodeType.BLOCK_ON_GOAL)
-					continue;
-				*/
-				
+					continue;						
 				
 				for(BoardPosition neighbour : board.getFromNeighbours(pos)) {
 					if(visited.contains(neighbour)) 
@@ -122,7 +128,7 @@ public class Analyser {
 				}
 			}	
 			
-			
+			i++;			
 		}
 	}
 	
@@ -166,7 +172,6 @@ public class Analyser {
 	 * Kanske borde abstraheras till vissa mönster?
 	 * @param board
 	 * @return
-	 * @deprecated Freds liveanalyser borde ta detta nu. eller inte? för slö :(
 	 */
 	private boolean has4x4Block(BoardState board) {
 		
@@ -228,30 +233,164 @@ public class Analyser {
 	
 	
 	private void printDistanceMatrix(BoardState board) {
-		mapDistancesToGoal(board);
+		//mapDistancesToGoals(board);
 		
 		StringBuilder builder = new StringBuilder();		
-		for(int row = 0; row < rows; ++row) {
-			for(int col = 0; col < cols; ++col) {
-				NodeType type = workbench[row][col];
-				//(badTable[row][col]) ? "x" : 
-				String c = distanceMatrix[row][col] > 9 ? " " : "" + distanceMatrix[row][col];
-				if(type == NodeType.GOAL)
-					c = ".";
-				else if(type == NodeType.WALL)
-					c = "#";
-				builder.append(c).append("");
-				
+		for(int i = 0; i < distanceMatrix.length; i++)
+		{
+			for(int row = 0; row < rows; ++row) {
+				for(int col = 0; col < cols; ++col) {
+					NodeType type = workbench[row][col];
+					//(badTable[row][col]) ? "x" : 
+					String c = distanceMatrix[i][row][col] > 9 ? " " : "" + distanceMatrix[i][row][col];
+					if(type == NodeType.WALL)
+						c = "#";
+					else if(distanceMatrix[i][row][col] == Integer.MAX_VALUE)
+						c = "x";
+					else if(type == NodeType.GOAL)
+						c = ".";					
+		
+					builder.append(c).append("");
+					
+				}
+				builder.append("\n");				
 			}
-			builder.append("\n");
-			
 		}
 		System.out.println(builder.toString());
 	}
 	
+	/***
+	 * Hopcroft-Karp maximal bipartite matching
+	 * http://en.wikipedia.org/wiki/Hopcroft%E2%80%93Karp_algorithm
+	 * @param map
+	 * @return
+	 */
+	private int maxBipartiteMatch(HashMap<BoardPosition, List<BoardPosition>> map)
+	{
+		BoardPosition nil = new BoardPosition(-1,-1);
+		HashMap<BoardPosition, BoardPosition> goal_pairings = new HashMap<BoardPosition, BoardPosition>();
+		HashMap<BoardPosition, BoardPosition> block_pairings = new HashMap<BoardPosition, BoardPosition>();
+		HashMap<BoardPosition, Integer> dist = new HashMap<BoardPosition, Integer>();
+		
+		Set<BoardPosition> goalNodes = board.getGoalNodes();
+		List<BoardPosition> blockNodes = board.getBlockNodes();
+		
+		for(BoardPosition goal : goalNodes) {			
+			goal_pairings.put(goal, nil);
+		}		
+		for(BoardPosition block : blockNodes) {
+			block_pairings.put(block, nil);
+		}
+		
+		/*
+		System.out.println(map);
+		System.out.println(goal_pairings);
+		System.out.println(block_pairings);
+		System.out.println(blockNodes);
+		*/
+		//goal_pairings.put(nil, nil);
+			
+		
+		int matching = 0;
+		boolean bfs = true;
+		
+		while(bfs) {			
+			Queue<BoardPosition> queue = new LinkedList<BoardPosition>();			
+			
+			
+			for(BoardPosition goal : goalNodes) {
+				if(goal_pairings.get(goal).equals(nil)) {
+					queue.add(goal);
+					dist.put(goal, 0);
+				} else {
+					dist.put(goal, Integer.MAX_VALUE);
+				}
+			}
+			
+			
+			dist.put(nil, Integer.MAX_VALUE);			
+			
+			while(!queue.isEmpty()) {
+				BoardPosition v = queue.poll();
+				
+				if(dist.get(v) >= dist.get(nil))
+					continue;
+
+				for(BoardPosition u : map.get(v))
+				{
+					BoardPosition pg2 = block_pairings.get(u);	
+					if(dist.get(pg2) == Integer.MAX_VALUE) {
+						dist.put(pg2, dist.get(v) + 1);
+						queue.add(pg2);
+					}
+										
+				}
+			}
+			
+			bfs = dist.get(nil) != Integer.MAX_VALUE;
+			
+			if(!bfs) {
+				break;
+			}
+			
+			// Dfs part..
+			for(BoardPosition v : goalNodes) {				
+				if(goal_pairings.get(v).equals(nil) && dfsFindMaxMatch(map, goal_pairings, block_pairings, dist, v))
+					matching++;						
+				
+			}
+			//System.out.println(matching);
+		}
+		
+		return matching;
+	}
+	
+
+	
+	private boolean dfsFindMaxMatch(HashMap<BoardPosition, List<BoardPosition>> map,
+									HashMap<BoardPosition, BoardPosition> goal_pairings,
+									HashMap<BoardPosition, BoardPosition> block_pairings,
+									HashMap<BoardPosition, Integer> dist,
+									BoardPosition v) {
+		
+		BoardPosition nil = new BoardPosition(-1,-1);
+		if(v.equals(nil))
+			return true;
+		
+		if(map.get(v) == null)
+		{
+			System.out.println(v);
+			System.out.println(map.get(v));
+			System.exit(0);
+		}
+		
+		for(BoardPosition u : map.get(v))
+		{
+			BoardPosition pg2 = block_pairings.get(u);
+			/*
+			System.out.println(u);
+			System.out.println(board.getNode(u));
+			System.out.println(pg2);
+			System.out.println(board.getNode(pg2));
+			*/
+			if(dist.get(pg2) == dist.get(v) + 1)
+				if(dfsFindMaxMatch(map, goal_pairings, block_pairings, dist, pg2))
+				{
+					block_pairings.put(u, v);
+					goal_pairings.put(v, u);
+					return true;
+				}
+			
+		}
+		
+		dist.put(v, Integer.MAX_VALUE);
+		return false;	
+	}
+	
 	public int getHeuristicValue(BoardState board) {
+		this.board = board;
 		if(board.isWin()) {				
-			return  Integer.MAX_VALUE;
+			return Integer.MAX_VALUE;
 		}
 		
 		
@@ -261,63 +400,79 @@ public class Analyser {
 		}
 		
 		
-		mapDistancesToGoal(board);
+		mapDistancesToGoals(board);
 		
 		int val = 0;
 		List<BoardPosition> blocks = board.getBlockNodes();
 		int number_of_unsolved_blocks = 0;
-		int number_of_stuck_blocks = 0;
+		//int number_of_stuck_blocks = 0;
 		
-		Set<BoardPosition> goalNodes = new HashSet<BoardPosition>();
+		//Set<BoardPosition> goalNodes = new HashSet<BoardPosition>();
 		/*
 		for(BoardPosition goal : board.getGoalNodes()) {
 			if(board.getNode(goal) == NodeType.GOAL)
 				goalNodes.add(goal);
 		}*/
 		
+		HashMap<BoardPosition, List<BoardPosition>> reachMap = new HashMap<>(); 
+		
+		for(BoardPosition goal : board.getGoalNodes())
+			reachMap.put(goal, new ArrayList<BoardPosition>());
+		
 		for(BoardPosition block : blocks)
-		{	
-			
-			if(board.getNode(block) == NodeType.BLOCK_ON_GOAL) {				
-				continue;
-			}
-						
-			
+		{
 			if(board.isInCorner(block))
 				return Integer.MIN_VALUE;
 			
-
-			/*
-			if(pathfinder.getPath(board, block, goalNodes) == null) {
-				number_of_stuck_blocks++;				
+			
+			int mindistToGoal = Integer.MAX_VALUE;
+			int i = 0;
+			for(BoardPosition goal : board.getGoalNodes())
+			{
+				if(board.getNode(goal) != NodeType.BLOCK_ON_GOAL)
+					mindistToGoal = Math.min(distanceMatrix[i][block.Row][block.Column], mindistToGoal);			
+				
+				if(mindistToGoal != Integer.MAX_VALUE)					
+					reachMap.get(goal).add(block);
+				
+				++i;
 			}
-			*/
-			
-			/*
-			if(deadlockfinder.isBadState(board, block)) {
-				return Integer.MIN_VALUE;					
+					
+			if(board.getNode(block) == NodeType.BLOCK_ON_GOAL) {			
+				continue;
 			}
-			*/
 			
-			
-			int mindistToGoal = distanceMatrix[block.Row][block.Column];
 			if(mindistToGoal == Integer.MAX_VALUE)
 				return Integer.MIN_VALUE;
 			number_of_unsolved_blocks++;
 			val -= mindistToGoal;
 		}
 		
+		int matching = maxBipartiteMatch(reachMap);
+		//System.out.println(matching);
+		if(matching < board.getGoalNodes().size())
+			return Integer.MIN_VALUE;
+		
+		/*
+		for(BoardPosition goal : board.getGoalNodes())
+		{
+			System.out.println(goal.toString() + " || " + reachMap.get(goal).size() + " || " + reachMap.get(goal));
+			
+			if(reachMap.get(goal).size() == 0)
+				return Integer.MIN_VALUE;
+		}
+		System.out.println();
+		
 		/*
 		if(number_of_stuck_blocks >= number_of_unsolved_blocks)
 			return Integer.MIN_VALUE;
 		*/
 		
-		return (int) (val * (Math.pow(2, number_of_unsolved_blocks)));
-		
+		return val * number_of_unsolved_blocks;		
 	}
 	
 	public static void main(String[] args) throws IOException {
-		BoardState board = BoardState.getBoardFromFile("testing/firstplaytest");
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest51");
 		System.out.println(board);
 		Analyser analyser = new Analyser(board);
 		System.out.println(analyser);

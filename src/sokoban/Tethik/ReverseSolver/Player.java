@@ -1,4 +1,4 @@
-package sokoban.Tethik;
+package sokoban.Tethik.ReverseSolver;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -23,9 +23,6 @@ public class Player {
 	public Player(BoardState initialState)
 	{		
 		this.initialState = initialState;
-		
-		if(initialState.getBlockNodes().size() != initialState.getGoalNodes().size())
-			throw new IllegalArgumentException("Different number of goals than blocks");
 	}
 
 	public Move getVictoryPath(Move initialPosition)
@@ -51,7 +48,7 @@ public class Player {
         	if(node.getHeuristicValue() == Integer.MIN_VALUE)
         		return null;
         	
-        	//Integer tentative_g = node.getHeuristicValue() + 100;
+        	Integer tentative_g = node.getHeuristicValue() + 100;
         	
         	for(Move neighbour: node.getNextMoves())
         	{	       		                		
@@ -74,7 +71,8 @@ public class Player {
         		{        		        			
         			openSet.add(neighbour);
         			toVisitSet.add(neighbour.board);
-        		}        		        		
+        		}
+        		        		
         	}
         	
         	
@@ -85,7 +83,9 @@ public class Player {
         	closedSet.add(node.board);
 
         }
-
+        
+        //System.out.println("No path found?");        		
+		
 		return null;
 	}
 		
@@ -97,14 +97,15 @@ public class Player {
 		Move initial = new Move();
 		initial.board = initialState;
 		initial.path = new Path();
-		Move.initPreanalyser(initialState);		
+		Move.initPreanalyser(initialState);
+		
 		
 		Move win = getVictoryPath(initial);
 		if(win != null) {
 			//System.out.println(win.board);
 			System.out.println(win.path);
 		} else {
-			System.out.println("");
+			System.out.println("No path?");
 		}
 		
 		/*
@@ -116,7 +117,7 @@ public class Player {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest5");
+		BoardState board = BoardState.getBoardFromFile("testing/level13");
 		
 		System.out.println(board);
 		Player noob = new Player(board);

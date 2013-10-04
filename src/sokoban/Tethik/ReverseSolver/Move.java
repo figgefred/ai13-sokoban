@@ -1,4 +1,4 @@
-package sokoban.Tethik;
+package sokoban.Tethik.ReverseSolver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,28 +26,8 @@ public class Move implements Comparable<Move> {
 	public List<Move> getNextMoves() {
 		List<Move> possibleMoves = new ArrayList<Move>();
 		List<BoardPosition> blocks = board.getBlockNodes();
-		BoardPosition playerPos = board.getPlayerNode();		
+		BoardPosition playerPos = board.getPlayerNode();			
 		
-		/* Player move based
-		for(BoardPosition pos : board.getNeighbours(playerPos))
-		{
-			//if(board.isBlockingNode(pos))
-				//continue;
-			
-			try {
-				BoardState newBoardState = (BoardState) board.clone();
-				newBoardState.movePlayerTo(pos);
-				Move move = new Move();
-				move.board = newBoardState;
-				move.path = path.cloneAndAppend(pos);
-				possibleMoves.add(move);
-			}
-			catch(IllegalArgumentException ex) {
-				continue;
-			}
-		}*/
-		
-		/* Block move based */
 		for(BoardPosition blockPos : blocks)
 		{
 			// hitta ställen man kan göra förflyttningar av block.
@@ -81,7 +61,7 @@ public class Move implements Comparable<Move> {
 				possibleMoves.add(move);					
 			}		
 						
-		} 
+		}
 		
 		return possibleMoves;
 	}
