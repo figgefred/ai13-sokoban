@@ -104,7 +104,8 @@ public class Player {
 			//System.out.println(win.board);
 			System.out.println(win.path);
 		} else {
-			System.out.println("");
+			System.out.println("wat?");
+			
 		}
 		
 		/*

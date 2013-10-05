@@ -23,11 +23,13 @@ public class Analyser {
 	private boolean badTable[][];
 	private NodeType workbench[][];
 	private int distanceMatrix[][][];
+	private int closestDistToGoal[];
 	
 	private BoardState board;
 	private int rows;
 	private int cols;
 	private BlockPathFinder pathfinder = new BlockPathFinder();
+	//private HopcroftKarpMatching bipartiteMatcher = new HopcroftKarpMatching();
 	
 	public Analyser(BoardState board)
 	{
@@ -48,7 +50,7 @@ public class Analyser {
 		
 		badTable = new boolean[rows][cols];
 		workbench = new NodeType[rows][cols];
-		;
+		closestDistToGoal = new int[board.getGoalNodes().size()];
 		distanceMatrix = new int[board.getGoalNodes().size()][rows][cols];
 		
 		for(int row = 0; row < rows; ++row)
@@ -110,9 +112,11 @@ public class Analyser {
 				distanceMatrix[i][pos.Row][pos.Column] = distance;
 				
 				++distance;				
-					
+
+				/*
 				if(board.getNode(pos) == NodeType.BLOCK || board.getNode(pos) == NodeType.BLOCK_ON_GOAL)
 					continue;						
+				*/
 				
 				for(BoardPosition neighbour : board.getFromNeighbours(pos)) {
 					if(visited.contains(neighbour)) 
@@ -259,134 +263,6 @@ public class Analyser {
 		System.out.println(builder.toString());
 	}
 	
-	/***
-	 * Hopcroft-Karp maximal bipartite matching
-	 * http://en.wikipedia.org/wiki/Hopcroft%E2%80%93Karp_algorithm
-	 * @param map
-	 * @return
-	 */
-	private int maxBipartiteMatch(HashMap<BoardPosition, List<BoardPosition>> map)
-	{
-		BoardPosition nil = new BoardPosition(-1,-1);
-		HashMap<BoardPosition, BoardPosition> goal_pairings = new HashMap<BoardPosition, BoardPosition>();
-		HashMap<BoardPosition, BoardPosition> block_pairings = new HashMap<BoardPosition, BoardPosition>();
-		HashMap<BoardPosition, Integer> dist = new HashMap<BoardPosition, Integer>();
-		
-		Set<BoardPosition> goalNodes = board.getGoalNodes();
-		List<BoardPosition> blockNodes = board.getBlockNodes();
-		
-		for(BoardPosition goal : goalNodes) {			
-			goal_pairings.put(goal, nil);
-		}		
-		for(BoardPosition block : blockNodes) {
-			block_pairings.put(block, nil);
-		}
-		
-		/*
-		System.out.println(map);
-		System.out.println(goal_pairings);
-		System.out.println(block_pairings);
-		System.out.println(blockNodes);
-		*/
-		//goal_pairings.put(nil, nil);
-			
-		
-		int matching = 0;
-		boolean bfs = true;
-		
-		while(bfs) {			
-			Queue<BoardPosition> queue = new LinkedList<BoardPosition>();			
-			
-			
-			for(BoardPosition goal : goalNodes) {
-				if(goal_pairings.get(goal).equals(nil)) {
-					queue.add(goal);
-					dist.put(goal, 0);
-				} else {
-					dist.put(goal, Integer.MAX_VALUE);
-				}
-			}
-			
-			
-			dist.put(nil, Integer.MAX_VALUE);			
-			
-			while(!queue.isEmpty()) {
-				BoardPosition v = queue.poll();
-				
-				if(dist.get(v) >= dist.get(nil))
-					continue;
-
-				for(BoardPosition u : map.get(v))
-				{
-					BoardPosition pg2 = block_pairings.get(u);	
-					if(dist.get(pg2) == Integer.MAX_VALUE) {
-						dist.put(pg2, dist.get(v) + 1);
-						queue.add(pg2);
-					}
-										
-				}
-			}
-			
-			bfs = dist.get(nil) != Integer.MAX_VALUE;
-			
-			if(!bfs) {
-				break;
-			}
-			
-			// Dfs part..
-			for(BoardPosition v : goalNodes) {				
-				if(goal_pairings.get(v).equals(nil) && dfsFindMaxMatch(map, goal_pairings, block_pairings, dist, v))
-					matching++;						
-				
-			}
-			//System.out.println(matching);
-		}
-		
-		return matching;
-	}
-	
-
-	
-	private boolean dfsFindMaxMatch(HashMap<BoardPosition, List<BoardPosition>> map,
-									HashMap<BoardPosition, BoardPosition> goal_pairings,
-									HashMap<BoardPosition, BoardPosition> block_pairings,
-									HashMap<BoardPosition, Integer> dist,
-									BoardPosition v) {
-		
-		BoardPosition nil = new BoardPosition(-1,-1);
-		if(v.equals(nil))
-			return true;
-		
-		if(map.get(v) == null)
-		{
-			System.out.println(v);
-			System.out.println(map.get(v));
-			System.exit(0);
-		}
-		
-		for(BoardPosition u : map.get(v))
-		{
-			BoardPosition pg2 = block_pairings.get(u);
-			/*
-			System.out.println(u);
-			System.out.println(board.getNode(u));
-			System.out.println(pg2);
-			System.out.println(board.getNode(pg2));
-			*/
-			if(dist.get(pg2) == dist.get(v) + 1)
-				if(dfsFindMaxMatch(map, goal_pairings, block_pairings, dist, pg2))
-				{
-					block_pairings.put(u, v);
-					goal_pairings.put(v, u);
-					return true;
-				}
-			
-		}
-		
-		dist.put(v, Integer.MAX_VALUE);
-		return false;	
-	}
-	
 	public int getHeuristicValue(BoardState board) {
 		this.board = board;
 		if(board.isWin()) {				
@@ -400,11 +276,14 @@ public class Analyser {
 		}
 		
 		
-		mapDistancesToGoals(board);
+		//mapDistancesToGoals(board);
 		
-		int val = 0;
+		for(int i = 0; i < closestDistToGoal.length; i++)
+			closestDistToGoal[i] = Integer.MAX_VALUE;
+		
+		
 		List<BoardPosition> blocks = board.getBlockNodes();
-		int number_of_unsolved_blocks = 0;
+		
 		//int number_of_stuck_blocks = 0;
 		
 		//Set<BoardPosition> goalNodes = new HashSet<BoardPosition>();
@@ -421,58 +300,46 @@ public class Analyser {
 		
 		for(BoardPosition block : blocks)
 		{
-			if(board.isInCorner(block))
+			if(board.isInCorner(block) || isBadPosition(block))
 				return Integer.MIN_VALUE;
-			
-			
-			int mindistToGoal = Integer.MAX_VALUE;
-			int i = 0;
-			for(BoardPosition goal : board.getGoalNodes())
-			{
-				if(board.getNode(goal) != NodeType.BLOCK_ON_GOAL)
-					mindistToGoal = Math.min(distanceMatrix[i][block.Row][block.Column], mindistToGoal);			
-				
-				if(mindistToGoal != Integer.MAX_VALUE)					
-					reachMap.get(goal).add(block);
-				
-				++i;
-			}
-					
-			if(board.getNode(block) == NodeType.BLOCK_ON_GOAL) {			
-				continue;
-			}
-			
-			if(mindistToGoal == Integer.MAX_VALUE)
-				return Integer.MIN_VALUE;
-			number_of_unsolved_blocks++;
-			val -= mindistToGoal;
+		
 		}
 		
-		int matching = maxBipartiteMatch(reachMap);
-		//System.out.println(matching);
-		if(matching < board.getGoalNodes().size())
-			return Integer.MIN_VALUE;
-		
-		/*
+		int i = 0;
 		for(BoardPosition goal : board.getGoalNodes())
-		{
-			System.out.println(goal.toString() + " || " + reachMap.get(goal).size() + " || " + reachMap.get(goal));
-			
-			if(reachMap.get(goal).size() == 0)
+		{				
+			if(board.getNode(goal) == NodeType.BLOCK_ON_GOAL)
+				closestDistToGoal[i] = 0;
+			else
+				for(BoardPosition block : blocks)
+				{
+					if(board.getNode(block) == NodeType.BLOCK_ON_GOAL)
+						continue;
+					closestDistToGoal[i] = Math.min(distanceMatrix[i][block.Row][block.Column], closestDistToGoal[i]);				
+				}
+				
+			++i;
+		}	
+		
+		int val = 0;
+		i = 0;
+		for(BoardPosition goal : board.getGoalNodes()) {
+			if(closestDistToGoal[i] == Integer.MAX_VALUE)
+			{
+				System.out.println(i);
+				System.out.println(goal);
 				return Integer.MIN_VALUE;
+			}
+			
+			val -= closestDistToGoal[i];
+			++i;
 		}
-		System.out.println();
 		
-		/*
-		if(number_of_stuck_blocks >= number_of_unsolved_blocks)
-			return Integer.MIN_VALUE;
-		*/
-		
-		return val * number_of_unsolved_blocks;		
+		return val;		
 	}
 	
 	public static void main(String[] args) throws IOException {
-		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest51");
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
 		System.out.println(board);
 		Analyser analyser = new Analyser(board);
 		System.out.println(analyser);
