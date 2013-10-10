@@ -13,7 +13,7 @@ public enum NodeType
     INVALID(0,'?'), 
     BLOCK(1, '$'), 
     BLOCK_ON_GOAL(2, '*'),
-    WALL(3, '+'),
+    WALL(3, '#'),
     PLAYER(4, '@'),
     GOAL(5, '.'), 
     PLAYER_ON_GOAL(6, '+'), 
