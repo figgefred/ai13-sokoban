@@ -8,7 +8,6 @@ import java.util.PriorityQueue;
 
 import sokoban.BoardPosition;
 import sokoban.NodeType;
-import sokoban.Direction;
 
 public class PathFinder {
     

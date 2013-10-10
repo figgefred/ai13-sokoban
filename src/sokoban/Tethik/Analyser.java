@@ -1,8 +1,6 @@
 package sokoban.Tethik;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,7 +9,6 @@ import java.util.Set;
 
 import sokoban.BoardPosition;
 import sokoban.NodeType;
-import sokoban.Direction;
 
 
 /***
@@ -297,10 +294,12 @@ public class Analyser {
 				goalNodes.add(goal);
 		}*/
 		
+		/*
 		HashMap<BoardPosition, List<BoardPosition>> reachMap = new HashMap<>(); 
 		
 		for(BoardPosition goal : board.getGoalNodes())
 			reachMap.put(goal, new ArrayList<BoardPosition>());
+		*/
 		
 		for(BoardPosition block : blocks)
 		{

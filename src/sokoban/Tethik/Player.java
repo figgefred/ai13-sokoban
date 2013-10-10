@@ -117,7 +117,7 @@ public class Player {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest5");
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
 		
 		System.out.println(board);
 		Player noob = new Player(board);
