@@ -86,21 +86,21 @@ public class LiveAnalyser {
             // Mark this block as checked - avoid stackoverflow
             tmpBlock.add(block);
             boolean deadlockState = 
-                    (
-                        (verticalWallBlocking)
-                        ||
-                        (up.Row >= 0 && isBlockType(state.getNode(up)) && (tmpBlock.contains(up) || isDeadlockState(state, tmpBlock, up)))
-                        ||
-                        (down.Row < state.getRowsCount() && isBlockType(state.getNode(down)) && (tmpBlock.contains(down) || isDeadlockState(state, tmpBlock, down)))
-                    )
-                    &&
-                    (
-                        (horizontalWallBlocking)
-                        ||
-                        (left.Column >= 0 && isBlockType(state.getNode(left)) && (tmpBlock.contains(left) || isDeadlockState(state, tmpBlock, left)))
-                        ||
-                        (right.Column < state.getColumnsCount(right.Row) && isBlockType(state.getNode(right)) && (tmpBlock.contains(right) || isDeadlockState(state, tmpBlock, right)))
-                    );
+                (
+                    (verticalWallBlocking)
+                    ||
+                    (up.Row >= 0 && isBlockType(state.getNode(up)) && (tmpBlock.contains(up) || isDeadlockState(state, tmpBlock, up)))
+                    ||
+                    (down.Row < state.getRowsCount() && isBlockType(state.getNode(down)) && (tmpBlock.contains(down) || isDeadlockState(state, tmpBlock, down)))
+                )
+                &&
+                (
+                    (horizontalWallBlocking)
+                    ||
+                    (left.Column >= 0 && isBlockType(state.getNode(left)) && (tmpBlock.contains(left) || isDeadlockState(state, tmpBlock, left)))
+                    ||
+                    (right.Column < state.getColumnsCount(right.Row) && isBlockType(state.getNode(right)) && (tmpBlock.contains(right) || isDeadlockState(state, tmpBlock, right)))
+                );
             return deadlockState;
         }
         

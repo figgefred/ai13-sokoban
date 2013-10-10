@@ -25,26 +25,26 @@ public class BlockPathFinder {
         EstimateWeight = 1;
     }
 
-	public Path getPath(BoardState board, BoardPosition initialPosition, BoardPosition goal) {
+	public Path getPath(BoardState state, BoardPosition initialPosition, BoardPosition goal) {
 
         openSet=new PriorityQueue<AStar_Node>();
         nodeMap = new ArrayList<List<AStar_Node>>();
         closedSet=new HashMap<BoardPosition, AStar_Node>();
 
-        //build nodeMap
-        for(int row=0; row<board.getRowsCount(); row++){
-            nodeMap.add(new ArrayList<AStar_Node>());
-            for(int column=0; column <board.getColumnsCount(row); column++){
+        for(int row=0; row<state.getRowsCount(); row++){
+                nodeMap.add(new ArrayList<AStar_Node>());
+                for(int column=0; column <state.getColumnsCount(row); column++){
 
-                NodeType nodeType=board.getNode(row, column);
-                if(nodeType==NodeType.SPACE || nodeType == NodeType.GOAL 
-                		|| nodeType==NodeType.PLAYER || nodeType==NodeType.PLAYER_ON_GOAL) {
-                    nodeMap.get(row).add(column,new AStar_Node(Math.abs((row-goal.Row)+Math.abs(column-goal.Column)), new BoardPosition(row, column)));
+                        NodeType nodeType=state.getNode(row, column);
+                        if(nodeType==NodeType.SPACE || nodeType == NodeType.GOAL 
+                                        ||nodeType==NodeType.PLAYER || nodeType==NodeType.PLAYER_ON_GOAL){
+                                nodeMap.get(row).add(column,new AStar_Node(Math.abs((row-goal.Row)+Math.abs(column-goal.Column)), new BoardPosition(row, column)));
 
-                } else {
-                    nodeMap.get(row).add(column,null);
+                        }else{
+                                nodeMap.get(row).add(column,null);
+
+                        }
                 }
-            }
         }
         openSet.add(nodeMap.get(initialPosition.Row).get(initialPosition.Column));
 
@@ -55,7 +55,7 @@ public class BlockPathFinder {
             }
             closedSet.put(current.bp, current);
 
-            List<BoardPosition> neighbourPositions = board.getPushingPositions(current.bp);
+            List<BoardPosition> neighbourPositions = state.getPushingPositions(current.bp);
             for(BoardPosition neighbour : neighbourPositions){
                 AStar_Node neighbourNode=nodeMap.get(neighbour.Row).get(neighbour.Column);
                 if(neighbourNode!=null){

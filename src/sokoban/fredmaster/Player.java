@@ -16,6 +16,9 @@ import sokoban.Path;
  */
 public class Player {	
 	
+    private BoardState StartingState;
+    private BoardState EndState;
+    
 	private Queue<Move> openSet;
         private HashSet<BoardState> closedSet;
         private HashSet<BoardState> toVisitSet;
@@ -31,6 +34,14 @@ public class Player {
         public Player(BoardState initialState, boolean verbose)
         {
             this.initialState = initialState;
+            StartingState = (BoardState) initialState.clone();
+            EndState = initialState.getEndingState();
+            
+            System.out.println("Start state is: " + StartingState);
+            System.out.println("Ending state is " + EndState);
+            
+            try {Thread.sleep(10000);} catch(InterruptedException ex){}
+            
             VERBOSE = verbose;
         }
         
@@ -46,16 +57,21 @@ public class Player {
                 Move node = openSet.poll();
                 if(VERBOSE)
                 {
-                    System.out.println(openSet.size() + " " + toVisitSet.size());
-                    System.out.println(node.path.getPath().size() + ", " + node.getHeuristicValue() + ", " + closedSet.size() + ", " + node.board.hashCode());
-                    System.out.println(node.board);
+                    if(++Player.playCounter == 10000)
+                    {
+                        Player.playCounter = 0;
+                        System.out.println(node.board);
+                    }
+                    //System.out.println(openSet.size() + " " + toVisitSet.size());
+                    //System.out.println(node.path.getPath().size() + ", " + node.getHeuristicValue() + ", " + closedSet.size() + ", " + node.board.hashCode());
+                    //System.out.println(node.board);
                 }
 
                 if(node.board.isWin())
                 {       		
                     return node;
                 }       	        	
-
+                
                 Integer tentative_g = node.getHeuristicValue() + 10;
 
                 for(Move neighbour: node.getNextMoves())
@@ -68,7 +84,8 @@ public class Player {
                     //System.out.println(to_g);
                     //System.out.println(tentative_g);
 
-                    // If this move results in a poor choice, lets skip
+                    // If move results in a state already seen, lets skip it
+                    // If this move results in a poor choice, lets skip it
                     if (closedSet.contains(neighbour.board) || to_g > tentative_g) {        			
                         continue;
                     }
@@ -88,7 +105,6 @@ public class Player {
                 }
                 toVisitSet.remove(node.board);
                 closedSet.add(node.board);
-
                  /*      	
                 if(c == 2)
                         return null;
@@ -103,7 +119,7 @@ public class Player {
 		
 	
 	
-	
+	private static int playCounter = 0;
 	public void play() throws InterruptedException {				
 		
             Move initial = new Move();
@@ -128,9 +144,10 @@ public class Player {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest8");
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
 		
-		Player noob = new Player(board);
+		//Player noob = new Player(board);
+                Player noob = new Player(board, true);
                 if(noob.VERBOSE)
                     System.out.println(board);
 		noob.play();

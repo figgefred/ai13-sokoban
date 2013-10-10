@@ -18,7 +18,7 @@ import sokoban.Constants;
  */
 public class PreAnalyser {
 	
-	private boolean badTable[][];
+	private boolean unreachable[][];
 	private NodeType workbench[][];
 	private BoardState board;
 	private int rows;
@@ -39,7 +39,7 @@ public class PreAnalyser {
 		for(int row = 0; row < rows; ++row)
 			cols = Math.max(cols, board.getColumnsCount(row));
 		
-		badTable = new boolean[rows][cols];
+		unreachable = new boolean[rows][cols];
 		workbench = new NodeType[rows][cols];
 		
 		for(int row = 0; row < rows; ++row)
@@ -56,20 +56,88 @@ public class PreAnalyser {
 			}
 		
 	}
+        
+            private void constructTableAndWorkbench2() {
+		rows = board.getRowsCount();
+		
+		for(int row = 0; row < rows; ++row)
+                {
+                    unreachable = new boolean[rows][board.getColumnsCount(row)];
+                    workbench = new NodeType[rows][board.getColumnsCount(row)];    
+                }
+                
+		for(int row = 0; row < rows; ++row)
+			for(int col = 0; col < workbench[row].length; ++col) {
+				NodeType type = board.getNode(row, col);				
+				
+				// Remove blocks from the map
+				if(type == NodeType.BLOCK || type == NodeType.PLAYER)
+					type = NodeType.SPACE;
+				if(type == NodeType.BLOCK_ON_GOAL)
+					type = NodeType.GOAL;
+				
+				workbench[row][col] = type;
+			}
+		
+	}
 	
+        private void analyse2() {
+		for(int row = 0; row < workbench.length; ++row)
+			for(int col = 0; col <  workbench[row].length; ++col) {
+				NodeType type = workbench[row][col];
+				
+				if(type == NodeType.WALL || type == NodeType.INVALID) {
+					unreachable[row][col] = true;
+					continue;
+				}
+				
+				/*if(type == NodeType.GOAL)
+				{
+					badTable[row][col] = false;
+					continue;
+				}*/				
+                                if(type != NodeType.GOAL)
+                                {
+                                    continue;
+                                }
+				workbench[row][col] = NodeType.BLOCK_ON_GOAL;
+				BoardState testBoard = new BoardState(workbench);
+				//System.out.println(row + " " + col);
+				//System.out.println(testBoard);				
+                                
+                                for(int r = 0; r < workbench.length; ++r)
+                                {
+                                    for(int c = 0; c < workbench[row].length; ++c) {
+                                        if(unreachable[r][c])
+                                            continue;
+                                        
+                                        System.out.println("Pull block from " + row + ", " + col + " to " + r + ", " +c);
+                                        Path path = pathfinder.getPath(testBoard, new BoardPosition(row, col), new BoardPosition(r,c));
+                                        if(path == null)
+                                            unreachable[r][c] = true;
+                                    }
+                                }
+                                
+				
+				//unreachable[row][col] = path == null;
+				// reset
+				//workbench[row][col] = type;
+			}
+        }
+        
 	private void analyse() {
 		for(int row = 0; row < rows; ++row)
 			for(int col = 0; col < cols; ++col) {
 				NodeType type = workbench[row][col];
 				
 				if(type == NodeType.WALL || type == NodeType.INVALID) {
-					badTable[row][col] = true;
+					unreachable[row][col] = true;
 					continue;
 				}
 				
 				if(type == NodeType.GOAL)
 				{
-					badTable[row][col] = false;
+					unreachable[row][col] = false;
 					continue;
 				}				
 				
@@ -78,7 +146,7 @@ public class PreAnalyser {
 				//System.out.println(row + " " + col);
 				//System.out.println(testBoard);				
 				Path path = pathfinder.getPath(testBoard, new BoardPosition(row, col), board.getGoalNodes());
-				badTable[row][col] = path == null;
+				unreachable[row][col] = path == null;
 				// reset
 				workbench[row][col] = type;
 			}
@@ -86,7 +154,7 @@ public class PreAnalyser {
 	
 	public boolean isBadPosition(int Row, int Col)
 	{
-		return badTable[Row][Col];
+		return unreachable[Row][Col];
 	}
 	
 	public boolean isBadPosition(BoardPosition pos) {
@@ -99,7 +167,7 @@ public class PreAnalyser {
 		for(int row = 0; row < rows; ++row) {
 			for(int col = 0; col < cols; ++col) {
 				NodeType type = workbench[row][col];
-				char c = (badTable[row][col]) ? 'x' : ' ';
+				char c = (unreachable[row][col]) ? 'x' : ' ';
 				if(type == NodeType.GOAL)
 					c = '.';
 				else if(type == NodeType.WALL)
@@ -115,7 +183,7 @@ public class PreAnalyser {
 	
 	public static void main(String[] args) throws IOException {
 		//BoardState board = BoardState.getBoardFromFile("testing/level6");
-                BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest5");
+                BoardState board = BoardState.getBoardFromFile("testing/level3");
 		System.out.println(board);
 		PreAnalyser analyser = new PreAnalyser(board);
 		System.out.println(analyser);

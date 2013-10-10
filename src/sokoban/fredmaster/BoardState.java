@@ -4,7 +4,6 @@
  */
 package sokoban.fredmaster;
 
-import sokoban.Tethik.*;
 import sokoban.BoardPosition;
 import sokoban.Constants;
 import sokoban.Path;
@@ -14,15 +13,11 @@ import sokoban.types.NodeType;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import sokoban.Algorithms.ISearchAlgorithmPath;
 
 /**
  *
@@ -398,6 +393,19 @@ public class BoardState implements Cloneable
     public boolean isSpaceNode(BoardPosition p) {
         return isSpaceNode(p.Row, p.Column);
     }
+    public boolean isOnlySpaceNode(int r, int c)
+    {
+        NodeType type = getNode(r, c);
+        if(type == NodeType.INVALID)
+            System.err.println("Referring to position " + r + ", " + c + " which refers to INVALID type");
+        
+        return 
+                type == NodeType.SPACE;
+    }
+    public boolean isOnlySpaceNode(BoardPosition p)
+    {
+        return isOnlySpaceNode(p.Row, p.Column);
+    }
     
     public boolean isNoneBlockingNode(int r, int c)
     {
@@ -585,6 +593,87 @@ public class BoardState implements Cloneable
 		return false;
 	}
 	
+        /**
+         * Get the state that represents the ending state of the game
+         * 
+         * The player position must probably be positioned better.
+         * For now the player is positioned closed to the the first occurring
+         * goal
+         * 
+         * @return 
+         */
+        public BoardState getEndingState()
+        {
+            BoardState endState = (BoardState) this.clone();
+            
+            // First remove player from map
+            
+            NodeType t = endState.Map.get(endState.CurrentNode.Row).get(endState.CurrentNode.Column);
+            if(t == NodeType.PLAYER)
+            {
+                endState.Map.get(endState.CurrentNode.Row).set(endState.CurrentNode.Column, NodeType.SPACE);
+            }
+            else if(t == NodeType.PLAYER_ON_GOAL)
+            {
+                endState.Map.get(endState.CurrentNode.Row).set(endState.CurrentNode.Column, NodeType.GOAL);
+            }
+            
+            // Place all blocks on goal positions
+            
+            for(int r = 0; r < getRowsCount(); r++)
+            {
+                for(int c = 0; c < getColumnsCount(r); c++)
+                {
+                    NodeType type = endState.Map.get(r).get(c);
+                    if(type == NodeType.BLOCK)
+                    {
+                        endState.Map.get(r).set(c, NodeType.SPACE);
+                    }
+                    else if(type == NodeType.GOAL)
+                    {
+                        endState.Map.get(r).set(c, NodeType.BLOCK_ON_GOAL);
+                    }
+                }
+            }
+            
+            // Find out where the players end position can be
+            // north, south, west and east positions are were the player can stand
+            // next to block
+            
+            BoardPosition playerPos = null;
+            for(BoardPosition p: endState.Goals)
+            {
+                BoardPosition north = new BoardPosition(p.Row-1, p.Column);
+                if(isOnlySpaceNode(north) && isOnlySpaceNode(new BoardPosition(north.Row-1, north.Column)))
+                {
+                    playerPos = north;
+                }
+                BoardPosition south = new BoardPosition(p.Row+1, p.Column);
+                if(playerPos == null && isOnlySpaceNode(south) && isOnlySpaceNode(new BoardPosition(south.Row+1, south.Column)))
+                {
+                    playerPos = south;
+                }
+                BoardPosition west = new BoardPosition(p.Row, p.Column-1);
+                if(playerPos == null && isOnlySpaceNode(west) && isOnlySpaceNode(new BoardPosition(west.Row, west.Column-1)))
+                {
+                    playerPos = west;
+                }
+                BoardPosition east = new BoardPosition(p.Row, p.Column+1);
+                if(playerPos == null && isOnlySpaceNode(east) && isOnlySpaceNode(new BoardPosition(east.Row, east.Column+1)))
+                {
+                    playerPos = east;
+                }
+                
+                if(playerPos != null)
+                    break;
+            }            
+            
+            // Position the player on resp. position        
+            endState.Map.get(playerPos.Row).set(playerPos.Column, NodeType.PLAYER);
+            endState.CurrentNode = playerPos;
+            return endState;
+        }
+        
 	public boolean equals(Object o) {
 		if(!(o instanceof BoardState))
 			return false;
