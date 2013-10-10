@@ -4,6 +4,11 @@
  */
 package sokoban.Tethik;
 
+
+import sokoban.BoardPosition;
+import sokoban.NodeType;
+import sokoban.Direction;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

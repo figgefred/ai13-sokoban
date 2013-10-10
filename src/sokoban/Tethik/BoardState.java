@@ -13,6 +13,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+
+import sokoban.BoardPosition;
+import sokoban.NodeType;
+import sokoban.Direction;
 /**
  *
  * @author figgefred
@@ -117,7 +121,7 @@ public class BoardState implements Cloneable
                 n.setNodeType(getNodeType(columns[cIndex]));
                 Map.put(p, n);
                 */
-                NodeType type = Constants.GetNodeType(columns[cIndex]);
+                NodeType type = NodeType.parse(columns[cIndex]);
                 
                 if(type == NodeType.GOAL || type == NodeType.BLOCK_ON_GOAL || type == NodeType.PLAYER_ON_GOAL)
                 {
@@ -658,7 +662,7 @@ public class BoardState implements Cloneable
     	StringBuilder builder = new StringBuilder();
     	for(List<NodeType> row : Map) {
     		for(NodeType t : row)
-    			builder.append(Constants.GetCharFromNodeType(t));
+    			builder.append(t.getChar());
     		builder.append('\n');
     	}
     	

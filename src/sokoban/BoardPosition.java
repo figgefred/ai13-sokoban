@@ -31,13 +31,8 @@ public class BoardPosition
     
     @Override
     public int hashCode()
-    {
-    	/*
-        if(MyHash == null)
-        {
-            MyHash = 17*(Row+1)*(Row+1) + 13*(Column+2);
-        }*/
-        return 17*(Row+1)*(Row+1) + 13*(Column+2);
+    {    	
+        return 171717*(Row+1)*(Row+1) + 13*(Column+2);
     }
     
     @Override

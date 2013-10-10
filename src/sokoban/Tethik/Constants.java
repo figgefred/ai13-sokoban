@@ -6,6 +6,11 @@ package sokoban.Tethik;
 
 import java.util.HashMap;
 
+
+import sokoban.BoardPosition;
+import sokoban.NodeType;
+import sokoban.Direction;
+
 /**
  *
  * @author figgefred
@@ -55,112 +60,7 @@ public class Constants {
         return StringToDirection.get(s);
     }
     
-    public static char GetTypeAsString(NodeType type)
-    {
-		switch(type)
-		{
-			case SPACE:
-			{       
-				return ' ';
-			}
-			case BLOCK:
-			{
-				return '$';
-			}
-			case BLOCK_ON_GOAL:
-			{
-				return '*';
-			}
-			case PLAYER_ON_GOAL:
-			{
-				return '+';
-			}
-			case GOAL:
-			{
-				return '.';
-			}
-			case PLAYER:
-			{
-				return '@';
-			}
-			case WALL:
-			default:
-			{
-				return '#';
-			}
-                }
-    }
     
-    public static NodeType GetNodeType(char c)
-	{
-		switch(c)
-		{
-			case ' ':
-			{       
-				return NodeType.SPACE;
-			}
-			case '$':
-			{
-				return NodeType.BLOCK;
-			}
-			case '*':
-			{
-				return NodeType.BLOCK_ON_GOAL;
-			}
-			case '+':
-			{
-				return NodeType.PLAYER_ON_GOAL;
-			}
-			case '.':
-			{
-				return NodeType.GOAL;
-			}
-			case '@':
-			{
-				return NodeType.PLAYER;
-			}
-			case '#':
-			default:
-			{
-				return NodeType.WALL;
-			}
-		}
-	}
-    
-    public static char GetCharFromNodeType(NodeType type) {
-    	switch(type)
-		{
-			case SPACE:
-			{       
-				return ' ';
-			}
-			case BLOCK:
-			{
-				return '$';
-			}
-			case BLOCK_ON_GOAL:
-			{
-				return '*';
-			}
-			case PLAYER_ON_GOAL:
-			{
-				return '+';
-			}
-			case GOAL:
-			{
-				return '.';
-			}
-			case PLAYER:
-			{
-				return '@';
-			}
-			case WALL:
-			default:
-			{
-				return '#';
-			}
-		}
-    }
     
     
 }

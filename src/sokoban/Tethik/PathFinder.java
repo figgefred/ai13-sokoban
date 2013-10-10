@@ -6,6 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import sokoban.BoardPosition;
+import sokoban.NodeType;
+import sokoban.Direction;
+
 public class PathFinder {
     
 	private PriorityQueue<AStar_Node> openSet;
