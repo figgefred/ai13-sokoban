@@ -99,6 +99,7 @@ public class Player {
 		initial.path = new Path();
 		Move.initPreanalyser(initialState);		
 		
+		
 		Move win = getVictoryPath(initial);
 		if(win != null) {
 			//System.out.println(win.board);
@@ -109,11 +110,14 @@ public class Player {
 		}
 		
 		/*
+		
 		for(Move nextMove : initial.getNextMoves())
 		{
 			System.out.println(nextMove.board);
-			System.out.println(nextMove.path);
-		}*/
+			System.out.println(nextMove.path)4
+			System.out.println(nextMove.getHeuristicValue())
+		}
+		*/
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {

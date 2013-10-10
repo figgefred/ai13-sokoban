@@ -24,7 +24,8 @@ public class Analyser {
 	private boolean badTable[][];
 	private NodeType workbench[][];
 	private int distanceMatrix[][][];
-	private int closestDistToGoal[];
+	private int goalDist[];
+	private int blockDist[];
 	
 	private BoardState board;
 	private int rows;
@@ -51,7 +52,8 @@ public class Analyser {
 		
 		badTable = new boolean[rows][cols];
 		workbench = new NodeType[rows][cols];
-		closestDistToGoal = new int[board.getGoalNodes().size()];
+		goalDist = new int[board.getGoalNodes().size()];
+		blockDist = new int[board.getGoalNodes().size()];
 		distanceMatrix = new int[board.getGoalNodes().size()][rows][cols];
 		
 		for(int row = 0; row < rows; ++row)
@@ -266,6 +268,7 @@ public class Analyser {
 	
 	public int getHeuristicValue(BoardState board) {
 		this.board = board;
+		
 		if(board.isWin()) {				
 			return Integer.MAX_VALUE;
 		}
@@ -279,8 +282,10 @@ public class Analyser {
 		
 		//mapDistancesToGoals(board);
 		
-		for(int i = 0; i < closestDistToGoal.length; i++)
-			closestDistToGoal[i] = Integer.MAX_VALUE;
+		for(int i = 0; i < goalDist.length; i++) {
+			goalDist[i] = Integer.MAX_VALUE;
+			blockDist[i] = Integer.MAX_VALUE;
+		}
 		
 		
 		List<BoardPosition> blocks = board.getBlockNodes();
@@ -301,25 +306,35 @@ public class Analyser {
 			reachMap.put(goal, new ArrayList<BoardPosition>());
 		*/
 		
+		int b = 0; 
 		for(BoardPosition block : blocks)
 		{
-			if(board.isInCorner(block) || isBadPosition(block))
-				return Integer.MIN_VALUE;
-		
-		}
+
+			if(board.getNode(block) == NodeType.BLOCK_ON_GOAL)
+				blockDist[b] = 0;
+			else if(board.isInCorner(block)) {// || isBadPosition(block))
+				return Integer.MIN_VALUE;		
+			}
+			b++;
+			
+		} 
 		
 		int i = 0;
 		for(BoardPosition goal : board.getGoalNodes())
 		{				
-			if(board.getNode(goal) == NodeType.BLOCK_ON_GOAL)
-				closestDistToGoal[i] = 0;
-			else
-				for(BoardPosition block : blocks)
-				{
-					if(board.getNode(block) == NodeType.BLOCK_ON_GOAL)
-						continue;
-					closestDistToGoal[i] = Math.min(distanceMatrix[i][block.Row][block.Column], closestDistToGoal[i]);				
-				}
+			if(board.getNode(goal) == NodeType.BLOCK_ON_GOAL) {
+				goalDist[i++] = 0;
+				continue;
+			}
+			
+			b = 0; 
+			for(BoardPosition block : blocks)
+			{
+				int dist = distanceMatrix[i][block.Row][block.Column];
+				goalDist[i] = Math.min(dist, goalDist[i]);
+				blockDist[b] = Math.min(dist, blockDist[b++]);
+			}
+			
 				
 			++i;
 		}	
@@ -327,14 +342,15 @@ public class Analyser {
 		int val = 0;
 		i = 0;
 		for(BoardPosition goal : board.getGoalNodes()) {
-			if(closestDistToGoal[i] == Integer.MAX_VALUE)
+			if(goalDist[i] == Integer.MAX_VALUE || blockDist[i] == Integer.MAX_VALUE)
 			{
-				System.out.println(i);
-				System.out.println(goal);
 				return Integer.MIN_VALUE;
 			}
 			
-			val -= closestDistToGoal[i];
+			val -= goalDist[i];
+			val -= blockDist[i];
+			
+			System.out.println(goalDist[i] + ", " + blockDist[i]);
 			++i;
 		}
 		
@@ -342,7 +358,7 @@ public class Analyser {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
+		BoardState board = BoardState.getBoardFromFile("testing/disttest");
 		System.out.println(board);
 		Analyser analyser = new Analyser(board);
 		System.out.println(analyser);
