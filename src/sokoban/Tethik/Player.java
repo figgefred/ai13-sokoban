@@ -110,7 +110,6 @@ public class Player {
 		}
 		
 		/*
-		
 		for(Move nextMove : initial.getNextMoves())
 		{
 			System.out.println(nextMove.board);

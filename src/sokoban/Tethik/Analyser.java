@@ -1,6 +1,8 @@
 package sokoban.Tethik;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,7 +33,7 @@ public class Analyser {
 	private int rows;
 	private int cols;
 	private BlockPathFinder pathfinder = new BlockPathFinder();
-	//private HopcroftKarpMatching bipartiteMatcher = new HopcroftKarpMatching();
+	private HopcroftKarpMatching bipartiteMatcher = new HopcroftKarpMatching();
 	
 	public Analyser(BoardState board)
 	{
@@ -299,17 +301,13 @@ public class Analyser {
 				goalNodes.add(goal);
 		}*/
 		
-		/*
-		HashMap<BoardPosition, List<BoardPosition>> reachMap = new HashMap<>(); 
 		
-		for(BoardPosition goal : board.getGoalNodes())
-			reachMap.put(goal, new ArrayList<BoardPosition>());
-		*/
+		HashMap<BoardPosition, List<BoardPosition>> reachMap = new HashMap<>(); 
 		
 		int b = 0; 
 		for(BoardPosition block : blocks)
 		{
-
+			
 			if(board.getNode(block) == NodeType.BLOCK_ON_GOAL)
 				blockDist[b] = 0;
 			else if(board.isInCorner(block)) {// || isBadPosition(block))
@@ -321,18 +319,26 @@ public class Analyser {
 		
 		int i = 0;
 		for(BoardPosition goal : board.getGoalNodes())
-		{				
+		{		
+			reachMap.put(goal, new ArrayList<BoardPosition>());
+			
 			if(board.getNode(goal) == NodeType.BLOCK_ON_GOAL) {
-				goalDist[i++] = 0;
-				continue;
+				goalDist[i] = -300;
 			}
 			
 			b = 0; 
 			for(BoardPosition block : blocks)
 			{
 				int dist = distanceMatrix[i][block.Row][block.Column];
+				if(dist < Integer.MAX_VALUE)
+				{
+					reachMap.get(goal).add(block);
+				}
+				
 				goalDist[i] = Math.min(dist, goalDist[i]);
-				blockDist[b] = Math.min(dist, blockDist[b++]);
+				
+				if(goalDist[i] > 0)
+					blockDist[b] = Math.min(dist, blockDist[b++]);
 			}
 			
 				
@@ -340,8 +346,7 @@ public class Analyser {
 		}	
 		
 		int val = 0;
-		i = 0;
-		for(BoardPosition goal : board.getGoalNodes()) {
+		for(i = 0; i < board.getGoalNodes().size(); ++i) {
 			if(goalDist[i] == Integer.MAX_VALUE || blockDist[i] == Integer.MAX_VALUE)
 			{
 				return Integer.MIN_VALUE;
@@ -349,16 +354,17 @@ public class Analyser {
 			
 			val -= goalDist[i];
 			val -= blockDist[i];
-			
-			System.out.println(goalDist[i] + ", " + blockDist[i]);
-			++i;
 		}
+		
+		if(bipartiteMatcher.maxBipartiteMatch(reachMap, board) < board.getGoalNodes().size())
+			return Integer.MIN_VALUE;
+		
 		
 		return val;		
 	}
 	
 	public static void main(String[] args) throws IOException {
-		BoardState board = BoardState.getBoardFromFile("testing/disttest");
+		BoardState board = BoardState.getBoardFromFile("testing/deadlocktest6");
 		System.out.println(board);
 		Analyser analyser = new Analyser(board);
 		System.out.println(analyser);
