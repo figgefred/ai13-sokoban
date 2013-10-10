@@ -123,7 +123,7 @@ public class Path {
                 firstNode = n;
                 continue;
             }
-            sb.append(Constants.DirectionToString(getDirection(firstNode, n)));
+            sb.append(getDirection(firstNode, n).getChar());
             
             sb.append(" ");
             firstNode = n;
