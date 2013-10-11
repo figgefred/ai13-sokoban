@@ -105,8 +105,7 @@ public class Player {
 			//System.out.println(win.board);
 			System.out.println(win.path);
 		} else {
-			System.out.println("wat?");
-			
+			System.out.println("wat?");			
 		}
 		
 		/*
@@ -120,7 +119,7 @@ public class Player {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest5");
 		
 		System.out.println(board);
 		Player noob = new Player(board);

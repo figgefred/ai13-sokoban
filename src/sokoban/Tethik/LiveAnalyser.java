@@ -49,7 +49,7 @@ public class LiveAnalyser {
             boolean horizontalWallBlocking = 
                     (left.Column >= 0 && state.getNode(left) == NodeType.WALL) 
                     ||
-                    (right.Column < state.getColumnsCount(right.Row) && state.getNode(right) == NodeType.WALL)
+                    (right.Column < state.getColumnsCount() && state.getNode(right) == NodeType.WALL)
                     ;
             
             // Check same as above just vertical
@@ -97,7 +97,7 @@ public class LiveAnalyser {
                     ||
                     (left.Column >= 0 && isBlockType(state.getNode(left)) && (tmpBlock.contains(left) || isDeadlockState(state, tmpBlock, left)))
                     ||
-                    (right.Column < state.getColumnsCount(right.Row) && isBlockType(state.getNode(right)) && (tmpBlock.contains(right) || isDeadlockState(state, tmpBlock, right)))
+                    (right.Column < state.getColumnsCount() && isBlockType(state.getNode(right)) && (tmpBlock.contains(right) || isDeadlockState(state, tmpBlock, right)))
                 );
             return deadlockState;
         }
@@ -117,7 +117,7 @@ public class LiveAnalyser {
             {
                 for(int c = cmin; c <= cmax; c++)    
                 {
-                    if( (r >= 0 && r < state.getRowsCount()) && (c >= 0 && c < state.getColumnsCount(r)) )
+                    if( (r >= 0 && r < state.getRowsCount()) && (c >= 0 && c < state.getColumnsCount()) )
                     {
                         segments[r-rmin][c-cmin] = state.getNode(r, c);
                     }
@@ -180,7 +180,8 @@ public class LiveAnalyser {
                 "testing/deadlocktest3",
                 "testing/deadlocktest4",
                 "testing/deadlocktest5",
-                "testing/deadlocktest6"
+                "testing/deadlocktest6",
+                "testing/deadlocktest7",
             };
             for(String file: files)
             {
@@ -189,7 +190,7 @@ public class LiveAnalyser {
                 for(int r = 0; r < board.getRowsCount(); r++)
                 {
                     p = null;
-                    for(int c = 0; c < board.getColumnsCount(r); c++)
+                    for(int c = 0; c < board.getColumnsCount(); c++)
                     {
                         if(board.getNode(r, c) == NodeType.BLOCK_ON_GOAL)
                         {

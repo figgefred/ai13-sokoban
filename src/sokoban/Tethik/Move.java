@@ -30,25 +30,6 @@ public class Move implements Comparable<Move> {
 		List<BoardPosition> blocks = board.getBlockNodes();
 		BoardPosition playerPos = board.getPlayerNode();		
 		
-		/* Player move based
-		for(BoardPosition pos : board.getNeighbours(playerPos))
-		{
-			//if(board.isBlockingNode(pos))
-				//continue;
-			
-			try {
-				BoardState newBoardState = (BoardState) board.clone();
-				newBoardState.movePlayerTo(pos);
-				Move move = new Move();
-				move.board = newBoardState;
-				move.path = path.cloneAndAppend(pos);
-				possibleMoves.add(move);
-			}
-			catch(IllegalArgumentException ex) {
-				continue;
-			}
-		}*/
-		
 		/* Block move based */
 		for(BoardPosition blockPos : blocks)
 		{
@@ -63,12 +44,11 @@ public class Move implements Comparable<Move> {
 				if(candidate.equals(playerPos))
 					toPush = new Path(candidate);
 				else
-					toPush = pathfinder.getPath(board, playerPos, candidate);		
+					toPush = pathfinder.getPath(board, candidate);		
 				
 				if(toPush == null) // no path found
 					continue;				
 				
-				//toPush.getPath().remove(playerPos); // remove duplicate player pos (was causing null)
 				toPush.append(blockPos);
 				
 				BoardState newBoard = (BoardState) board.clone();

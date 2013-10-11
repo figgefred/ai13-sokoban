@@ -16,7 +16,7 @@ import sokoban.NodeType;
 /***
  * PreAnalyser: analyse the board beforehand to calculate positions in which blocks will get stuck in.
  * Usage:
- * 	p = PreAnalyser(board)
+ * 	p = Analyser(board)
  *  
  * @author tethik
  *
@@ -28,6 +28,7 @@ public class Analyser {
 	private int distanceMatrix[][][];
 	private int goalDist[];
 	private int blockDist[];
+	
 	
 	private BoardState board;
 	private int rows;
@@ -47,10 +48,7 @@ public class Analyser {
 	
 	private void constructTableAndWorkbench() {
 		rows = board.getRowsCount();
-		cols = Integer.MIN_VALUE;
-		
-		for(int row = 0; row < rows; ++row)
-			cols = Math.max(cols, board.getColumnsCount(row));
+		cols = board.getColumnsCount();
 		
 		badTable = new boolean[rows][cols];
 		workbench = new NodeType[rows][cols];
@@ -70,7 +68,7 @@ public class Analyser {
 				
 				workbench[row][col] = type;
 			}	
-	}
+	}	
 	
 	private void mapDistancesToGoals(BoardState board)
 	{
@@ -273,14 +271,11 @@ public class Analyser {
 		
 		if(board.isWin()) {				
 			return Integer.MAX_VALUE;
-		}
+		}		
 		
-		
-		if(has4x4Block(board))
-		{
+		if(has4x4Block(board)) {
 			return Integer.MIN_VALUE;
-		}
-		
+		}		
 		
 		//mapDistancesToGoals(board);
 		
@@ -290,17 +285,7 @@ public class Analyser {
 		}
 		
 		
-		List<BoardPosition> blocks = board.getBlockNodes();
-		
-		//int number_of_stuck_blocks = 0;
-		
-		//Set<BoardPosition> goalNodes = new HashSet<BoardPosition>();
-		/*
-		for(BoardPosition goal : board.getGoalNodes()) {
-			if(board.getNode(goal) == NodeType.GOAL)
-				goalNodes.add(goal);
-		}*/
-		
+		List<BoardPosition> blocks = board.getBlockNodes();	
 		
 		HashMap<BoardPosition, List<BoardPosition>> reachMap = new HashMap<>(); 
 		
@@ -320,10 +305,10 @@ public class Analyser {
 		int i = 0;
 		for(BoardPosition goal : board.getGoalNodes())
 		{		
-			reachMap.put(goal, new ArrayList<BoardPosition>());
+			reachMap.put(goal, new ArrayList<BoardPosition>());			
 			
 			if(board.getNode(goal) == NodeType.BLOCK_ON_GOAL) {
-				goalDist[i] = -300;
+				goalDist[i] = 0;
 			}
 			
 			b = 0; 
@@ -339,9 +324,7 @@ public class Analyser {
 				
 				if(goalDist[i] > 0)
 					blockDist[b] = Math.min(dist, blockDist[b++]);
-			}
-			
-				
+			}			
 			++i;
 		}	
 		

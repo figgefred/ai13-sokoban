@@ -33,7 +33,7 @@ public class BlockPathFinder {
         //build nodeMap
         for(int row=0; row<board.getRowsCount(); row++){
             nodeMap.add(new ArrayList<AStar_Node>());
-            for(int column=0; column <board.getColumnsCount(row); column++){
+            for(int column=0; column <board.getColumnsCount(); column++){
 
                 NodeType nodeType=board.getNode(row, column);
                 if(nodeType==NodeType.SPACE || nodeType == NodeType.GOAL 
@@ -89,7 +89,7 @@ public class BlockPathFinder {
 			//build nodeMap
 			for(int row=0; row<state.getRowsCount(); row++){
 				nodeMap.add(new ArrayList<AStar_Node>());
-				for(int column=0; column <state.getColumnsCount(row); column++){
+				for(int column=0; column <state.getColumnsCount(); column++){
 	
 					NodeType nodeType=state.getNode(row, column);
 					if(nodeType!=NodeType.WALL && nodeType != NodeType.INVALID) {

@@ -10,6 +10,7 @@ import sokoban.Direction;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 
 /**
@@ -43,7 +44,15 @@ public class Path {
         this.Nodes = nodes;
         if(reversedList && Nodes != null)
             Collections.reverse(Nodes);        
-    }  
+    } 
+    
+    public Path(Deque<BoardPosition> nodes) {
+    	Nodes = new ArrayList<BoardPosition>();
+    	
+    	for(BoardPosition node : nodes)
+    		Nodes.add(node);
+    }
+   
     
     
     public BoardPosition get(int index)
@@ -129,6 +138,7 @@ public class Path {
         }
         return sb.toString();
     }
+   
     
     private Direction getDirection(BoardPosition p1, BoardPosition p2)
     {

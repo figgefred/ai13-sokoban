@@ -27,12 +27,15 @@ public class BoardState implements Cloneable
     private List<List<NodeType>> Map = new ArrayList<>();
     private Set<BoardPosition> Goals;
     private BoardPosition CurrentNode;
+    private int rows;
+    private int cols;
     
     // fult, kanske ska byta interna kartan till samma typ av matris sen?
     public BoardState(NodeType[][] map) {
     	Goals = new HashSet<BoardPosition>();
-    	int cols = Integer.MIN_VALUE;
-    	for(int row = 0; row < map.length; ++row) {
+    	rows = map.length;
+    	cols = Integer.MIN_VALUE;
+    	for(int row = 0; row < rows; ++row) {
     		cols = Math.max(cols, map[row].length);
     		Map.add(new ArrayList<NodeType>(map[row].length));    	
     		for(int col = 0; col < map[row].length; ++col)
@@ -44,7 +47,7 @@ public class BoardState implements Cloneable
     		}
     	}
     	
-    	initZobristTable(map.length, cols);
+    	initZobristTable(rows, cols);
     }
     
     public BoardState(List<String> rows)
@@ -56,8 +59,9 @@ public class BoardState implements Cloneable
     {    
         // Init board
         buildBoard(rows);
+        this.rows = rows.size();
         if(initZobrist) {
-        	int cols = Integer.MIN_VALUE;
+        	cols = Integer.MIN_VALUE;
         	for(List<NodeType> row : Map)
         		cols = Math.max(row.size(), cols);
         		
@@ -289,15 +293,12 @@ public class BoardState implements Cloneable
     
     public int getRowsCount()
     {
-        return Map.size();
+        return rows;
     }
     
-    public int getColumnsCount(int r)
+    public int getColumnsCount()
     {
-        int size = Map.size();
-        if(r < 0 || r >= size)
-            return -1;
-        return Map.get(r).size();
+        return cols;
     }   
 
     
@@ -550,21 +551,6 @@ public class BoardState implements Cloneable
         }
         return blocks;
     }
-        
-    public boolean setNodeType(NodeType type, BoardPosition pos)
-    {
-        return setNodeType(type, pos.Row, pos.Column);
-    }
-    
-    public boolean setNodeType(NodeType type, int r, int c)
-    {
-        if( !((r >= 0 && r < getRowsCount()) && (c >= 0 && c < getColumnsCount(r))) )
-        {
-            return false;
-        }
-        Map.get(r).set(c, type);
-        return true;
-    }
   	
   	@SuppressWarnings("unchecked")
 	@Override
@@ -572,6 +558,8 @@ public class BoardState implements Cloneable
   		BoardState newState = new BoardState();
   		newState.CurrentNode = new BoardPosition(CurrentNode.Row, CurrentNode.Column);
   		newState.zobrist_hash = zobrist_hash;
+  		newState.cols = cols;
+  		newState.rows = rows;
   		
   		 // yay casts...
   		newState.Goals = Goals;
