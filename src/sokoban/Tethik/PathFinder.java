@@ -2,13 +2,9 @@ package sokoban.Tethik;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 
@@ -118,7 +114,7 @@ public class PathFinder {
 			return null; // Should not happen!
 		}
 		
-		positionStack.pop();
+		//positionStack.pop();
 		
 		return new Path(positionStack);
 	}

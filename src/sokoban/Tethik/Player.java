@@ -16,7 +16,7 @@ public class Player {
 	private Queue<Move> openSet;
     private HashSet<BoardState> closedSet;
     private HashSet<BoardState> toVisitSet;
-    private static boolean VERBOSE = true;
+    private static boolean VERBOSE = false;
     
 	private BoardState initialState;
 	
@@ -88,11 +88,9 @@ public class Player {
 
 		return null;
 	}
-		
 	
 	
-	
-	public void play() throws InterruptedException {				
+	public Path play() throws InterruptedException {				
 		
 		Move initial = new Move();
 		initial.board = initialState;
@@ -107,6 +105,8 @@ public class Player {
 		} else {
 			System.out.println("wat?");			
 		}
+		
+		return win.path;
 		
 		/*
 		for(Move nextMove : initial.getNextMoves())
@@ -123,7 +123,9 @@ public class Player {
 		
 		System.out.println(board);
 		Player noob = new Player(board);
-		noob.play();
+		Path path = noob.play();
+		board.movePlayer(path);
+		System.out.println(board);
 	}
 }
 
