@@ -28,6 +28,7 @@ public class Analyser {
 	private int distanceMatrix[][][];
 	private int goalDist[];
 	private int blockDist[];
+	private DeadlockFinder deadlockerFinder = new DeadlockFinder();
 	
 	
 	private BoardState board;
@@ -175,48 +176,6 @@ public class Analyser {
 		return isBadPosition(pos.Row, pos.Column);
 	}
 	
-	/***
-	 * Kanske borde abstraheras till vissa mönster?
-	 * @param board
-	 * @return
-	 */
-	private boolean has4x4Block(BoardState board) {
-		
-		for(int row = 0; row < rows - 1; ++row)
-			mainloop:
-			for(int col = 0; col < cols - 1; ++col) {
-				
-				if(!board.isBlockingNode(new BoardPosition(row, col)))
-					continue;
-				
-				NodeType nodes[] = new NodeType[] {
-					board.getNode(row, col),
-					board.getNode(row, col+1),
-					board.getNode(row+1, col),
-					board.getNode(row+1, col+1)
-				};
-				
-				
-				
-				boolean atLeastOneIsBlock = false;
-				for(NodeType node : nodes)
-				{
-					if(!board.isBlockingNode(node))
-						continue mainloop;
-					
-					atLeastOneIsBlock = atLeastOneIsBlock || node == NodeType.BLOCK;
-				}
-				
-				if(atLeastOneIsBlock) {
-					//System.out.println("found 4x4 block at " + row + " " + col);					
-					return true;
-				}
-				
-			}
-		
-		return false;		
-	}
-	
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -273,7 +232,7 @@ public class Analyser {
 			return Integer.MAX_VALUE;
 		}		
 		
-		if(has4x4Block(board)) {
+		if(deadlockerFinder.isDeadLock(board)) {
 			return Integer.MIN_VALUE;
 		}		
 		
@@ -291,15 +250,13 @@ public class Analyser {
 		
 		int b = 0; 
 		for(BoardPosition block : blocks)
-		{
-			
+		{			
 			if(board.getNode(block) == NodeType.BLOCK_ON_GOAL)
-				blockDist[b] = 0;
-			else if(board.isInCorner(block)) {// || isBadPosition(block))
+				blockDist[b] = -100;
+			else if(board.isInCorner(block)) {
 				return Integer.MIN_VALUE;		
 			}
-			b++;
-			
+			b++;	
 		} 
 		
 		int i = 0;

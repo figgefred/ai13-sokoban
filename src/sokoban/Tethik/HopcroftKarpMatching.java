@@ -93,7 +93,7 @@ public class HopcroftKarpMatching {
 			// Dfs part..
 			for(BoardPosition v : goalNodes) {				
 				if(goal_pairings.get(v).equals(nil) && dfsFindMaxMatch(map, goal_pairings, block_pairings, dist, v))
-					matching++;						
+					matching++;					
 				
 			}
 			//System.out.println(matching);

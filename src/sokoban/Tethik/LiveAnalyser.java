@@ -182,6 +182,7 @@ public class LiveAnalyser {
                 "testing/deadlocktest5",
                 "testing/deadlocktest6",
                 "testing/deadlocktest7",
+                "testing/deadlocktest9",
             };
             for(String file: files)
             {
@@ -192,7 +193,7 @@ public class LiveAnalyser {
                     p = null;
                     for(int c = 0; c < board.getColumnsCount(); c++)
                     {
-                        if(board.getNode(r, c) == NodeType.BLOCK_ON_GOAL)
+                        if(board.getNode(r, c) == NodeType.BLOCK)
                         {
                             p = new BoardPosition(r,c);
                             break;

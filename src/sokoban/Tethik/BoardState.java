@@ -318,20 +318,20 @@ public class BoardState implements Cloneable
     	{
 	    	switch(dir)
 	    	{
-	    	case UP:
-	    		pushBlock(fromRow, fromCol, fromRow - 1, fromCol);
-	    		break;
-	    	case DOWN:
-	    		pushBlock(fromRow, fromCol, fromRow + 1, fromCol);
-	    		break;
-	    	case LEFT:
-	    		pushBlock(fromRow, fromCol, fromRow, fromCol - 1);
-	    		break;
-	    	case RIGHT:
-	    		pushBlock(fromRow, fromCol, fromRow, fromCol + 1);
-	    		break;
-			default:
-				break;
+		    	case UP:
+		    		pushBlock(fromRow, fromCol, fromRow - 1, fromCol);
+		    		break;
+		    	case DOWN:
+		    		pushBlock(fromRow, fromCol, fromRow + 1, fromCol);
+		    		break;
+		    	case LEFT:
+		    		pushBlock(fromRow, fromCol, fromRow, fromCol - 1);
+		    		break;
+		    	case RIGHT:
+		    		pushBlock(fromRow, fromCol, fromRow, fromCol + 1);
+		    		break;
+				default:
+					break;
 	    	}
     	} catch(IllegalArgumentException ex)
     	{
