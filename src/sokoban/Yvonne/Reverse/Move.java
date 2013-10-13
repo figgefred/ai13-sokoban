@@ -34,11 +34,12 @@ public class Move implements Comparable<Move> {
 
 			// hitta ställen man kan göra förflyttningar av block.
 			// skriva om sen..
-			List<BoardPosition> pushPositions = board.getDraggingPositions(blockPos);
+			List<BoardPosition> pullPositions = board.getPullingPositions(blockPos);
 		
 			// now do pathfinding to see if player can reach it..
-			for(BoardPosition candidate : pushPositions)
+			for(BoardPosition candidate : pullPositions)
 			{
+				
 				Path toDrag;
 				if(candidate.equals(playerPos))
 					toDrag = new Path(candidate);

@@ -43,12 +43,15 @@ public class Player {
 	        	System.out.println(node.board);
         	}
         	
-        	if(node.board.isWin())        	
+        	if(node.board.isWin()){
         		return node;        	
-        	
-        	if(node.getHeuristicValue() == Integer.MIN_VALUE)
+        		
+        	}
+        		
+        	if(node.getHeuristicValue() == Integer.MIN_VALUE){
         		return null;
-        	
+        	}
+
         	Integer tentative_g = node.getHeuristicValue() + 100;
         	
         	for(Move neighbour: node.getNextMoves())
@@ -103,6 +106,7 @@ public class Player {
 		
 		
 		Move win = getVictoryPath(initial);
+		
 		if(win != null) {
 			//System.out.println(win.board);
 			System.out.println(win.path);
@@ -122,7 +126,7 @@ public class Player {
 		BoardState board = BoardState.getBoardFromFile("twenty.slc");
 		
 		System.out.println(board);
-		Player noob = new Player(board);
+		Player noob = new Player(board.getEndingState());
 		noob.play();
 	}
 }

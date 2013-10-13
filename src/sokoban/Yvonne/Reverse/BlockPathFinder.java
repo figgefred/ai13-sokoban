@@ -52,7 +52,7 @@ public class BlockPathFinder {
             }
             closedSet.put(current.bp, current);
 
-            List<BoardPosition> neighbourPositions = board.getDraggingPositions(current.bp);
+            List<BoardPosition> neighbourPositions = board.getPullingPositions(current.bp);
             for(BoardPosition neighbour : neighbourPositions){
                 AStar_Node neighbourNode=nodeMap.get(neighbour.Row).get(neighbour.Column);
                 if(neighbourNode!=null){
@@ -115,7 +115,7 @@ public class BlockPathFinder {
 			}
 			closedSet.put(current.bp, current);
 
-			List<BoardPosition> neighbourPositions = state.getDraggingPositions(current.bp);
+			List<BoardPosition> neighbourPositions = state.getPullingPositions(current.bp);
 			for(BoardPosition neighbour : neighbourPositions){
 				AStar_Node neighbourNode=nodeMap.get(neighbour.Row).get(neighbour.Column);
 				if(neighbourNode!=null){
