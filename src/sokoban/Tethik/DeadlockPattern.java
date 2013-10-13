@@ -87,6 +87,7 @@ public class DeadlockPattern {
     
     public boolean isMatch(BoardState board)  {  	
 		for(int x = 0; x < board.getRowsCount() - rows; ++x) {
+			
 			for(int y = 0; y < board.getColumnsCount() - cols; ++y) {
 				
 				BoardPosition pos = new BoardPosition(y, x);				

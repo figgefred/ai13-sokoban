@@ -43,4 +43,45 @@ public class BoardPosition
     public int DistanceTo(BoardPosition b) {
     	return Math.abs(Row - b.Row) + Math.abs(Column - b.Column);
     }
+    
+    public BoardPosition getNeighbouringPosition(Direction direction) {
+    	switch (direction) {
+			case UP:
+				return new BoardPosition(Row-1, Column);
+			case DOWN:
+				return new BoardPosition(Row+1, Column);
+			case RIGHT:
+				return new BoardPosition(Row, Column+1);
+			case LEFT:
+				return new BoardPosition(Row, Column-1);
+			default:
+				return this;	
+		}
+    }
+    
+    public Direction getDirection(BoardPosition to)
+	{
+    	return BoardPosition.getDirection(this, to);
+	}
+    
+    public static Direction getDirection(BoardPosition from, BoardPosition to)
+	{
+	    if( from.Row-1 == to.Row && from.Column == to.Column )
+	    {
+	        return Direction.UP;
+	    }
+	    if(from.Row+1 == to.Row && from.Column == to.Column)
+	    {
+	        return Direction.DOWN;
+	    }
+	    if(from.Column-1 == to.Column && from.Row == to.Row)
+	    {
+	        return Direction.LEFT;
+	    }
+	    if(from.Column+1 == to.Column && from.Row == to.Row)
+	    {
+	        return Direction.RIGHT;
+	    }
+	    return Direction.NONE;
+	}
 }

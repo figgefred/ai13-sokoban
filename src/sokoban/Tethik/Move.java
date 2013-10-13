@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sokoban.BoardPosition;
+import sokoban.Direction;
 
 public class Move implements Comparable<Move> {
 	private static PathFinder pathfinder = new PathFinder();
@@ -21,7 +22,13 @@ public class Move implements Comparable<Move> {
 		if(heuristic_value != null)
 			return heuristic_value;
 		
-		heuristic_value = analyser.getHeuristicValue(board);
+		BoardPosition lastpos = path.get(path.getPath().size() - 2);
+		BoardPosition pushedBlock = null;
+		if(lastpos != null) {
+			Direction pushDirection = lastpos.getDirection(board.getPlayerNode());
+			pushedBlock = board.getPlayerNode().getNeighbouringPosition(pushDirection);
+		}
+		heuristic_value = analyser.getHeuristicValue(board, pushedBlock);
 		return heuristic_value; 
 	}
 	

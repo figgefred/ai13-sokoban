@@ -17,12 +17,21 @@ public enum Direction {
     
     private final int index;
     private final char c;
+    private Direction opposite;
     
     private Direction(int index, char c)
     {
     	this.index = index;
     	this.c = c;
     }
+    
+    private Direction(int index, char c, Direction opposite)
+    {
+    	this.index = index;
+    	this.c = c;
+    	this.opposite = opposite;
+    }
+    
     
     public int getIndex() {    	
 		return this.index;		
@@ -41,4 +50,23 @@ public enum Direction {
     	}
     	return Direction.NONE;
 	}
+    
+    /**
+     * Returns the opposite direction.
+     * @return
+     */
+    public Direction opposite() {
+    	switch(this) {
+    		case UP:
+	    		return DOWN;
+	    	case DOWN:
+	    		return UP;
+	    	case LEFT:
+	    		return RIGHT;
+	    	case RIGHT:
+	    		return LEFT;
+	    	default:
+	    		return NONE;
+    	}
+    }
 }

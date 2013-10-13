@@ -120,7 +120,7 @@ public class Player {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BoardState board = BoardState.getBoardFromFile("testing/level6");
+		BoardState board = BoardState.getBoardFromFile("testing/deadlocktest9");
 		
 		System.out.println(board);
 		Player noob = new Player(board);

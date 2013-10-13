@@ -28,8 +28,9 @@ public class Analyser {
 	private int distanceMatrix[][][];
 	private int goalDist[];
 	private int blockDist[];
-	private DeadlockFinder deadlockerFinder = new DeadlockFinder();
 	
+	//private DeadlockFinder deadlockerFinder = new DeadlockFinder();
+	private LiveAnalyser deadlockFinder;
 	
 	private BoardState board;
 	private int rows;
@@ -42,6 +43,7 @@ public class Analyser {
 		constructTableAndWorkbench();
 		// Hitta distanser?
 		mapDistancesToGoals(new BoardState(workbench));
+		deadlockFinder = new LiveAnalyser(this, new PathFinder());
 	}
 	
 	private void constructTableAndWorkbench() {
@@ -196,16 +198,22 @@ public class Analyser {
 		System.out.println(builder.toString());
 	}
 	
-	public int getHeuristicValue(BoardState board) {
+	public int getHeuristicValue(BoardState board, BoardPosition pushedBlock) {
 		this.board = board;
 		
 		if(board.isWin()) {				
 			return Integer.MAX_VALUE;
 		}		
 		
-		if(deadlockerFinder.isDeadLock(board)) {
+		
+		
+		if(pushedBlock != null)
+		{
+			if(deadlockFinder.isBadState(board, pushedBlock))
+				return Integer.MIN_VALUE;
+		} else if(deadlockFinder.isBadState(board)) {
 			return Integer.MIN_VALUE;
-		}		
+		}
 		
 		//mapDistancesToGoals(board);
 		
@@ -275,7 +283,7 @@ public class Analyser {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		BoardState board = BoardState.getBoardFromFile("testing/deadlocktest6");
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest");
 		System.out.println(board);
 		Analyser analyser = new Analyser(board);
 		System.out.println(analyser);

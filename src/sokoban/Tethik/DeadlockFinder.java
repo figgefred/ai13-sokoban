@@ -36,7 +36,7 @@ public class DeadlockFinder {
 		int i = 1;
 		for(DeadlockPattern patt : patterns) {
 			boolean matched = patt.isMatch(board);
-			//System.out.println(i++ + " " + matched);			
+			System.out.println(i++ + " " + matched);			
 			isDeadlock |= matched;
 		}
 		
@@ -89,7 +89,7 @@ public class DeadlockFinder {
 	*/
 	
 	public static void main(String[] args) throws IOException {
-		BoardState board = BoardState.getBoardFromFile("testing/deadlocktest10");
+		BoardState board = BoardState.getBoardFromFile("testing/deadlocktest9");
 		System.out.println(board);
 		DeadlockFinder analyser = new DeadlockFinder();
 		System.out.println(analyser.isDeadLock(board));
