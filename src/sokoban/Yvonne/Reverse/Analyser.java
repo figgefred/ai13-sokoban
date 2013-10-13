@@ -112,9 +112,9 @@ public class Analyser {
 					if(visited.contains(neighbour)) 
 						continue;
 					
-					NodeType node = board.getNode(neighbour);
-					if(node == NodeType.WALL || node == NodeType.INVALID) 
-						continue;
+				//	NodeType node = board.getNode(neighbour);
+					//if(node == NodeType.WALL || node == NodeType.INVALID) 
+						//continue;
 									
 					positions.add(neighbour);
 					distances.add(distance);
@@ -283,9 +283,10 @@ public class Analyser {
 			}
 						
 			
-			if(board.isInCorner(block))
+			if(board.isInCorner(block)){
+				System.out.println("isinCorner");
 				return Integer.MIN_VALUE;
-			
+			}
 
 			/*
 			if(pathfinder.getPath(board, block, goalNodes) == null) {
@@ -301,8 +302,12 @@ public class Analyser {
 			
 			
 			int mindistToGoal = distanceMatrix[block.Row][block.Column];
-			if(mindistToGoal == Integer.MAX_VALUE)
+			if(mindistToGoal == Integer.MAX_VALUE){
+				System.out.println(block.Row+" "+block.Column);
+				System.out.println("mindist");
+
 				return Integer.MIN_VALUE;
+			}
 			number_of_unsolved_blocks++;
 			val -= mindistToGoal;
 		}
@@ -317,7 +322,7 @@ public class Analyser {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		BoardState board = BoardState.getBoardFromFile("testing/firstplaytest");
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytestrev");
 		System.out.println(board);
 		Analyser analyser = new Analyser(board);
 		System.out.println(analyser);

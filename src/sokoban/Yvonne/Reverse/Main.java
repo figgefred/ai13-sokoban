@@ -32,7 +32,7 @@ long startTime;
 		
 		//System.out.println(board);
 		BoardState board = new BoardState(b);
-		
+		System.out.println("Ending state: "+ board.getEndingState());
 		Player player = new Player(board.getEndingState());
 		player.play();
 	}

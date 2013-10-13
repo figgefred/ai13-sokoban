@@ -27,27 +27,34 @@ public class Move implements Comparable<Move> {
 		List<Move> possibleMoves = new ArrayList<Move>();
 		List<BoardPosition> blocks = board.getBlockNodes();
 		BoardPosition playerPos = board.getPlayerNode();			
-		
+		System.out.println("getnextmoves");
 		for(BoardPosition blockPos : blocks)
 		{
-			
+		System.out.println("blockpos");	
 
 			// hitta ställen man kan göra förflyttningar av block.
 			// skriva om sen..
 			List<BoardPosition> pullPositions = board.getPullingPositions(blockPos);
-		
+			for(BoardPosition pos : pullPositions){
+				System.out.println("A position: "+pos.Row+" "+pos.Column);
+			}
+			
 			// now do pathfinding to see if player can reach it..
 			for(BoardPosition candidate : pullPositions)
 			{
-				
+	    		System.out.println("pp");
+
 				Path toDrag;
-				if(candidate.equals(playerPos))
+				if(candidate.equals(playerPos)){
 					toDrag = new Path(candidate);
-				else
+					System.out.println("same");
+				}else
 					toDrag = pathfinder.getPath(board, playerPos, candidate);		
 				
-				if(toDrag == null) // no path found
-					continue;				
+				if(toDrag == null){ // no path found
+					System.out.println("path is null");
+					continue;		
+				}
 				
 				//toPush.getPath().remove(playerPos); // remove duplicate player pos (was causing null)
 				toDrag.append(blockPos);

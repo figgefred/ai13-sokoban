@@ -35,6 +35,7 @@ public class Player {
     	
         while(!openSet.isEmpty())
         {
+
         	Move node = openSet.poll();
         	
         	if(VERBOSE) {
@@ -44,18 +45,22 @@ public class Player {
         	}
         	
         	if(node.board.isWin()){
+        		System.out.println("desafsa");
+
         		return node;        	
         		
         	}
         		
+       
         	if(node.getHeuristicValue() == Integer.MIN_VALUE){
+
         		return null;
         	}
 
         	Integer tentative_g = node.getHeuristicValue() + 100;
-        	
         	for(Move neighbour: node.getNextMoves())
         	{	
+            	System.out.println("hhej");
 
         		if(neighbour.board.isWin())
         			return neighbour;
@@ -123,9 +128,11 @@ public class Player {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BoardState board = BoardState.getBoardFromFile("twenty.slc");
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest");
 		
-		System.out.println(board);
+	//	System.out.println(board);
+		System.out.println(board.getEndingState());
+
 		Player noob = new Player(board.getEndingState());
 		noob.play();
 	}

@@ -44,6 +44,7 @@ public class BoardState implements Cloneable
     			}
     			if(type == NodeType.GOAL || type == NodeType.PLAYER_ON_GOAL || type == NodeType.BLOCK_ON_GOAL)
     				Goals.add(new BoardPosition(row, col));
+    		
     		}
     	}
     	
@@ -235,27 +236,27 @@ public class BoardState implements Cloneable
     {
         List<BoardPosition> positions = new ArrayList<>();
         // UP
-        if(row > 1) {
-        	NodeType type = getNode(row-2,col);
+        if(row > 0) {
+        	NodeType type = getNode(row-1,col);
         	if(type != NodeType.WALL && type != NodeType.INVALID)
         		positions.add(new BoardPosition(row-1,col));
         }
         // Down
-        if(row < Map.size()-2) {
-        	NodeType type = getNode(row+2,col);
+        if(row < Map.size()-1) {
+        	NodeType type = getNode(row+1,col);
         	if(type != NodeType.WALL && type != NodeType.INVALID)
         	positions.add(new BoardPosition(row+1,col));
         }
         // LEFT
-        if(col > 1) {
-        	NodeType type = getNode(row,col-2);
+        if(col > 0) {
+        	NodeType type = getNode(row,col-1);
         	if(type != NodeType.WALL && type != NodeType.INVALID)
         		positions.add(new BoardPosition(row,col-1));
         }
         	
         //RIGHT
-        if(col < Map.get(row).size()-2) {
-        	NodeType type = getNode(row,col+2);
+        if(col < Map.get(row).size()-1) {
+        	NodeType type = getNode(row,col+1);
         	if(type != NodeType.WALL && type != NodeType.INVALID)
         		positions.add(new BoardPosition(row,col+1));
         
@@ -399,6 +400,7 @@ public class BoardState implements Cloneable
 		if(type == NodeType.BLOCK || type == NodeType.BLOCK_ON_GOAL)
 		{
 			System.out.println(row+ " "+col);
+			System.out.println(type);
 			throw new IllegalArgumentException ("Invalid destination");
 			/*
 			// Check if block can be pushed	(and if so do so)	
@@ -468,27 +470,37 @@ public class BoardState implements Cloneable
     	
     	if(orig == NodeType.BLOCK_ON_GOAL)
     	{
+    		System.out.println("destblockongoal");
+
     		updateHashCode(row, col, NodeType.BLOCK_ON_GOAL, NodeType.PLAYER_ON_GOAL);
     	}
     	else // Is block
     	{
+    		System.out.println("destblock");
+
     		updateHashCode(row, col, NodeType.BLOCK, NodeType.PLAYER);
     	}
     	
     	if(dest == NodeType.GOAL)
     	{
-    		updateHashCode(newrow, newcol, NodeType.GOAL, NodeType.BLOCK_ON_GOAL);
+    		System.out.println("destgoal");
+    	//	updateHashCode(newrow, newcol, NodeType.GOAL, NodeType.BLOCK_ON_GOAL);
+    		updateHashCode(newrow, newcol, NodeType.GOAL, NodeType.PLAYER_ON_GOAL);
+    		updateHashCode(row, col, NodeType.PLAYER, NodeType.BLOCK);
     	}
     	else // Is space
     	{
+    		System.out.println("destspace");
+
     		updateHashCode(newrow, newcol, NodeType.SPACE, NodeType.PLAYER);
     		updateHashCode(row, col, NodeType.PLAYER, NodeType.BLOCK);
     		
     	}
     	
-    	Map.get(row).set(col, (orig == NodeType.BLOCK_ON_GOAL) ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER);
     	
-    	Map.get(newrow).set(newcol, (dest == NodeType.GOAL) ? NodeType.BLOCK_ON_GOAL : NodeType.BLOCK);
+    	Map.get(row).set(col, (orig == NodeType.PLAYER_ON_GOAL) ? NodeType.BLOCK_ON_GOAL : NodeType.BLOCK);
+    	
+    	Map.get(newrow).set(newcol, (dest == NodeType.GOAL) ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER);
     }
     
     /***
@@ -708,7 +720,6 @@ public class BoardState implements Cloneable
         BoardState endState = (BoardState) this.clone();
         
         // First remove player from map
-        
         NodeType t = endState.Map.get(endState.CurrentNode.Row).get(endState.CurrentNode.Column);
         if(t == NodeType.PLAYER)
         {
@@ -720,6 +731,7 @@ public class BoardState implements Cloneable
         }
         
         // Place all blocks on goal positions
+        Goals.clear();
         
         for(int r = 0; r < getRowsCount(); r++)
         {
@@ -729,6 +741,7 @@ public class BoardState implements Cloneable
                 if(type == NodeType.BLOCK)
                 {
                     endState.Map.get(r).set(c, NodeType.GOAL);
+                    Goals.add(new BoardPosition(r,c));
                 }
                 else if(type == NodeType.GOAL)
                 {
@@ -742,6 +755,7 @@ public class BoardState implements Cloneable
         // next to block
         
         BoardPosition playerPos = null;
+
         for(BoardPosition p: endState.Goals)
         {
             BoardPosition north = new BoardPosition(p.Row-1, p.Column);
@@ -781,8 +795,10 @@ public class BoardState implements Cloneable
         if(type == NodeType.INVALID)
             System.err.println("Referring to position " + r + ", " + c + " which refers to INVALID type");
         
-        return 
-                type == NodeType.SPACE;
+        
+              if(  type == NodeType.SPACE || type ==NodeType.GOAL){
+            	  return true;
+              }return false;
     }
     public boolean isOnlySpaceNode(BoardPosition p)
     {
