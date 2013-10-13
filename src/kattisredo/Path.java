@@ -2,11 +2,8 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package sokoban.Tethik;
+package kattisredo;
 
-
-import sokoban.BoardPosition;
-import sokoban.Direction;
 
 import java.util.ArrayList;
 import java.util.Collections;

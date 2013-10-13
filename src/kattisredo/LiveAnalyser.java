@@ -2,14 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package sokoban.Tethik;
+package kattisredo;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import sokoban.BoardPosition;
-import sokoban.NodeType;
 
 /**
  *
@@ -182,7 +180,6 @@ public class LiveAnalyser {
                 "testing/deadlocktest5",
                 "testing/deadlocktest6",
                 "testing/deadlocktest7",
-                "testing/deadlocktest9",
             };
             for(String file: files)
             {
@@ -193,7 +190,7 @@ public class LiveAnalyser {
                     p = null;
                     for(int c = 0; c < board.getColumnsCount(); c++)
                     {
-                        if(board.getNode(r, c) == NodeType.BLOCK)
+                        if(board.getNode(r, c) == NodeType.BLOCK_ON_GOAL)
                         {
                             p = new BoardPosition(r,c);
                             break;

@@ -1,4 +1,4 @@
-package sokoban.Tethik;
+package kattisredo;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -16,7 +16,7 @@ public class Player {
 	private Queue<Move> openSet;
     private HashSet<BoardState> closedSet;
     private HashSet<BoardState> toVisitSet;
-    private static boolean VERBOSE = true;
+    private static boolean VERBOSE = false;
     
 	private BoardState initialState;
 	
@@ -102,12 +102,11 @@ public class Player {
 		if(win != null) {
 			//System.out.println(win.board);
 			System.out.println(win.path);
-			return win.path;
 		} else {
 			System.out.println("wat?");			
 		}
-		return new Path();
 		
+		return win.path;
 		
 		/*
 		for(Move nextMove : initial.getNextMoves())
@@ -120,7 +119,7 @@ public class Player {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BoardState board = BoardState.getBoardFromFile("testing/level6");
+		BoardState board = BoardState.getBoardFromFile("testing/level3");
 		
 		System.out.println(board);
 		Player noob = new Player(board);

@@ -1,4 +1,4 @@
-package sokoban.Tethik;
+package kattisredo;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
-import sokoban.BoardPosition;
 
 /***
  * Hopcroft-Karp maximal bipartite matching
@@ -93,7 +92,7 @@ public class HopcroftKarpMatching {
 			// Dfs part..
 			for(BoardPosition v : goalNodes) {				
 				if(goal_pairings.get(v).equals(nil) && dfsFindMaxMatch(map, goal_pairings, block_pairings, dist, v))
-					matching++;					
+					matching++;						
 				
 			}
 			//System.out.println(matching);

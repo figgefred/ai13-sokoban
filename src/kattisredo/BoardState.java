@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package sokoban.Tethik;
+package kattisredo;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -13,10 +13,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-
-import sokoban.BoardPosition;
-import sokoban.NodeType;
-import sokoban.Direction;
 /**
  *
  * @author figgefred
@@ -318,20 +314,20 @@ public class BoardState implements Cloneable
     	{
 	    	switch(dir)
 	    	{
-		    	case UP:
-		    		pushBlock(fromRow, fromCol, fromRow - 1, fromCol);
-		    		break;
-		    	case DOWN:
-		    		pushBlock(fromRow, fromCol, fromRow + 1, fromCol);
-		    		break;
-		    	case LEFT:
-		    		pushBlock(fromRow, fromCol, fromRow, fromCol - 1);
-		    		break;
-		    	case RIGHT:
-		    		pushBlock(fromRow, fromCol, fromRow, fromCol + 1);
-		    		break;
-				default:
-					break;
+	    	case UP:
+	    		pushBlock(fromRow, fromCol, fromRow - 1, fromCol);
+	    		break;
+	    	case DOWN:
+	    		pushBlock(fromRow, fromCol, fromRow + 1, fromCol);
+	    		break;
+	    	case LEFT:
+	    		pushBlock(fromRow, fromCol, fromRow, fromCol - 1);
+	    		break;
+	    	case RIGHT:
+	    		pushBlock(fromRow, fromCol, fromRow, fromCol + 1);
+	    		break;
+			default:
+				break;
 	    	}
     	} catch(IllegalArgumentException ex)
     	{

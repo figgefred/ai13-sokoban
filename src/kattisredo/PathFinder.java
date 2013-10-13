@@ -1,4 +1,4 @@
-package sokoban.Tethik;
+package kattisredo;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
@@ -8,8 +8,6 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
-import sokoban.BoardPosition;
-import sokoban.NodeType;
 
 public class PathFinder {
     

@@ -1,9 +1,8 @@
-package sokoban.Tethik;
+package kattisredo;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import sokoban.BoardPosition;
 
 public class Move implements Comparable<Move> {
 	private static PathFinder pathfinder = new PathFinder();
