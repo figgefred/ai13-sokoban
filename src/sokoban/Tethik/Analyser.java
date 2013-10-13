@@ -34,15 +34,12 @@ public class Analyser {
 	private BoardState board;
 	private int rows;
 	private int cols;
-	private BlockPathFinder pathfinder = new BlockPathFinder();
 	private HopcroftKarpMatching bipartiteMatcher = new HopcroftKarpMatching();
 	
 	public Analyser(BoardState board)
 	{
 		this.board = board;
 		constructTableAndWorkbench();
-		// Hitta dåliga positions
-		analyse();
 		// Hitta distanser?
 		mapDistancesToGoals(new BoardState(workbench));
 	}
@@ -68,6 +65,7 @@ public class Analyser {
 					type = NodeType.GOAL;
 				
 				workbench[row][col] = type;
+				badTable[row][col] = true;
 			}	
 	}	
 	
@@ -114,6 +112,7 @@ public class Analyser {
 				
 				// Uppdatera positions i matrisen
 				distanceMatrix[i][pos.Row][pos.Column] = distance;
+				badTable[pos.Row][pos.Column] = false;
 				
 				++distance;				
 
@@ -140,35 +139,7 @@ public class Analyser {
 		}
 	}
 	
-	private void analyse() {
-		for(int row = 0; row < rows; ++row)
-			for(int col = 0; col < cols; ++col) {
-				NodeType type = workbench[row][col];
-				
-				if(type == NodeType.WALL || type == NodeType.INVALID) {
-					badTable[row][col] = true;
-					continue;
-				}
-				
-				if(type == NodeType.GOAL)
-				{
-					badTable[row][col] = false;
-					continue;
-				}				
-				
-				workbench[row][col] = NodeType.PLAYER;
-				BoardState testBoard = new BoardState(workbench);
-				//System.out.println(row + " " + col);
-				//System.out.println(testBoard);				
-				Path path = pathfinder.getPath(testBoard, new BoardPosition(row, col), board.getGoalNodes());
-				badTable[row][col] = path == null;
-				// reset
-				workbench[row][col] = type;
-			}
-	}
-	
-	public boolean isBadPosition(int Row, int Col)
-	{
+	public boolean isBadPosition(int Row, int Col) {		
 		return badTable[Row][Col];
 	}
 	

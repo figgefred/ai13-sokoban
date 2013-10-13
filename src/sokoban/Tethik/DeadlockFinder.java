@@ -14,7 +14,7 @@ import sokoban.NodeType;
  */
 public class DeadlockFinder {
 
-	private PathFinder pathFinder = new PathFinder();
+	//private PathFinder pathFinder = new PathFinder();
 	
 	private List<DeadlockPattern> patterns = new ArrayList<DeadlockPattern>();
 	
@@ -36,7 +36,7 @@ public class DeadlockFinder {
 		int i = 1;
 		for(DeadlockPattern patt : patterns) {
 			boolean matched = patt.isMatch(board);
-			System.out.println(i++ + " " + matched);			
+			//System.out.println(i++ + " " + matched);			
 			isDeadlock |= matched;
 		}
 		

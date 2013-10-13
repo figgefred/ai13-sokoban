@@ -87,7 +87,6 @@ public class DeadlockPattern {
     
     public boolean isMatch(BoardState board)  {  	
 		for(int x = 0; x < board.getRowsCount() - rows; ++x) {
-			blockloop:
 			for(int y = 0; y < board.getColumnsCount() - cols; ++y) {
 				
 				BoardPosition pos = new BoardPosition(y, x);				
@@ -95,7 +94,9 @@ public class DeadlockPattern {
 	    		// todo..
 	    		// boolean[] rotations = new boolean[4];
 	    		int blocks = 0;
+	    		boolean matched = true;
 	    		
+	    		normal:
 	    		for(int r = 0; r < rows; ++r) {
 	    			for(int c = 0; c < Map.get(r).size(); ++c)
 	    			{    				
@@ -113,16 +114,20 @@ public class DeadlockPattern {
 	    				
 	    				if(node == NodeType.BLOCK_ON_GOAL && patt == NodeType.BLOCK)
 	    					continue;
-	    					
-	    				continue blockloop;
+	    				
+	    				matched = false;
+	    				break normal;
 	    			}
 	    		}
 	    		
-	    		if(blocks > 0)
+	    		if(blocks > 0 && matched)
 	    			return true;
 	    		
 	    		blocks = 0;
+	    		matched = false;
+	    		
 	    		// Upp och ner (bah)
+	    		upsidedown:
 	    		for(int r = 0; r < rows; ++r) {
 	    			for(int c = 0; c < Map.get(r).size(); ++c)
 	    			{    				
@@ -141,15 +146,19 @@ public class DeadlockPattern {
 	    				if(node == NodeType.BLOCK_ON_GOAL && patt == NodeType.BLOCK)
 	    					continue;
 	    					
-	    				continue blockloop;
+	    				matched = false;
+	    				break upsidedown;
 	    			}
 	    		}
 	    		
-	    		if(blocks > 0)
+	    		if(blocks > 0 && matched)
 	    			return true;
 	    		
 	    		blocks = 0;
+	    		matched = true;
+	    		
 	    		// Mirrored
+	    		mirrored:
 	    		for(int r = 0; r < rows; ++r) {
 	    			for(int c = 0; c < Map.get(r).size(); ++c)
 	    			{    				
@@ -167,12 +176,13 @@ public class DeadlockPattern {
 	    				
 	    				if(node == NodeType.BLOCK_ON_GOAL && patt == NodeType.BLOCK)
 	    					continue;
-	    					
-	    				continue blockloop;
+	    				
+	    				matched = false;
+	    				break mirrored;
 	    			}
 	    		}
 	    		
-	    		if(blocks > 0)
+	    		if(blocks > 0 && matched)
 	    			return true;
 	    	}
 		}
