@@ -30,6 +30,8 @@ public class BoardState implements Cloneable
     private int rows;
     private int cols;
     
+    
+    
     // fult, kanske ska byta interna kartan till samma typ av matris sen?
     public BoardState(NodeType[][] map) {
     	Goals = new HashSet<BoardPosition>();

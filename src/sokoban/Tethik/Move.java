@@ -12,6 +12,7 @@ public class Move implements Comparable<Move> {
 	public BoardState board;
 	public Path path;
 	private Integer heuristic_value = null;
+	public int pushes = 1;
 	
 	public static void initPreanalyser(BoardState board) {
 		analyser = new Analyser(board);
@@ -22,13 +23,13 @@ public class Move implements Comparable<Move> {
 		if(heuristic_value != null)
 			return heuristic_value;
 		
-		BoardPosition lastpos = path.get(path.getPath().size() - 2);
-		BoardPosition pushedBlock = null;
-		if(lastpos != null) {
-			Direction pushDirection = lastpos.getDirection(board.getPlayerNode());
-			pushedBlock = board.getPlayerNode().getNeighbouringPosition(pushDirection);
-		}
-		heuristic_value = analyser.getHeuristicValue(board, pushedBlock);
+//		BoardPosition lastpos = path.get(path.getPath().size() - 2);
+//		BoardPosition pushedBlock = null;
+//		if(lastpos != null) {
+//			Direction pushDirection = lastpos.getDirection(board.getPlayerNode());
+//			pushedBlock = board.getPlayerNode().getNeighbouringPosition(pushDirection);
+//		}
+		heuristic_value = analyser.getHeuristicValue(board);
 		return heuristic_value; 
 	}
 	
@@ -67,6 +68,7 @@ public class Move implements Comparable<Move> {
 				Move move = new Move();
 				move.board = newBoard;
 				move.path = path.cloneAndAppend(toPush);
+				move.pushes = pushes + 1;
 				possibleMoves.add(move);					
 			}		
 						

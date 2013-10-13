@@ -14,9 +14,8 @@ import java.util.Queue;
 public class Player {	
 	
 	private Queue<Move> openSet;
-    private HashSet<BoardState> closedSet;
-    private HashSet<BoardState> toVisitSet;
-    private static boolean VERBOSE = true;
+    private HashSet<Integer> closedSet;
+    public static boolean VERBOSE = true;
     
 	private BoardState initialState;
 	
@@ -30,9 +29,9 @@ public class Player {
 
 	public Move getVictoryPath(Move initialPosition)
 	{
+		System.err.println();
 		openSet = new PriorityQueue<Move>();
-		closedSet = new HashSet<BoardState>();
-		toVisitSet = new HashSet<BoardState>();
+		closedSet = new HashSet<Integer>();
     	openSet.add(initialPosition);
     	
         while(!openSet.isEmpty())
@@ -40,7 +39,8 @@ public class Player {
         	Move node = openSet.poll();
         	
         	if(VERBOSE) {
-	        	System.out.println(openSet.size() + " " + toVisitSet.size());
+	        	System.out.println(openSet.size() + " " + closedSet.size());
+	        	System.out.println("Pushes : " + node.pushes);
 	        	System.out.println(node.path.getPath().size() + ", " + node.getHeuristicValue() + ", " + closedSet.size() + ", " + node.board.hashCode());
 	        	System.out.println(node.board);
         	}
@@ -48,49 +48,24 @@ public class Player {
         	if(node.board.isWin())        	
         		return node;        	
         	
-        	if(node.getHeuristicValue() == Integer.MIN_VALUE)
-        		return null;
-        	
-        	//Integer tentative_g = node.getHeuristicValue() + 100;
-        	
         	for(Move neighbour: node.getNextMoves())
-        	{	       		                		
-        		if(neighbour.board.isWin())
-        			return neighbour;
-        		
-        		Integer to_g = neighbour.getHeuristicValue();        		
-        		
-        		//System.out.println(neighbour.board);
-        		//System.out.println(to_g);
-        		//System.out.println(tentative_g);
-        		
-        		
-        		if (closedSet.contains(neighbour.board) || to_g == Integer.MIN_VALUE) {        			
+        	{	            		       		
+        		if (closedSet.contains(neighbour.board.hashCode())) {        			
                 	continue;
         		}
         		
-        		
-        		if(!toVisitSet.contains(neighbour.board))
-        		{        		        			
-        			openSet.add(neighbour);
-        			toVisitSet.add(neighbour.board);
-        		}        		        		
+    			closedSet.add(neighbour.board.hashCode());
+    			
+    			if(neighbour.getHeuristicValue() > Integer.MIN_VALUE)
+    				openSet.add(neighbour);  	
         	}
-        	
-        	
-        	if(closedSet.contains(node.board)) {        		
-        		System.err.println("hash collision!");
-        	}
-        	toVisitSet.remove(node.board);
-        	closedSet.add(node.board);
-
         }
 
 		return null;
 	}
 	
 	
-	public Path play() throws InterruptedException {				
+	public Path play() {				
 		
 		Move initial = new Move();
 		initial.board = initialState;
@@ -98,17 +73,17 @@ public class Player {
 		Move.initPreanalyser(initialState);		
 		
 		
+		
 		Move win = getVictoryPath(initial);
 		if(win != null) {
 			//System.out.println(win.board);
 			System.out.println(win.path);
 			return win.path;
-		} else {
-			System.out.println("wat?");			
-		}
+		}			
+	
+		
+		System.out.println();
 		return new Path();
-		
-		
 		/*
 		for(Move nextMove : initial.getNextMoves())
 		{
@@ -120,7 +95,7 @@ public class Player {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BoardState board = BoardState.getBoardFromFile("testing/deadlocktest9");
+		BoardState board = BoardState.getBoardFromFile("test100/test098.in");
 		
 		System.out.println(board);
 		Player noob = new Player(board);

@@ -86,14 +86,12 @@ public class DeadlockPattern {
     }
     
     public boolean isMatch(BoardState board)  {  	
-		for(int x = 0; x < board.getRowsCount() - rows; ++x) {
+		for(int y = 0; y < board.getRowsCount() - rows + 1; ++y) {
 			
-			for(int y = 0; y < board.getColumnsCount() - cols; ++y) {
+			for(int x = 0; x < board.getColumnsCount() - cols + 1; ++x) {
 				
 				BoardPosition pos = new BoardPosition(y, x);				
 				
-	    		// todo..
-	    		// boolean[] rotations = new boolean[4];
 	    		int blocks = 0;
 	    		boolean matched = true;
 	    		
@@ -101,7 +99,7 @@ public class DeadlockPattern {
 	    		for(int r = 0; r < rows; ++r) {
 	    			for(int c = 0; c < Map.get(r).size(); ++c)
 	    			{    				
-	    				NodeType node = board.getNode(pos.Row + r, pos.Column + c);
+	    				NodeType node = board.getNode(pos.Row + r, pos.Column + c);	    				
 	    				NodeType patt = Map.get(r).get(c);
 	    				
 	    				// Tolka pattern filer lite olika:
@@ -190,5 +188,28 @@ public class DeadlockPattern {
     	
     	return false;
     }
+    
+    public static void main(String[] args) throws IOException {
+    	BoardState board = BoardState.getBoardFromFile("testing/deadlocktest7");
+		DeadlockPattern pattern = DeadlockPattern.getPatternFromFile("deadlockpatterns/8");
+		
+		System.out.println(board);
+		System.out.println(pattern);
+		System.out.println(pattern.isMatch(board));    	
+    }
+    
+    @Override
+    public String toString() {
+    	StringBuilder builder = new StringBuilder();
+    	for(List<NodeType> row : Map) {
+    		for(NodeType t : row)
+    			builder.append(t.getChar());
+    		builder.append('\n');
+    	}
+    	
+    	return builder.toString();   		
+    }
+	
+    
 
 }

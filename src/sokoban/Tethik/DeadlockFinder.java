@@ -1,11 +1,9 @@
 package sokoban.Tethik;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-
-import sokoban.BoardPosition;
-import sokoban.NodeType;
 
 /**
  * Kommer inte på någon vettig abstraktion för deadlocks än. Så hårdkodade mönster får hjälpa till lite istället...
@@ -15,16 +13,20 @@ import sokoban.NodeType;
 public class DeadlockFinder {
 
 	//private PathFinder pathFinder = new PathFinder();
+	private String dir = "deadlockpatterns/";
 	
 	private List<DeadlockPattern> patterns = new ArrayList<DeadlockPattern>();
 	
 	public DeadlockFinder() {
-		for(int i = 1; i < 14; ++i) {
+		
+	
+		
+		for(int i = 1; i < 40; ++i) {
 			try {
 				patterns.add(DeadlockPattern.getPatternFromFile("deadlockpatterns/"+i));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+			//	e.printStackTrace();
 			}
 		}
 	}
@@ -36,7 +38,7 @@ public class DeadlockFinder {
 		int i = 1;
 		for(DeadlockPattern patt : patterns) {
 			boolean matched = patt.isMatch(board);
-			System.out.println(i++ + " " + matched);			
+			//System.out.println(i++ + " " + matched);			
 			isDeadlock |= matched;
 		}
 		
@@ -89,7 +91,7 @@ public class DeadlockFinder {
 	*/
 	
 	public static void main(String[] args) throws IOException {
-		BoardState board = BoardState.getBoardFromFile("testing/deadlocktest9");
+		BoardState board = BoardState.getBoardFromFile("testing/deadlocktest12");
 		System.out.println(board);
 		DeadlockFinder analyser = new DeadlockFinder();
 		System.out.println(analyser.isDeadLock(board));
