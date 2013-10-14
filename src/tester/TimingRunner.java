@@ -30,6 +30,12 @@ public class TimingRunner implements Runnable {
 				System.out.print("+");
 				return;
 			}
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 		System.out.println("- " + timetaken + " " + runnableToTime.message);

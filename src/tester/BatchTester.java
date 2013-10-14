@@ -13,7 +13,7 @@ public class BatchTester {
 	
 	private static int TIMELIMIT = 11000;
 	//private static int NUMBER_OF_THREADS = 8;
-	private static int NUMBER_OF_TESTS = 10;
+	private static int NUMBER_OF_TESTS = 100;
 	static final ExecutorService threadPool = Executors.newFixedThreadPool(4);
 	
 
@@ -53,6 +53,7 @@ public class BatchTester {
 		System.out.println();
 		System.out.println();
 		int sum_passed = 0;
+		long sum_timetaken = 0;
 		for(int i = 0; i < NUMBER_OF_TESTS; ++i) {
 			TestJob job = jobs.get(i);
 			TimingRunner timer = timers.get(i);
@@ -65,10 +66,15 @@ public class BatchTester {
 			} else {
 				result += job.message;
 			}
+			
+			sum_timetaken += timer.getTimeTaken();
 
 			System.out.println(result);								
 		}
+		
 		System.out.println("Passed " + sum_passed + " out of " + NUMBER_OF_TESTS);
+		System.out.println("Total time " + sum_timetaken + "ms");
+		
 		
 	}
 
