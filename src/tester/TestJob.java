@@ -38,8 +38,10 @@ public class TestJob implements Runnable {
 			play0r = new Player(board);
 			Path path = play0r.play();
 			if(path != null) {			
-				board.movePlayer(path);
-				result = true;
+				board.movePlayer(path);				
+				result = board.isWin();
+				if(!result)
+					message = "Finished, but wrong path: " + path.toString();
 			}
 		} catch(IllegalArgumentException ex) {
 			result = false;			
