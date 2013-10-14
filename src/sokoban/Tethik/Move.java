@@ -7,15 +7,16 @@ import sokoban.BoardPosition;
 import sokoban.Direction;
 
 public class Move implements Comparable<Move> {
-	private static PathFinder pathfinder = new PathFinder();
-	private static Analyser analyser = null;
+	private PathFinder pathfinder = new PathFinder();
+	private Analyser analyser = null;
 	public BoardState board;
 	public Path path;
 	private Integer heuristic_value = null;
 	public int pushes = 1;
 	
-	public static void initPreanalyser(BoardState board) {
-		analyser = new Analyser(board);
+	public Move(Analyser analyser, PathFinder pathfinder) {
+		this.pathfinder = pathfinder;
+		this.analyser = analyser;
 	}
 	
 
@@ -65,7 +66,7 @@ public class Move implements Comparable<Move> {
 				// push the block by moving towards the block.
 				newBoard.movePlayerTo(blockPos);
 				
-				Move move = new Move();
+				Move move = new Move(analyser, pathfinder);
 				move.board = newBoard;
 				move.path = path.cloneAndAppend(toPush);
 				move.pushes = pushes + 1;

@@ -16,6 +16,7 @@ public class Player {
 	private Queue<Move> openSet;
     private HashSet<Integer> closedSet;
     public static boolean VERBOSE = true;
+    public volatile boolean shouldStop = false;
     
 	private BoardState initialState;
 	
@@ -34,7 +35,7 @@ public class Player {
 		closedSet = new HashSet<Integer>();
     	openSet.add(initialPosition);
     	
-        while(!openSet.isEmpty())
+        while(!openSet.isEmpty() && !shouldStop)
         {
         	Move node = openSet.poll();
         	
@@ -67,23 +68,21 @@ public class Player {
 	
 	public Path play() {				
 		
-		Move initial = new Move();
+		Analyser analyser = new Analyser(initialState);
+		PathFinder pathfinder = new PathFinder();
+		Move initial = new Move(analyser, pathfinder);
 		initial.board = initialState;
 		initial.path = new Path();
-		Move.initPreanalyser(initialState);		
-		
-		
 		
 		Move win = getVictoryPath(initial);
-		if(win != null) {
-			//System.out.println(win.board);
-			System.out.println(win.path);
+		if(win != null) {		
+			//System.out.println(win.path);
 			return win.path;
 		}			
 	
 		
-		System.out.println();
-		return new Path();
+		//System.out.println();
+		return null;
 		/*
 		for(Move nextMove : initial.getNextMoves())
 		{
@@ -95,11 +94,12 @@ public class Player {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BoardState board = BoardState.getBoardFromFile("test100/test098.in");
+		BoardState board = BoardState.getBoardFromFile("test100/test099.in");
 		
 		System.out.println(board);
 		Player noob = new Player(board);
 		Path path = noob.play();
+		System.out.println(path);
 		board.movePlayer(path);
 		System.out.println(board);
 	}

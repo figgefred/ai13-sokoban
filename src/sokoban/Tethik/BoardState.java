@@ -49,7 +49,8 @@ public class BoardState implements Cloneable
     		}
     	}
     	
-    	initZobristTable(rows, cols);
+    	//initZobristTable(rows, cols);
+    	//System.err.println("zorbi!");
     }
     
     public BoardState(List<String> rows)
@@ -62,11 +63,10 @@ public class BoardState implements Cloneable
         // Init board
         buildBoard(rows);
         this.rows = rows.size();
-        if(initZobrist) {
-        	cols = Integer.MIN_VALUE;
-        	for(List<NodeType> row : Map)
-        		cols = Math.max(row.size(), cols);
-        		
+     	cols = Integer.MIN_VALUE;
+    	for(List<NodeType> row : Map)
+    		cols = Math.max(row.size(), cols);
+        if(initZobrist) { 
         	initZobristTable(Map.size(), cols);
         }
     }
@@ -559,7 +559,7 @@ public class BoardState implements Cloneable
 	 * Se: http://en.wikipedia.org/wiki/Zobrist_hashing
 	 */
 	private Integer zobrist_hash = null;
-	private static int zobrist_table[][][];
+	public static int zobrist_table[][][];
 
 	public static void initZobristTable(int rows, int cols) {		
 		NodeType[] vals = NodeType.values();
@@ -571,6 +571,7 @@ public class BoardState implements Cloneable
 				for(int i = 0; i < vals.length; ++i)
 					zobrist_table[row][col][i] = random.nextInt();
 		
+		//System.err.println("zobrist inited.");
 	}
 	
 	@Override
@@ -592,7 +593,9 @@ public class BoardState implements Cloneable
 					if(type == vals[val]) 						
 						break typeloop;					
 				
-				zobrist_hash ^= zobrist_table[row][col][val]; 
+				int[][] table = zobrist_table[row];
+				int[] tablerow = table[col];
+				zobrist_hash ^= tablerow[val]; 
 			}
 		}
 		

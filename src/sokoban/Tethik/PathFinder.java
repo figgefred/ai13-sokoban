@@ -13,7 +13,7 @@ import sokoban.NodeType;
 
 public class PathFinder {
     
-	private int playerDistMatrix[][];
+	private int[][] playerDistMatrix;
 	private int board_hash = 0;
     
     public PathFinder() {
@@ -22,6 +22,7 @@ public class PathFinder {
     
 	private void mapPlayerDistance(BoardState board) {
 		playerDistMatrix = new int[board.getRowsCount()][board.getColumnsCount()];
+		//System.err.println(board.getRowsCount() + " " + board.getColumnsCount());
 		Queue<BoardPosition> positions = new LinkedList<>();
 		Queue<Integer> distances = new LinkedList<Integer>();
 		Set<BoardPosition> visited = new HashSet<>();
@@ -45,9 +46,7 @@ public class PathFinder {
 			int distance = distances.poll();
 			
 			// Uppdatera positions i matrisen
-			playerDistMatrix[pos.Row][pos.Column] = distance;
-			
-			++distance;				
+			playerDistMatrix[pos.Row][pos.Column] = distance++;
 			
 			for(BoardPosition neighbour : board.getNeighbours(pos)) {
 				if(visited.contains(neighbour)) 
@@ -90,8 +89,6 @@ public class PathFinder {
 		
 		if(!isReachable(board, goal))
 			return null;		
-		
-		//System.err.println("watassdsa");
 		
 		Deque<BoardPosition> positionStack = new ArrayDeque<BoardPosition>();		
 		positionStack.add(goal);
