@@ -215,16 +215,12 @@ public class Analyser {
 		//if(deadlockerFinder2.isDeadLock(board)) 
 		//	return Integer.MIN_VALUE;
 		
-		
-		//if(has4x4Block(board))
-			//return Integer.MIN_VALUE;
 		//mapDistancesToGoals(board);
 		
 		for(int i = 0; i < goalDist.length; i++) {
 			goalDist[i] = Integer.MAX_VALUE;
 			blockDist[i] = Integer.MAX_VALUE;
 		}
-		
 		
 		List<BoardPosition> blocks = board.getBlockNodes();	
 		
@@ -233,7 +229,7 @@ public class Analyser {
 		int b = 0; 
 		for(BoardPosition block : blocks)
 		{
-			if(has4x4Block(board, block))
+			if(is4x4Block(board, block))
 				return Integer.MIN_VALUE;
 			if(board.getNode(block) == NodeType.BLOCK_ON_GOAL)
 				blockDist[b] = 0;
@@ -327,7 +323,7 @@ public class Analyser {
 		return false;		
 	}
 	
-	private boolean has4x4Block(BoardState board, BoardPosition block) {
+	private boolean is4x4Block(BoardState board, BoardPosition block) {
 		
 		int row = block.Row;
 		int col = block.Column;
