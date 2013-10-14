@@ -1,4 +1,8 @@
-package sokoban.carlos;
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package sokoban.fredmaster2;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -20,16 +24,21 @@ import sokoban.Direction;
 public class BoardState implements Cloneable
 {
     // Game board
+    
+    // Is initialized in constructor and updated for every push made.
+    private List<BoardPosition> BlockIndex = new ArrayList<>();
+    private int BlockLastMovedIndex = -1; // Unset it is '-1' - no block was pushed
+    
     private List<List<NodeType>> Map = new ArrayList<>();
     private Set<BoardPosition> Goals;
     private BoardPosition CurrentNode;
+    
     private int rows;
     private int cols;
     
     
-    
     // fult, kanske ska byta interna kartan till samma typ av matris sen?
-    public BoardState(NodeType[][] map) {
+    public BoardState(NodeType[][] map, boolean initZobrist) {
     	Goals = new HashSet<BoardPosition>();
     	rows = map.length;
     	cols = Integer.MIN_VALUE;
@@ -42,17 +51,16 @@ public class BoardState implements Cloneable
     			Map.get(row).add(type);
     			if(type == NodeType.GOAL || type == NodeType.PLAYER_ON_GOAL || type == NodeType.BLOCK_ON_GOAL)
     				Goals.add(new BoardPosition(row, col));
+                        if(type == NodeType.BLOCK || type == NodeType.BLOCK_ON_GOAL)
+                        {
+                            BlockIndex.add(new BoardPosition(row, col));
+                        }
     		}
     	}
     	
-    	//initZobristTable(rows, cols);
-    	//System.err.println("zorbi!");
+        if(initZobrist)
+            initZobristTable(rows, cols);
     }
-    
-    public BoardState(List<String> rows)
-    {
-    	this(rows, true);
-    }    
     
     public BoardState(List<String> rows, boolean initZobrist)
     {    
@@ -133,6 +141,10 @@ public class BoardState implements Cloneable
                 if(type == NodeType.PLAYER || type == NodeType.PLAYER_ON_GOAL)
                 {
                     CurrentNode = p;                    
+                }
+                if(type == NodeType.BLOCK || type == NodeType.BLOCK_ON_GOAL)
+                {
+                    BlockIndex.add(new BoardPosition(rIndex, cIndex));
                 }
                 Map.get(rIndex).add(type);
             }
@@ -435,25 +447,38 @@ public class BoardState implements Cloneable
     	
     	if(orig == NodeType.BLOCK_ON_GOAL)
     	{
-    		updateHashCode(row, col, NodeType.BLOCK_ON_GOAL, NodeType.PLAYER_ON_GOAL);
+            updateHashCode(row, col, NodeType.BLOCK_ON_GOAL, NodeType.PLAYER_ON_GOAL);
     	}
     	else // Is block
     	{
-    		updateHashCode(row, col, NodeType.BLOCK, NodeType.PLAYER);
+            updateHashCode(row, col, NodeType.BLOCK, NodeType.PLAYER);
     	}
     	
     	if(dest == NodeType.GOAL)
     	{
-    		updateHashCode(newrow, newcol, NodeType.GOAL, NodeType.BLOCK_ON_GOAL);
+            updateHashCode(newrow, newcol, NodeType.GOAL, NodeType.BLOCK_ON_GOAL);
     	}
     	else // Is space
     	{
-    		updateHashCode(newrow, newcol, NodeType.SPACE, NodeType.BLOCK);
+            updateHashCode(newrow, newcol, NodeType.SPACE, NodeType.BLOCK);
     	}
     	
     	Map.get(row).set(col, (orig == NodeType.BLOCK_ON_GOAL) ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER);
     	
     	Map.get(newrow).set(newcol, (dest == NodeType.GOAL) ? NodeType.BLOCK_ON_GOAL : NodeType.BLOCK);
+        
+        
+        BoardPosition from = new BoardPosition(row, col);
+        BoardPosition to = new BoardPosition(newrow, newcol);
+        for(int i = 0; i < BlockIndex.size(); i++)
+        {
+            if(from.equals(BlockIndex.get(i)))
+            {
+                BlockIndex.set(i, to);
+                BlockLastMovedIndex = i;
+                break;
+            }
+        }
     }
     
     /***
@@ -512,24 +537,39 @@ public class BoardState implements Cloneable
     
     
     
+    public void manipulate(BoardPosition p, NodeType type)
+    {
+        Map.get(p.Row).set(p.Column, type);
+    }
 
+    /**
+     * Returns an index of the block last moved.
+     * 
+     * If no block was last pushed then -1 is returned.
+     * @return 
+     */
+    public int getBlockLastMovedIndex()
+    {
+        return BlockLastMovedIndex;
+    }
     
   	public List<BoardPosition> getBlockNodes()
-    {
-        List<BoardPosition> blocks = new ArrayList<>();
-        for(int i = 0; i < Map.size(); i++)
         {
-            for(int j = 0; j < Map.get(i).size(); j ++)
+          /*  List<BoardPosition> blocks = new ArrayList<>();
+            for(int i = 0; i < Map.size(); i++)
             {
-                NodeType type = getNode(i,j);
-                if( type == NodeType.BLOCK || type == NodeType.BLOCK_ON_GOAL )
+                for(int j = 0; j < Map.get(i).size(); j ++)
                 {
-                    blocks.add(new BoardPosition(i, j));
+                    NodeType type = getNode(i,j);
+                    if( type == NodeType.BLOCK || type == NodeType.BLOCK_ON_GOAL )
+                    {
+                        blocks.add(new BoardPosition(i, j));
+                    }
                 }
             }
+            return blocks;*/
+            return BlockIndex;
         }
-        return blocks;
-    }
   	
   	@SuppressWarnings("unchecked")
 	@Override
@@ -544,6 +584,11 @@ public class BoardState implements Cloneable
   		newState.Goals = Goals;
   		for(List<NodeType> row : Map)
   			newState.Map.add((List<NodeType>) ((ArrayList<NodeType>) row).clone()); 	
+                
+                newState.BlockIndex = new ArrayList<>();
+                for(BoardPosition p: BlockIndex)
+                    newState.BlockIndex.add(new BoardPosition(p.Row, p.Column));
+                
   		
   		return newState;
   	}
@@ -555,7 +600,7 @@ public class BoardState implements Cloneable
 	 * Se: http://en.wikipedia.org/wiki/Zobrist_hashing
 	 */
 	private Integer zobrist_hash = null;
-	public static int zobrist_table[][][];
+	private static int zobrist_table[][][];
 
 	public static void initZobristTable(int rows, int cols) {		
 		NodeType[] vals = NodeType.values();
@@ -567,7 +612,6 @@ public class BoardState implements Cloneable
 				for(int i = 0; i < vals.length; ++i)
 					zobrist_table[row][col][i] = random.nextInt();
 		
-		//System.err.println("zobrist inited.");
 	}
 	
 	@Override
@@ -589,9 +633,7 @@ public class BoardState implements Cloneable
 					if(type == vals[val]) 						
 						break typeloop;					
 				
-				int[][] table = zobrist_table[row];
-				int[] tablerow = table[col];
-				zobrist_hash ^= tablerow[val]; 
+				zobrist_hash ^= zobrist_table[row][col][val]; 
 			}
 		}
 		
