@@ -27,10 +27,12 @@ public class BoardState implements Cloneable
     
     // Is initialized in constructor and updated for every push made.
     private List<BoardPosition> BlockIndex = new ArrayList<>();
+    private int BlockLastMovedIndex = -1; // Unset it is '-1' - no block was pushed
     
     private List<List<NodeType>> Map = new ArrayList<>();
     private Set<BoardPosition> Goals;
     private BoardPosition CurrentNode;
+    
     private int rows;
     private int cols;
     
@@ -473,6 +475,8 @@ public class BoardState implements Cloneable
             if(from.equals(BlockIndex.get(i)))
             {
                 BlockIndex.set(i, to);
+                BlockLastMovedIndex = i;
+                break;
             }
         }
     }
@@ -538,6 +542,16 @@ public class BoardState implements Cloneable
         Map.get(p.Row).set(p.Column, type);
     }
 
+    /**
+     * Returns an index of the block last moved.
+     * 
+     * If no block was last pushed then -1 is returned.
+     * @return 
+     */
+    public int getBlockLastMovedIndex()
+    {
+        return BlockLastMovedIndex;
+    }
     
   	public List<BoardPosition> getBlockNodes()
         {
