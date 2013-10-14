@@ -237,27 +237,27 @@ public class BoardState implements Cloneable
     {
         List<BoardPosition> positions = new ArrayList<>();
         // UP
-        if(row > 1) {
-        	NodeType type = getNode(row-2,col);
+        if(row > 0) {
+        	NodeType type = getNode(row-1,col);
         	if(type != NodeType.WALL && type != NodeType.INVALID)
         		positions.add(new BoardPosition(row-1,col));
         }
         // Down
         if(row < Map.size()-2) {
-        	NodeType type = getNode(row+2,col);
+        	NodeType type = getNode(row+1,col);
         	if(type != NodeType.WALL && type != NodeType.INVALID)
         	positions.add(new BoardPosition(row+1,col));
         }
         // LEFT
-        if(col > 1) {
-        	NodeType type = getNode(row,col-2);
+        if(col > 0) {
+        	NodeType type = getNode(row,col-1);
         	if(type != NodeType.WALL && type != NodeType.INVALID)
         		positions.add(new BoardPosition(row,col-1));
         }
         	
         //RIGHT
         if(col < Map.get(row).size()-2) {
-        	NodeType type = getNode(row,col+2);
+        	NodeType type = getNode(row,col+1);
         	if(type != NodeType.WALL && type != NodeType.INVALID)
         		positions.add(new BoardPosition(row,col+1));
         
