@@ -102,6 +102,7 @@ public class Player {
 	public static void main(String[] args) throws IOException, InterruptedException {
 		long timeStart = System.currentTimeMillis();
 		BoardState board = BoardState.getBoardFromFile("test100/test000.in");
+		BoardState orig = (BoardState) board.clone();
 		
 		System.out.println(board);
 		Player noob = new Player(board);
@@ -109,6 +110,9 @@ public class Player {
 		System.out.println(path);
 		board.movePlayer(path);
 		System.out.println(board);
+		
+		orig.movePlayer(path);
+		System.out.println(orig);
 		
 		long timeStop = System.currentTimeMillis();
 		

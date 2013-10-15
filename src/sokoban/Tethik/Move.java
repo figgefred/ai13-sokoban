@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sokoban.BoardPosition;
-import sokoban.Direction;
 
 public class Move implements Comparable<Move> {
 	private PathFinder pathfinder = new PathFinder();

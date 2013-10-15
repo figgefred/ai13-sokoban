@@ -30,7 +30,6 @@ public class Player {
 
 	public Move getVictoryPath(Move initialPosition)
 	{
-		System.err.println();
 		openSet = new PriorityQueue<Move>();
 		closedSet = new HashSet<Integer>();
     	openSet.add(initialPosition);
