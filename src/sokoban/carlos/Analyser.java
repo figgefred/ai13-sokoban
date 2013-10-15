@@ -279,6 +279,7 @@ public class Analyser {
 			val -= blockDist[i];
 		}
 		
+		
 		if(bipartiteMatcher.maxBipartiteMatch(reachMap, board) < board.getGoalNodes().size())
 			return Integer.MIN_VALUE;
 		
