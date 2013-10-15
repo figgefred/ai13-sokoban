@@ -64,7 +64,8 @@ public class Move implements Comparable<Move> {
 				if(movesMap.containsKey(board.hashCode())) {
 					toPush = movesMap.get(board.hashCode()).get(candidate);
 					if(toPush != null) {
-						//System.out.println("Hämtade: " + toPush + ", för candidate: " + candidate );
+						System.out.println("Hämtade: " + toPush + ", för candidate: " + candidate );
+
 						isInMap = true;
 					}
 				} else {
@@ -81,14 +82,18 @@ public class Move implements Comparable<Move> {
 						if(toPush == null)
 							continue;
 						
+						//TODO var appenda?
 						//toPush.append(blockPos);
-						
 						movesMap.get(board.hashCode()).put(candidate, toPush);
+						System.out.println("Lägger till: " + toPush + ", för candidate: " + candidate);
 					}
 				}
 
 				if(toPush == null) // no path found
 					continue;
+				
+				if(!isInMap)
+					toPush.append(blockPos);
 				
 				BoardState newBoard = (BoardState) board.clone();
 				// move the player along the path.
