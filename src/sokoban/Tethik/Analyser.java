@@ -29,7 +29,7 @@ public class Analyser {
 	private int goalDist[];
 	private int blockDist[];
 	
-	private DeadlockFinder deadlockerFinder2 = new DeadlockFinder();
+	//private DeadlockFinder deadlockerFinder2 = new DeadlockFinder();
 	
 	private BoardState board;
 	private int rows;
@@ -212,13 +212,12 @@ public class Analyser {
 //		}
 //		
 //		
-		if(deadlockerFinder2.isDeadLock(board)) 
-			return Integer.MIN_VALUE;
+//		if(deadlockerFinder2.isDeadLock(board)) 
+//			return Integer.MIN_VALUE;
 		
 		
 		if(has4x4Block(board))
 			return Integer.MIN_VALUE;
-		//mapDistancesToGoals(board);
 		
 		for(int i = 0; i < goalDist.length; i++) {
 			goalDist[i] = Integer.MAX_VALUE;

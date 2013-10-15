@@ -482,6 +482,30 @@ public class BoardState implements Cloneable
         return isNoneBlockingNode(p.Row, p.Column);
     }
     
+	public boolean isInCorner(BoardPosition position) {
+		
+		BoardPosition north = new BoardPosition(position.Row-1, position.Column);
+		BoardPosition east = new BoardPosition(position.Row, position.Column+1);
+		BoardPosition south = new BoardPosition(position.Row+1, position.Column);
+		BoardPosition west = new BoardPosition(position.Row, position.Column-1);
+		
+		if(getNode(north) == NodeType.WALL && getNode(east) == NodeType.WALL)
+			return true;
+		
+		if(getNode(north) == NodeType.WALL && getNode(west) == NodeType.WALL)
+			return true;
+		
+		if(getNode(south) == NodeType.WALL && getNode(west) == NodeType.WALL)
+			return true;
+		
+		if(getNode(south) == NodeType.WALL && getNode(east) == NodeType.WALL)
+			return true;
+		
+		
+		return false;
+	}
+    
+    
   	public List<BoardPosition> getBlockNodes()
     {
         List<BoardPosition> blocks = new ArrayList<>();
