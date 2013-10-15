@@ -60,6 +60,27 @@ public class BoardState implements Cloneable
     	
         if(initZobrist)
             initZobristTable(rows, cols);
+        
+        setInvalidFields(Map);
+        
+    }
+    
+    private void setInvalidFields(List<List<NodeType>> map)
+    {
+    	for(int row = 0; row < rows; ++row) {
+            boolean firstWall = false;
+            for(int col = 0; col < map.get(row).size(); ++col)
+            {    			
+                NodeType type = map.get(row).get(col);
+                if(type != NodeType.WALL)
+                    map.get(row).set(col, NodeType.INVALID);
+                else
+                    firstWall = true;
+                
+                if(firstWall)
+                    break;
+            }
+    	}
     }
     
     public BoardState(List<String> rows, boolean initZobrist)
@@ -73,6 +94,7 @@ public class BoardState implements Cloneable
         if(initZobrist) { 
         	initZobristTable(Map.size(), cols);
         }
+        setInvalidFields(Map);
     }
     
     public BoardState() {
@@ -309,6 +331,11 @@ public class BoardState implements Cloneable
     public int getColumnsCount()
     {
         return cols;
+    }   
+    
+    public int getColumnsCount(int r)
+    {
+        return Map.get(r).size();
     }   
 
     
