@@ -104,19 +104,19 @@ public class Player {
 		BoardState board = BoardState.getBoardFromFile("test100/test000.in");
 		BoardState orig = (BoardState) board.clone();
 		
-		System.out.println(board);
+//		System.out.println(board);
 		Player noob = new Player(board);
 		Path path = noob.play();
 		System.out.println(path);
 		board.movePlayer(path);
-		System.out.println(board);
+//		System.out.println(board);
 		
 		orig.movePlayer(path);
-		System.out.println(orig);
+//		System.out.println(orig);
 		
 		long timeStop = System.currentTimeMillis();
 		
-		System.out.println("Time: " + (timeStop - timeStart) + " ms");
+//		System.out.println("Time: " + (timeStop - timeStart) + " ms");
 	}
 }
 
