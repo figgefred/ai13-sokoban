@@ -280,8 +280,6 @@ public class Analyser {
 		if(bipartiteMatcher.maxBipartiteMatch(reachMap, board) < board.getGoalNodes().size())
 			return Integer.MIN_VALUE;
 		
-		
-		
 		return val;		
 	}
 	
@@ -312,10 +310,8 @@ public class Analyser {
 					atLeastOneIsBlock = atLeastOneIsBlock || node == NodeType.BLOCK;
 				}
 				
-				if(atLeastOneIsBlock) {
-					//System.out.println("found 4x4 block at " + row + " " + col);					
+				if(atLeastOneIsBlock) 				
 					return true;
-				}
 				
 			}
 		

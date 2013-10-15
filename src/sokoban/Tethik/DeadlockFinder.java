@@ -1,7 +1,6 @@
 package sokoban.Tethik;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,14 +17,10 @@ public class DeadlockFinder {
 	private List<DeadlockPattern> patterns = new ArrayList<DeadlockPattern>();
 	
 	public DeadlockFinder() {
-		
-	
-		
 		for(int i = 1; i < 40; ++i) {
 			try {
-				patterns.add(DeadlockPattern.getPatternFromFile("deadlockpatterns/"+i));
+				patterns.add(DeadlockPattern.getPatternFromFile(dir+i));
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 			//	e.printStackTrace();
 			}
 		}
@@ -35,7 +30,7 @@ public class DeadlockFinder {
 	public boolean isDeadLock(BoardState board) {
 		boolean isDeadlock = false;
 		
-		int i = 1;
+//		int i = 1;
 		for(DeadlockPattern patt : patterns) {
 			boolean matched = patt.isMatch(board);
 			//System.out.println(i++ + " " + matched);			
