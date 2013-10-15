@@ -212,9 +212,13 @@ public class Analyser {
 //		}
 //		
 //		
-		//if(deadlockerFinder2.isDeadLock(board)) 
-		//	return Integer.MIN_VALUE;
+		/*
+		if(deadlockerFinder2.isDeadLock(board)) 
+			return Integer.MIN_VALUE;
+		*/
 		
+		if(has4x4Block(board))
+			return Integer.MIN_VALUE;
 		//mapDistancesToGoals(board);
 		
 		for(int i = 0; i < goalDist.length; i++) {
@@ -222,17 +226,14 @@ public class Analyser {
 			blockDist[i] = Integer.MAX_VALUE;
 		}
 		
+		
 		List<BoardPosition> blocks = board.getBlockNodes();	
 		
 		HashMap<BoardPosition, List<BoardPosition>> reachMap = new HashMap<>(); 
 		
 		int b = 0; 
 		for(BoardPosition block : blocks)
-		{
-			/*
-			if(is4x4Block(board, block))
-				return Integer.MIN_VALUE;
-				*/
+		{			
 			if(board.getNode(block) == NodeType.BLOCK_ON_GOAL)
 				blockDist[b] = 0;
 			else if(board.isInCorner(block)) {
@@ -277,61 +278,50 @@ public class Analyser {
 			val -= goalDist[i];
 			val -= blockDist[i];
 		}
-		/*
+		
 		if(bipartiteMatcher.maxBipartiteMatch(reachMap, board) < board.getGoalNodes().size())
 			return Integer.MIN_VALUE;
-		*/
+		
+		
 		
 		return val;		
 	}
+	
+	private boolean has4x4Block(BoardState board) {
 		
-	private boolean is4x4Block(BoardState board, BoardPosition block) {
+		for(int row = 0; row < board.getRowsCount() - 1; ++row)
+			mainloop:
+			for(int col = 0; col < board.getColumnsCount() - 1; ++col) {
+				
+				if(!board.isBlockingNode(new BoardPosition(row, col)))
+					continue;
+				
+				NodeType nodes[] = new NodeType[] {
+					board.getNode(row, col),
+					board.getNode(row, col+1),
+					board.getNode(row+1, col),
+					board.getNode(row+1, col+1)
+				};
+				
+				
+				
+				boolean atLeastOneIsBlock = false;
+				for(NodeType node : nodes)
+				{
+					if(!board.isBlockingNode(node))
+						continue mainloop;
+					
+					atLeastOneIsBlock = atLeastOneIsBlock || node == NodeType.BLOCK;
+				}
+				
+				if(atLeastOneIsBlock) {
+					//System.out.println("found 4x4 block at " + row + " " + col);					
+					return true;
+				}
+				
+			}
 		
-		int row = block.Row;
-		int col = block.Column;
-		
-		int nrWalls = 0;
-		int nrBlocks = 0;
-		
-		// One-move-neighbours
-		NodeType oneMove[] = new NodeType[] {
-			board.getNode(row, col+1),
-			board.getNode(row+1, col),
-			board.getNode(row-1, col),
-			board.getNode(row, col-1)
-		};
-		
-		// If two of four neighbours are walls => in corner
-		for(NodeType node: oneMove) {
-			if(node == NodeType.WALL)
-				nrWalls++;
-			
-			if(nrWalls == 2)
-				return true;
-			
-			if(node == NodeType.BLOCK || node == NodeType.BLOCK_ON_GOAL)
-				nrBlocks++;
-		}
-		
-		NodeType nodes[] = new NodeType[] {
-			 // Four corner-neighbours
-			board.getNode(row+1, col+1)
-		};		
-		/*
-		boolean atLeastOneIsBlock = false;
-		for(NodeType node : nodes)
-		{
-			if()
-				return false;
-			
-			atLeastOneIsBlock = atLeastOneIsBlock || node == NodeType.BLOCK;
-		}
-		
-		if(atLeastOneIsBlock) {
-			return true;
-		}*/
-		
-		return false;
+		return false;		
 	}
 	
 	public static void main(String[] args) throws IOException {

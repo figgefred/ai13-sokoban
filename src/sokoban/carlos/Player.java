@@ -1,7 +1,9 @@
 package sokoban.carlos;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
@@ -15,10 +17,11 @@ public class Player {
 	
 	private Queue<Move> openSet;
     private HashSet<Integer> closedSet;
-    public static boolean VERBOSE = true;
+    public static boolean VERBOSE = false;
     public volatile boolean shouldStop = false;
     
 	private BoardState initialState;
+	
 	
 	public Player(BoardState initialState)
 	{		
@@ -38,6 +41,7 @@ public class Player {
         while(!openSet.isEmpty() && !shouldStop)
         {
         	Move node = openSet.poll();
+        	//System.out.println(node);
         	
         	if(VERBOSE) {
 	        	System.out.println(openSet.size() + " " + closedSet.size());
@@ -47,9 +51,11 @@ public class Player {
         	}
         	
         	if(node.board.isWin())        	
-        		return node;        	
+        		return node;
+
+        	List<Move> nextMoves = node.getNextMoves();
         	
-        	for(Move neighbour: node.getNextMoves())
+        	for(Move neighbour: nextMoves)
         	{	            		       		
         		if (closedSet.contains(neighbour.board.hashCode())) {        			
                 	continue;
@@ -87,14 +93,15 @@ public class Player {
 		for(Move nextMove : initial.getNextMoves())
 		{
 			System.out.println(nextMove.board);
-			System.out.println(nextMove.path)4
+			System.out.println(nextMove.path)
 			System.out.println(nextMove.getHeuristicValue())
 		}
 		*/
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BoardState board = BoardState.getBoardFromFile("test100/test005.in");
+		long timeStart = System.currentTimeMillis();
+		BoardState board = BoardState.getBoardFromFile("test100/test022.in");
 		
 		System.out.println(board);
 		Player noob = new Player(board);
@@ -102,6 +109,10 @@ public class Player {
 		System.out.println(path);
 		board.movePlayer(path);
 		System.out.println(board);
+		
+		long timeStop = System.currentTimeMillis();
+		
+		System.out.println("Time: " + (timeStop - timeStart) + " ms");
 	}
 }
 

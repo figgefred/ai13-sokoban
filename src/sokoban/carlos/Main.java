@@ -26,7 +26,7 @@ public class Main {
 		} // End while
 		
 		//System.out.println(board);
-		BoardState board = new BoardState(b);
+		BoardState board = new BoardState(b, true);
 		Player noob = new Player(board);
 		noob.play();
 	}
