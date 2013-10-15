@@ -15,6 +15,7 @@ public class Move implements Comparable<Move> {
 	
         public Move(PathFinder pathfinder, Analyser analyser)
         {
+            //super();
             this.pathfinder = pathfinder;
             this.analyser = analyser;
         }

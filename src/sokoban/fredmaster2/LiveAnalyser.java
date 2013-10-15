@@ -29,10 +29,10 @@ public class LiveAnalyser {
     public boolean isBadState(BoardState state, BoardPosition block)
     {
         return  
-                isQuadBlocking(state, block)
-                ||
-                isDeadlockState(state, new HashSet<BoardPosition>(),block)
-                ;
+            isQuadBlocking(state, block)
+            ||
+            isDeadlockState(state, new HashSet<BoardPosition>(),block)
+            ;
     }
     
     public boolean isBadState(BoardState board)

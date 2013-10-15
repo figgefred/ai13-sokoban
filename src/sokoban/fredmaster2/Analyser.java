@@ -43,8 +43,10 @@ public class Analyser {
         private Map<BoardPosition, Integer> GoalToBlockIndexMap;
         // A queue containing guesses of which goals to move blocks to first.
         private Queue<BoardPosition> GoalQueue;
-        private Queue<BoardPosition> LastPushedBlock = 
+        private BoardPosition LastPushedBlock = null;
 	
+        
+        
 	public Analyser(BoardState board)
 	{
 		this.board = board;
@@ -407,6 +409,10 @@ public class Analyser {
 		} else if(deadlockFinder.isBadState(board)) {
                     return Integer.MIN_VALUE;
 		}
+		/*if(has4x4Block(board))
+			return Integer.MIN_VALUE;*/
+                
+                
 		//mapDistancesToGoals(board);
 		
 		for(int i = 0; i < goalDist.length; i++) {
@@ -416,7 +422,6 @@ public class Analyser {
                 
 		List<BoardPosition> blocks = board.getBlockNodes();	
 		HashMap<BoardPosition, List<BoardPosition>> reachMap = new HashMap<>(); 
-                
                 int b = 0; 
 		/*
 		for(BoardPosition block : blocks)
@@ -454,7 +459,7 @@ public class Analyser {
 			}			
 			++i;
 		}	
-                /*
+                
 		int val = 0;
 		for(i = 0; i < board.getGoalNodes().size(); ++i) {
 			if(goalDist[i] == Integer.MAX_VALUE || blockDist[i] == Integer.MAX_VALUE)
@@ -464,30 +469,84 @@ public class Analyser {
 			
 			val -= goalDist[i];
 			val -= blockDist[i];
-		}*/
+		}
 		
 		if(bipartiteMatcher.maxBipartiteMatchCount(reachMap, board) < board.getGoalNodes().size())
                     return Integer.MIN_VALUE;
 		
-                int val = 0;
+                //int val = 0;
                 List<BoardPosition> goals = (List) GoalQueue;
                 
-                int weightIncrement = 10;
+                int weightIncrement = 100;
                 int penaltyWeight = goals.size()*weightIncrement;
                 for(BoardPosition goal: goals)
                 {
                     //BoardPosition block = board.getBlockNodes().get(GoalToBlockIndexMap.get(goal));
-                    if(board.getNode(goal) == NodeType.BLOCK_ON_GOAL)
+                    if(board.getNode(goal) != NodeType.BLOCK_ON_GOAL)
                     {
                         penaltyWeight -= penaltyWeight;
                     }
                     penaltyWeight -= weightIncrement;
                 }
-		return val;		
+                
+                int blockLastPushedIndex = board.getBlockLastMovedIndex();
+                penaltyWeight = (goals.size()*weightIncrement)/4;
+                // If not -1, then a block has been pushed sometime ago - lets prioritize it!
+                if(blockLastPushedIndex != -1)
+                {
+                    BoardPosition block = board.getBlockNodes().get(blockLastPushedIndex);
+                    if(pushedBlock.equals(block))
+                    {
+                        val += penaltyWeight;
+                    }
+                    else
+                    {
+                        val -= penaltyWeight;
+                    } 
+                }
+		return val;
+	}
+        
+	
+	private boolean has4x4Block(BoardState board) {
+		
+		for(int row = 0; row < board.getRowsCount() - 1; ++row)
+			mainloop:
+			for(int col = 0; col < board.getColumnsCount() - 1; ++col) {
+				
+				if(!board.isBlockingNode(new BoardPosition(row, col)))
+					continue;
+				
+				NodeType nodes[] = new NodeType[] {
+					board.getNode(row, col),
+					board.getNode(row, col+1),
+					board.getNode(row+1, col),
+					board.getNode(row+1, col+1)
+				};
+				
+				
+				
+				boolean atLeastOneIsBlock = false;
+				for(NodeType node : nodes)
+				{
+					if(!board.isBlockingNode(node))
+						continue mainloop;
+					
+					atLeastOneIsBlock = atLeastOneIsBlock || node == NodeType.BLOCK;
+				}
+				
+				if(atLeastOneIsBlock) {
+					//System.out.println("found 4x4 block at " + row + " " + col);					
+					return true;
+				}
+				
+			}
+		
+		return false;		
 	}
 	
 	public static void main(String[] args) throws IOException {
-		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest3");
 		System.out.println(board);
 		Analyser analyser = new Analyser(board);
 		System.out.println(analyser);
