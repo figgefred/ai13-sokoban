@@ -402,16 +402,20 @@ public class Analyser {
 			return Integer.MAX_VALUE;
 		}		
 		
-		/*if(pushedBlock != null)
-		{
-                    if(LiveAnalyser.isBadState(board, pushedBlock))
-                        return Integer.MIN_VALUE;
-		} else if(deadlockFinder.isBadState(board)) {
-                    return Integer.MIN_VALUE;
-		}*/
-		/*if(has4x4Block(board))
-			return Integer.MIN_VALUE;*/
-                
+                if(Player.DO_DEADLOCKS_CHECKS)
+                {
+                    if(pushedBlock != null)
+                    {
+                        if(isBadPosition(pushedBlock))
+                        {
+                            return Integer.MIN_VALUE;
+                        }
+                        else if(Player.DO_DEADLOCKS_4x4 && LiveAnalyser.is4x4Block(board, pushedBlock))
+                        {
+                            return Integer.MIN_VALUE;
+                        }
+                    }
+                }
                 
 		//mapDistancesToGoals(board);
 		

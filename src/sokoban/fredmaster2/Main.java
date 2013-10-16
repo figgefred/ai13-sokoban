@@ -20,11 +20,17 @@ public class Main {
 				new InputStreamReader(System.in));
 		
 		String line;
-		while(br.ready()) {
-			line = br.readLine();
-			b.add(line);
+                line = br.readLine();
+		while(line != null) {
+                    if(line.equals(""))
+                        break;
+                    b.add(line);
+                    line = br.readLine();
 		} // End while
 		
+                Player.DO_GOAL_SORTING = false;
+                Move.CORRAL_LIVE_DETECTION = true;
+                
 		//System.out.println(board);
 		BoardState board = new BoardState(b, true);
 		Player noob = new Player(board);

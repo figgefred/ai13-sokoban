@@ -25,7 +25,7 @@ public class LiveAnalyser {
 	private Analyser analyser;
 	private PathFinder pathfinder;
     
-        public static boolean VERBOSE = true;
+        private static boolean VERBOSE = Player.VERBOSE;
         
 	public LiveAnalyser(Analyser analyser, PathFinder finder)
 	{
@@ -36,7 +36,7 @@ public class LiveAnalyser {
     public boolean isBadState(BoardState state, BoardPosition block)
     {
         return  
-            isQuadBlocking(state, block)
+            is4x4Block(state, block)
             ||
             isDeadlockState(state, new HashSet<BoardPosition>(),block)
             ;
@@ -127,64 +127,38 @@ public class LiveAnalyser {
             );
         return deadlockState;
     }
-    
-   private boolean isQuadBlocking(BoardState state, BoardPosition block) {
-        
-        int rmin = block.Row-1;
-        int rmax = block.Row+1;
-        int cmin = block.Column-1;
-        int cmax = block.Column+1;
-        
-        NodeType[] top = new NodeType[3];
-        NodeType[] middle = new NodeType[3];
-        NodeType[] bottom = new NodeType[3];
-        NodeType[][] segments = {top, middle, bottom};
-        for(int r = rmin; r <= rmax; r++)
-        {
-            for(int c = cmin; c <= cmax; c++)    
-            {
-                if( (r >= 0 && r < state.getRowsCount()) && (c >= 0 && c < state.getColumnsCount()) )
-                {
-                    segments[r-rmin][c-cmin] = state.getNode(r, c);
-                }
-                else
-                {
-                    segments[r-rmin][c-cmin] = NodeType.INVALID;
-                }
-            }
-        }
-        boolean leftIsUnMovable = false;
-        boolean rightIsUnMovable = false;
-        
-        leftIsUnMovable = 
-                (
-                    ( isBlockingType(segments[0][0]) && isBlockingType(segments[0][1]) )
-                    &&
-                    ( isBlockingType(segments[1][0]) && isBlockingType(segments[1][1]) )
-                ) 
-                ||
-                (
-                    ( isBlockingType(segments[1][0]) && isBlockingType(segments[1][1]) )
-                    &&
-                    ( isBlockingType(segments[2][0]) && isBlockingType(segments[2][1]) )
-                );
-        
-        rightIsUnMovable = 
-                (
-                    ( isBlockingType(segments[0][0]) && isBlockingType(segments[0][1]) )
-                    &&
-                    ( isBlockingType(segments[1][0]) && isBlockingType(segments[1][1]) )
-                ) 
-                ||
-                (
-                    ( isBlockingType(segments[1][0]) && isBlockingType(segments[1][1]) )
-                    &&
-                    ( isBlockingType(segments[2][0]) && isBlockingType(segments[2][1]) )
-                );
-        
-        
-        return leftIsUnMovable || rightIsUnMovable;
-    }
+   
+	private boolean is4x4BlockTopLeftCorner(BoardState board, BoardPosition pos) {
+		if(!board.isBlockingNode(pos))
+			return false;
+		
+		NodeType nodes[] = new NodeType[] {
+			board.getNode(pos.Row, pos.Column),
+			board.getNode(pos.Row, pos.Column+1),
+			board.getNode(pos.Row+1, pos.Column),
+			board.getNode(pos.Row+1, pos.Column+1)
+		};		
+		
+		boolean atLeastOneIsBlock = false;
+		for(NodeType node : nodes)
+		{
+			if(!board.isBlockingNode(node))
+				return false;			
+			atLeastOneIsBlock = atLeastOneIsBlock || node == NodeType.BLOCK;
+		}
+		
+		return (atLeastOneIsBlock);		
+	}
+	
+	public boolean is4x4Block(BoardState board, BoardPosition block) {
+		BoardPosition leftDown = new BoardPosition(block.Row-1, block.Column-1);
+		BoardPosition leftTop = new BoardPosition(block.Row, block.Column-1);
+		BoardPosition rightDown = new BoardPosition(block.Row-1, block.Column);
+		return is4x4BlockTopLeftCorner(board, block) 
+				|| is4x4BlockTopLeftCorner(board, leftDown)
+				|| is4x4BlockTopLeftCorner(board, rightDown)
+				|| is4x4BlockTopLeftCorner(board, leftTop);
+	}
     
     private boolean isBlockType(NodeType type)
     {

@@ -20,6 +20,8 @@ public class Player {
         public volatile boolean shouldStop;
     
         public static boolean DO_GOAL_SORTING = true;
+        public static boolean DO_DEADLOCKS_CHECKS = true;
+        public static boolean DO_DEADLOCKS_4x4 = true;
     
 	private BoardState initialState;
 	
@@ -107,7 +109,8 @@ public class Player {
 			System.out.println(win.path);
 			return win.path;
 		} else {
-			//System.out.println("wat?");			
+                    if(VERBOSE)
+                        System.out.println("wat?");			
                     return null;
 		}
 		/*
@@ -123,7 +126,21 @@ public class Player {
 	public static void main(String[] args) throws IOException, InterruptedException {
 		BoardState board;
                 //board = BoardState.getBoardFromFile("testing/simpleplaytest3");
+                //board = BoardState.getBoardFromFile("test100/test098.in");
+                //board = BoardState.getBoardFromFile("test100/test092.in");
+                
+            // Can solve
                 //board = BoardState.getBoardFromFile("test100/test059.in");
+                //board = BoardState.getBoardFromFile("test100/test069.in");
+                board = BoardState.getBoardFromFile("test100/test092.in");
+                
+            // Cant't solve
+                //board = BoardState.getBoardFromFile("test100/test089.in");
+                
+                // IDA dålig
+                //board = BoardState.getBoardFromFile("test100/test036.in");
+                //board = BoardState.getBoardFromFile("test100/test069.in");
+                
                 
                 //board = BoardState.getBoardFromFile("test100/test009.in");
                 //board = BoardState.getBoardFromFile("test100/test019.in");
@@ -132,14 +149,16 @@ public class Player {
                 //board = BoardState.getBoardFromFile("test100/test039.in");
                 //board = BoardState.getBoardFromFile("test100/test049.in");
                 //board = BoardState.getBoardFromFile("test100/test059.in");
-                board = BoardState.getBoardFromFile("test100/test069.in");
+                //board = BoardState.getBoardFromFile("test100/test069.in");
                 //board = BoardState.getBoardFromFile("test100/test079.in");
                 //board = BoardState.getBoardFromFile("test100/test089.in");
                 //board = BoardState.getBoardFromFile("test100/test099.in");
-                Player.VERBOSE = false;
+                Player.VERBOSE = true;
                 
                 Move.CORRAL_LIVE_DETECTION = true;
-                Player.DO_GOAL_SORTING = true;
+                Player.DO_GOAL_SORTING = false;
+                Player.DO_DEADLOCKS_CHECKS = true;
+                Player.DO_DEADLOCKS_4x4 = true;
                 
 		System.out.println(board);
 		Player noob = new Player(board);
