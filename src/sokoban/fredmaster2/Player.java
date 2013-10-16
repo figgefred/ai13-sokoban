@@ -20,8 +20,10 @@ public class Player {
         public volatile boolean shouldStop;
     
         public static boolean DO_GOAL_SORTING = true;
-        public static boolean DO_DEADLOCKS_CHECKS = true;
+        public static boolean DO_DEADLOCKS_CONSTANTCHECK = true;
         public static boolean DO_DEADLOCKS_4x4 = true;
+        public static boolean DO_BIPARTITE_MATCHING = true;
+        public static boolean DO_CORRAL_LIVE_DETECTION = true;
     
 	private BoardState initialState;
 	
@@ -156,10 +158,11 @@ public class Player {
                 //board = BoardState.getBoardFromFile("test100/test099.in");
                 Player.VERBOSE = false;
                 
-                Move.CORRAL_LIVE_DETECTION = true;
-                Player.DO_GOAL_SORTING = false;
-                Player.DO_DEADLOCKS_CHECKS = true;
+                Player.DO_BIPARTITE_MATCHING = true;
+                Player.DO_CORRAL_LIVE_DETECTION = true;
+                Player.DO_DEADLOCKS_CONSTANTCHECK = true;
                 Player.DO_DEADLOCKS_4x4 = true;
+                Player.DO_GOAL_SORTING = false;
                 
 		System.out.println(board);
 		Player noob = new Player(board);

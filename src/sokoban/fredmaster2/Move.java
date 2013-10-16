@@ -13,7 +13,6 @@ public class Move implements Comparable<Move> {
 	public Path path;
 	private Integer heuristic_value = null;
         
-        public static boolean CORRAL_LIVE_DETECTION = true;
         private LiveAnalyser LiveAnalyser;
 	
         public Move(PathFinder pathfinder, Analyser analyser)
@@ -50,7 +49,7 @@ public class Move implements Comparable<Move> {
                 BoardPosition playerPos = board.getPlayerNode();		
                 
                 boolean isRealCorral = false;
-                if(CORRAL_LIVE_DETECTION)
+                if(Player.DO_CORRAL_LIVE_DETECTION)
                 {
                     List<Area> l = LiveAnalyser.getAreas(board);
                     if(l != null && l.size() > 1)
