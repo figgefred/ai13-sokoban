@@ -45,7 +45,6 @@ public class Player {
         	}
         	
         	if(node.board.isWin()){
-        		System.out.println("desafsa");
 
         		return node;        	
         		
@@ -58,18 +57,14 @@ public class Player {
         	}
 
         	Integer tentative_g = node.getHeuristicValue() + 100;
+    
         	for(Move neighbour: node.getNextMoves())
         	{	
-            	System.out.println("hhej");
 
         		if(neighbour.board.isWin())
         			return neighbour;
         		
         		Integer to_g = neighbour.getHeuristicValue();        		
-        		
-        		//System.out.println(neighbour.board);
-        		//System.out.println(to_g);
-        		//System.out.println(tentative_g);
         		
         		
         		if (closedSet.contains(neighbour.board) || to_g == Integer.MIN_VALUE) {        			
@@ -119,18 +114,14 @@ public class Player {
 			System.out.println("No path?");
 		}
 		
-		/*
-		for(Move nextMove : initial.getNextMoves())
-		{
-			System.out.println(nextMove.board);
-			System.out.println(nextMove.path);
-		}*/
+
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
 		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest");
 		
-	//	System.out.println(board);
+		System.out.println(board);
+		
 		System.out.println(board.getEndingState());
 
 		Player noob = new Player(board.getEndingState());
