@@ -321,43 +321,6 @@ public class Analyser {
 				|| is4x4BlockTopLeftCorner(board, leftTop);
 	}
 	
-	private boolean has4x4Block(BoardState board) {
-		
-		for(int row = 0; row < board.getRowsCount() - 1; ++row)
-			mainloop:
-			for(int col = 0; col < board.getColumnsCount() - 1; ++col) {
-				
-				if(!board.isBlockingNode(new BoardPosition(row, col)))
-					continue;
-				
-				NodeType nodes[] = new NodeType[] {
-					board.getNode(row, col),
-					board.getNode(row, col+1),
-					board.getNode(row+1, col),
-					board.getNode(row+1, col+1)
-				};
-				
-				
-				
-				boolean atLeastOneIsBlock = false;
-				for(NodeType node : nodes)
-				{
-					if(!board.isBlockingNode(node))
-						continue mainloop;
-					
-					atLeastOneIsBlock = atLeastOneIsBlock || node == NodeType.BLOCK;
-				}
-				
-				if(atLeastOneIsBlock) {
-					//System.out.println("found 4x4 block at " + row + " " + col);					
-					return true;
-				}
-				
-			}
-		
-		return false;		
-	}
-	
 	public static void main(String[] args) throws IOException {
 		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
 		System.out.println(board);

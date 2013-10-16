@@ -88,9 +88,10 @@ public class Move implements Comparable<Move> {
 				newBoard.movePlayerTo(blockPos);
 				
 				// GOOD SHIT
+				/*
 				if(analyser.getHeuristicValue(newBoard) == Integer.MIN_VALUE)
 					continue;
-
+*/
 				Move move = new Move(analyser, pathfinder);
 				move.board = newBoard;
 				move.path = path.cloneAndAppend(toPush.cloneAndAppend(blockPos));

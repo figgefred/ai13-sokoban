@@ -17,7 +17,7 @@ public class Player {
 	
 	private Queue<Move> openSet;
     private HashSet<Integer> closedSet;
-    public static boolean VERBOSE = true;
+    public static boolean VERBOSE = false;
     public volatile boolean shouldStop = false;
     
 	private BoardState initialState;
@@ -70,7 +70,10 @@ public class Player {
     			closedSet.add(neighbour.board.hashCode());
     			
     			if(neighbour.getHeuristicValue() > Integer.MIN_VALUE)
-    				openSet.add(neighbour); 
+    				openSet.add(neighbour);
+    			/*else {
+    				System.out.println("AAAALDRIG IN HÄR");
+    			}*/
         	}
         }
 
@@ -92,17 +95,7 @@ public class Player {
 			//return win.path;
 		}			
 	
-		
-		//System.out.println();
 		return null;
-		/*
-		for(Move nextMove : initial.getNextMoves())
-		{
-			System.out.println(nextMove.board);
-			System.out.println(nextMove.path)
-			System.out.println(nextMove.getHeuristicValue())
-		}
-		*/
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
