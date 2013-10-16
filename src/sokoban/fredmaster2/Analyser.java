@@ -402,7 +402,7 @@ public class Analyser {
 			return Integer.MAX_VALUE;
 		}		
 		
-                if(Player.DO_DEADLOCKS_CHECKS)
+                if(Player.DO_DEADLOCKS_CONSTANTCHECK)
                 {
                     if(pushedBlock != null)
                     {
@@ -465,7 +465,7 @@ public class Analyser {
 		}	
                 
 		
-		if(bipartiteMatcher.maxBipartiteMatchCount(reachMap, board) < board.getGoalNodes().size())
+		if(Player.DO_BIPARTITE_MATCHING && bipartiteMatcher.maxBipartiteMatchCount(reachMap, board) < board.getGoalNodes().size())
                     return Integer.MIN_VALUE;
                 
 		int val = 0;
