@@ -7,11 +7,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import sokoban.Tethik.BoardState;
+import sokoban.Tethik.IDAPlayer;
 import sokoban.Tethik.Player;
+
 
 public class BatchTester {
 	
-	private static int TIMELIMIT = 11000;
+	private static int TIMELIMIT = 1000;
 	//private static int NUMBER_OF_THREADS = 8;
 	private static int NUMBER_OF_TESTS = 100;
 	static final ExecutorService threadPool = Executors.newFixedThreadPool(4);
@@ -23,7 +25,10 @@ public class BatchTester {
 		List<TimingRunner> timers = new ArrayList<TimingRunner>();
 		
 		// Some statics..
+		sokoban.fredmaster2.BoardState.initZobristTable(50, 50);
 		BoardState.initZobristTable(50, 50);
+		sokoban.fredmaster2.Player.VERBOSE = false;
+		IDAPlayer.VERBOSE = false;
 		Player.VERBOSE = false;
 		
 //		TestJob job = new TestJob("test100/test099.in");
@@ -73,7 +78,8 @@ public class BatchTester {
 		}
 		
 		System.out.println("Passed " + sum_passed + " out of " + NUMBER_OF_TESTS);
-		System.out.println("Total time " + sum_timetaken + "ms");
+		System.out.println("Total time: " + sum_timetaken + "ms");
+		System.out.println("Average time: " + sum_timetaken / NUMBER_OF_TESTS + "ms");
 		
 		
 	}

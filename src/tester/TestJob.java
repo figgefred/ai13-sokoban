@@ -5,6 +5,8 @@ import java.io.IOException;
 import sokoban.Tethik.BoardState;
 import sokoban.Tethik.Path;
 import sokoban.Tethik.Player;
+import sokoban.Tethik.IDAPlayer;
+
 
 public class TestJob implements Runnable {
 
@@ -12,7 +14,9 @@ public class TestJob implements Runnable {
 	public volatile boolean result = false;
 	public String message = "";
 	public volatile boolean isRunning = true;
-	public Player play0r;
+//	public Player play0r;
+//	public IDAPlayer play0r;
+	public sokoban.fredmaster2.Player play0r;
 	
 	public TestJob(String filename) {
 		this.filename = filename;
@@ -25,9 +29,11 @@ public class TestJob implements Runnable {
 	@Override
 	public void run() {
 		isRunning = true;
-		BoardState board = null;
+		sokoban.fredmaster2.BoardState board = null;
+//		BoardState board = null;
 		try {
-			board = BoardState.getBoardFromFile(filename, false);
+			board = sokoban.fredmaster2.BoardState.getBoardFromFile(filename, false);
+//			board = BoardState.getBoardFromFile(filename, false);
 		} catch (IOException e) {
 			result = false;
 			message = "File not found: " + filename;
@@ -35,13 +41,22 @@ public class TestJob implements Runnable {
 		}
 		
 		try {
-			play0r = new Player(board);
-			Path path = play0r.play();
+//			play0r = new Player(board);
+//			play0r = new IDAPlayer(board);
+			play0r = new sokoban.fredmaster2.Player(board);
+			sokoban.fredmaster2.Path path = play0r.play();
+//			Path path = play0r.play();
 			if(path != null) {			
-				board.movePlayer(path);				
+				board.movePlayer(path);
 				result = board.isWin();
 				if(!result)
 					message = "Finished, but wrong path: " + path.toString();
+			} else if(!play0r.shouldStop) {
+				result = board.isWin();
+				message = "Path is null?!";
+			} else {
+				result = false;
+				message = "Timeout!";
 			}
 		} catch(IllegalArgumentException ex) {
 			result = false;			
