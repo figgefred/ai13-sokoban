@@ -345,8 +345,8 @@ public class LiveAnalyser {
             }
             else if(neighbourType.isBlockNode())
             {
-                area.add(neighbour, neighbourType);
-                //visitNeighbouringBlocks(board, area, neighbour, new HashSet<BoardPosition>());
+                //area.add(neighbour, neighbourType);
+                visitNeighbouringBlocks(board, area, neighbour, new HashSet<BoardPosition>());
             }
         }
     }
