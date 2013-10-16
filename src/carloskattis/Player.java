@@ -17,7 +17,7 @@ public class Player {
 	
 	private Queue<Move> openSet;
     private HashSet<Integer> closedSet;
-    public static boolean VERBOSE = false;
+    public static boolean VERBOSE = true;
     public volatile boolean shouldStop = false;
     
 	private BoardState initialState;
@@ -48,6 +48,12 @@ public class Player {
 	        	System.out.println("Pushes : " + node.pushes);
 	        	System.out.println(node.path.getPath().size() + ", " + node.getHeuristicValue() + ", " + closedSet.size() + ", " + node.board.hashCode());
 	        	System.out.println(node.board);
+	        	
+	        	try {
+	        		System.in.read();
+	        	} catch(IOException e) {
+	        		
+	        	}
         	}
         	
         	if(node.board.isWin())        	
@@ -64,7 +70,7 @@ public class Player {
     			closedSet.add(neighbour.board.hashCode());
     			
     			if(neighbour.getHeuristicValue() > Integer.MIN_VALUE)
-    				openSet.add(neighbour);  	
+    				openSet.add(neighbour); 
         	}
         }
 

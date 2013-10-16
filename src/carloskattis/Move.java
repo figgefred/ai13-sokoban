@@ -30,12 +30,6 @@ public class Move implements Comparable<Move> {
 		if(heuristic_value != null)
 			return heuristic_value;
 
-//		BoardPosition lastpos = path.get(path.getPath().size() - 2);
-//		BoardPosition pushedBlock = null;
-//		if(lastpos != null) {
-//			Direction pushDirection = lastpos.getDirection(board.getPlayerNode());
-//			pushedBlock = board.getPlayerNode().getNeighbouringPosition(pushDirection);
-//		}
 		heuristic_value = analyser.getHeuristicValue(board);
 		return heuristic_value; 
 	}
@@ -80,25 +74,22 @@ public class Move implements Comparable<Move> {
 						if(toPush == null)
 							continue;
 						
-						//TODO var appenda?
-						//toPush.append(blockPos);
 						movesMap.get(board.hashCode()).put(candidate, toPush);
-//						System.out.println(movesMap);
-//						System.out.println("Lägger till: " + toPush + ", för candidate: " + candidate);
 					}
 				}
 
 				if(toPush == null) // no path found
 					continue;
 				
-				//if(!isInMap)
-					//toPush.append(blockPos);
-				
 				BoardState newBoard = (BoardState) board.clone();
 				// move the player along the path.
 				newBoard.movePlayer(toPush);
 				// push the block by moving towards the block.
 				newBoard.movePlayerTo(blockPos);
+				
+				// GOOD SHIT
+				if(analyser.getHeuristicValue(newBoard) == Integer.MIN_VALUE)
+					continue;
 
 				Move move = new Move(analyser, pathfinder);
 				move.board = newBoard;

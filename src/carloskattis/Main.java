@@ -27,9 +27,15 @@ public class Main {
 			b.add(line);
 		}
 
+//		BoardState board = BoardState.getBoardFromFile("test100/test001.in");
 		BoardState board = new BoardState(b, true);
 		Player noob = new Player(board);
+		
+		long startTime = System.currentTimeMillis();
 		noob.play();
+		long stopTime = System.currentTimeMillis();
+		
+		System.err.println("Tid: " + (stopTime - startTime) + "ms");
 		
 	}
 }

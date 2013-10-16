@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-
 /**
  *
  * @author figgefred
@@ -22,7 +21,7 @@ public class BoardState implements Cloneable
 
     // Game board
     private List<List<NodeType>> Map = new ArrayList<>();
-    private Set<BoardPosition> Goals;
+    private ArrayList<BoardPosition> Goals;
     private BoardPosition CurrentNode;
     
     private int rows;
@@ -32,7 +31,7 @@ public class BoardState implements Cloneable
     
     // fult, kanske ska byta interna kartan till samma typ av matris sen?
     public BoardState(NodeType[][] map) {
-    	Goals = new HashSet<BoardPosition>();
+    	Goals = new ArrayList<BoardPosition>();
     	rows = map.length;
     	cols = Integer.MIN_VALUE;
     	for(int row = 0; row < rows; ++row) {
@@ -67,6 +66,7 @@ public class BoardState implements Cloneable
         if(initZobrist) { 
         	initZobristTable(Map.size(), cols);
         }
+        //sortGoals();
     }
     
     public BoardState() {
@@ -97,13 +97,104 @@ public class BoardState implements Cloneable
 		
 		return new BoardState(buffer, initHash);
 	}
+	
+	private void sortGoals()
+    {
+		boolean SHOW_SORTING = false;
+		
+		if(SHOW_SORTING)
+			for(BoardPosition goal: Goals)
+				System.out.println(goal);
+        
+		java.util.Collections.sort(Goals, new java.util.Comparator<BoardPosition>() {
+
+			@Override
+			public int compare(BoardPosition o1, BoardPosition o2) {
+				NodeType[] n1 = getNeighbourTypes(o1);
+				
+				int val1 = 0;
+				int val2 = 0;
+				
+				int w1 = 0;
+				int w2 = 0;
+				
+				if(isInCorner(o1))
+					val1 += 10;
+				if(isInCorner(o2))
+					val2 += 10;
+				
+				NodeType[] n2 = getNeighbourTypes(o2);
+				
+				for(int i = 0; i < n1.length; i++) {
+					switch(n1[i]) {
+						case WALL:
+							w1++;
+							val1 += 10;
+						break;
+						case GOAL:
+							val1 += 8;
+						break;
+					default: break;
+					}
+					
+					switch(n2[i]) {
+						case WALL:
+							w2++;
+							val2 += 10;
+						break;
+						case GOAL: 
+							val2 += 8;
+						break;
+					default: break;
+					}
+					
+					/*
+					if(n1[i] == NodeType.WALL)
+						w1++;
+					
+					if(n2[i] == NodeType.WALL)
+						w2++;
+						*/
+				}
+
+				if(w1 == 3 && w2 != 3)
+					return -1;
+				else if(w2 == 3 && w1 != 3)
+					return 1;
+				
+				return 0;
+				
+				// Om nästan ingen skillnad
+				/*
+				if(Math.abs(val1- val2) < 5)
+					return 0;
+				
+				if(val1 > val2)
+					return -1;
+				else if (val2 < val1)
+					return 1;
+				else 
+					return 0;
+				*/
+			}
+		});
+        
+		if(SHOW_SORTING) {
+			System.out.println("======");
+	        
+	        for(BoardPosition goal: Goals)
+				System.out.println(goal);
+	        
+	        System.exit(0);
+		}
+    }
     
     
     private void buildBoard(List<String> rows)
     {
         
         //IDCounter = 1;
-        Goals = new HashSet<>();
+        Goals = new ArrayList<>();
         Map = new ArrayList<>();
         
         char[] columns = null;
@@ -200,6 +291,21 @@ public class BoardState implements Cloneable
         if(col < Map.get(row).size()-1)
         	positions.add(new BoardPosition(row,col+1));
         return positions;
+    }
+    
+    public NodeType[] getNeighbourTypes(BoardPosition pos)
+    {
+    	return getNeighbourTypes(pos.Row, pos.Column);
+    }
+    
+    public NodeType[] getNeighbourTypes(int row, int col)
+    {
+    	return new NodeType[] {
+    		getNode(row + 1, col),
+    		getNode(row - 1, col),
+    		getNode(row, col + 1),
+    		getNode(row, col - 1)
+    	};
     }
     
     public List<BoardPosition> getFromNeighbours(BoardPosition pos) {
@@ -307,7 +413,7 @@ public class BoardState implements Cloneable
         return CurrentNode;
     }
     
-    public Set<BoardPosition> getGoalNodes()
+    public ArrayList<BoardPosition> getGoalNodes()
     {
         return Goals;
     }

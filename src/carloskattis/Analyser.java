@@ -134,14 +134,6 @@ public class Analyser {
 		}
 	}
 	
-	public boolean isBadPosition(int Row, int Col) {		
-		return badTable[Row][Col];
-	}
-	
-	public boolean isBadPosition(BoardPosition pos) {
-		return isBadPosition(pos.Row, pos.Column);
-	}
-	
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -191,6 +183,8 @@ public class Analyser {
 		System.out.println(builder.toString());
 	}
 	
+	
+	
 	public int getHeuristicValue(BoardState board) {
 		this.board = board;
 		
@@ -214,8 +208,10 @@ public class Analyser {
 			return Integer.MIN_VALUE;
 		*/
 		
+		/*
 		if(has4x4Block(board))
 			return Integer.MIN_VALUE;
+			*/
 		//mapDistancesToGoals(board);
 		
 		for(int i = 0; i < goalDist.length; i++) {
@@ -233,7 +229,7 @@ public class Analyser {
 		{			
 			if(board.getNode(block) == NodeType.BLOCK_ON_GOAL)
 				blockDist[b] = 0;
-			else if(board.isInCorner(block)) {
+			else if(isBadPosition(block) || is4x4Block(board, block)) {
 				return Integer.MIN_VALUE;		
 			}
 			b++;	
@@ -258,10 +254,10 @@ public class Analyser {
 				}
 				
 				goalDist[i] = Math.min(dist, goalDist[i]);
-				
+
 				if(goalDist[i] > 0)
 					blockDist[b] = Math.min(dist, blockDist[b++]);
-			}			
+			}
 			++i;
 		}	
 		
@@ -283,6 +279,46 @@ public class Analyser {
 		
 		
 		return val;		
+	}
+	
+	public boolean isBadPosition(int Row, int Col) {
+		return badTable[Row][Col];
+	}
+	
+	public boolean isBadPosition(BoardPosition pos) {
+		return isBadPosition(pos.Row, pos.Column);
+	}
+	
+	private boolean is4x4BlockTopLeftCorner(BoardState board, BoardPosition pos) {
+		if(!board.isBlockingNode(pos))
+			return false;
+		
+		NodeType nodes[] = new NodeType[] {
+			board.getNode(pos.Row, pos.Column),
+			board.getNode(pos.Row, pos.Column+1),
+			board.getNode(pos.Row+1, pos.Column),
+			board.getNode(pos.Row+1, pos.Column+1)
+		};		
+		
+		boolean atLeastOneIsBlock = false;
+		for(NodeType node : nodes)
+		{
+			if(!board.isBlockingNode(node))
+				return false;			
+			atLeastOneIsBlock = atLeastOneIsBlock || node == NodeType.BLOCK;
+		}
+		
+		return (atLeastOneIsBlock);		
+	}
+	
+	private boolean is4x4Block(BoardState board, BoardPosition block) {
+		BoardPosition leftDown = new BoardPosition(block.Row-1, block.Column-1);
+		BoardPosition leftTop = new BoardPosition(block.Row, block.Column-1);
+		BoardPosition rightDown = new BoardPosition(block.Row-1, block.Column);
+		return is4x4BlockTopLeftCorner(board, block) 
+				|| is4x4BlockTopLeftCorner(board, leftDown)
+				|| is4x4BlockTopLeftCorner(board, rightDown)
+				|| is4x4BlockTopLeftCorner(board, leftTop);
 	}
 	
 	private boolean has4x4Block(BoardState board) {
