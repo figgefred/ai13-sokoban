@@ -56,7 +56,7 @@ public class Analyser {
 		
 		for(int row = 0; row < rows; ++row)
 			for(int col = 0; col < cols; ++col) {
-				NodeType type = board.getNode(row, col);				
+				NodeType type = board.get(row, col);				
 				
 				// Remove blocks from the map
 				if(type == NodeType.BLOCK || type == NodeType.PLAYER)
@@ -86,9 +86,6 @@ public class Analyser {
 		
 		i = 0;
 		for(BoardPosition goal : board.getGoalNodes()) {
-		
-			if(board.getNode(goal) == NodeType.BLOCK_ON_GOAL)
-				continue;
 			
 			positions.clear();
 			distances.clear();
@@ -97,10 +94,6 @@ public class Analyser {
 			positions.add(goal);
 			distances.add(0);
 			visited.add(goal);
-			
-			if(board.getNode(goal) == NodeType.BLOCK_ON_GOAL) {
-				continue;
-			}
 			
 			distanceMatrix[i][goal.Row][goal.Column] = 0;
 			
@@ -112,18 +105,14 @@ public class Analyser {
 				
 				// Uppdatera positions i matrisen
 				distanceMatrix[i][pos.Row][pos.Column] = distance++;
-				badTable[pos.Row][pos.Column] = false;
-				
-				/*
-				if(board.getNode(pos) == NodeType.BLOCK || board.getNode(pos) == NodeType.BLOCK_ON_GOAL)
-					continue;						
-				*/
+				if(distance > 1)
+					badTable[pos.Row][pos.Column] = false;
 				
 				for(BoardPosition neighbour : board.getFromNeighbours(pos)) {
 					if(visited.contains(neighbour)) 
 						continue;
 					
-					NodeType node = board.getNode(neighbour);
+					NodeType node = board.get(neighbour);
 					if(node == NodeType.WALL || node == NodeType.INVALID) 
 						continue;
 									
@@ -144,6 +133,7 @@ public class Analyser {
 	public boolean isBadPosition(BoardPosition pos) {
 		return isBadPosition(pos.Row, pos.Column);
 	}
+
 	
 	@Override
 	public String toString() {
@@ -155,7 +145,8 @@ public class Analyser {
 				char c = (badTable[row][col]) ? 'x' : ' ';
 				if(type == NodeType.GOAL)
 					c = '.';
-				else if(type == NodeType.WALL)
+				else 
+					if(type == NodeType.WALL)
 					c = '#';
 				builder.append(c);
 				
@@ -179,11 +170,12 @@ public class Analyser {
 					//(badTable[row][col]) ? "x" : 
 					String c = distanceMatrix[i][row][col] > 9 ? " " : "" + distanceMatrix[i][row][col];
 					if(type == NodeType.WALL)
-						c = "#";
-					else if(distanceMatrix[i][row][col] == Integer.MAX_VALUE)
+						c = "#";	
+					else if(badTable[row][col])
 						c = "x";
 					else if(type == NodeType.GOAL)
 						c = ".";					
+					
 		
 					builder.append(c).append("");
 					
@@ -230,8 +222,10 @@ public class Analyser {
 		int b = 0; 
 		for(BoardPosition block : blocks)
 		{			
-			 if(board.getNode(block) == NodeType.BLOCK_ON_GOAL) {
+			 if(board.get(block) == NodeType.BLOCK_ON_GOAL) {
 				blockDist[b] = 0;
+				if(isBadPosition(block))
+					blockDist[b] = -100;
 			 } else if(isBadPosition(block) || is4x4Block(board, block)) {
 				return Integer.MIN_VALUE;		
 			} 
@@ -244,7 +238,7 @@ public class Analyser {
 		{		
 			reachMap.put(goal, new ArrayList<BoardPosition>());			
 			
-			if(board.getNode(goal) == NodeType.BLOCK_ON_GOAL) {
+			if(board.get(goal) == NodeType.BLOCK_ON_GOAL) {
 				goalDist[i] = 0;
 			}
 			
@@ -263,7 +257,10 @@ public class Analyser {
 					blockDist[b] = Math.min(dist, blockDist[b++]);
 			}			
 			++i;
-		}	
+		}			
+		
+		if(bipartiteMatcher.maxBipartiteMatch(reachMap, board) < board.getGoalNodes().size())
+			return Integer.MIN_VALUE;
 		
 		int val = 0;
 		for(i = 0; i < board.getGoalNodes().size(); ++i) {
@@ -276,9 +273,6 @@ public class Analyser {
 			val -= blockDist[i];
 		}
 		
-		if(bipartiteMatcher.maxBipartiteMatch(reachMap, board) < board.getGoalNodes().size())
-			return Integer.MIN_VALUE;
-		
 		return val;		
 	}
 	
@@ -287,10 +281,10 @@ public class Analyser {
 			return false;
 		
 		NodeType nodes[] = new NodeType[] {
-			board.getNode(pos.Row, pos.Column),
-			board.getNode(pos.Row, pos.Column+1),
-			board.getNode(pos.Row+1, pos.Column),
-			board.getNode(pos.Row+1, pos.Column+1)
+			board.get(pos.Row, pos.Column),
+			board.get(pos.Row, pos.Column+1),
+			board.get(pos.Row+1, pos.Column),
+			board.get(pos.Row+1, pos.Column+1)
 		};		
 		
 		boolean atLeastOneIsBlock = false;
@@ -325,7 +319,7 @@ public class Analyser {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest3");
+		BoardState board = BoardState.getBoardFromFile("test100/test001.in");
 		System.out.println(board);
 		Analyser analyser = new Analyser(board);
 		System.out.println(analyser);
