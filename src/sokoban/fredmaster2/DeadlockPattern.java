@@ -25,41 +25,41 @@ public class DeadlockPattern {
     	buildMap(rows);
         this.rows = rows.size();
         if(initZobrist) {
-        	cols = Integer.MIN_VALUE;
-        	for(List<NodeType> row : Map)
-        		cols = Math.max(row.size(), cols);
+            cols = Integer.MIN_VALUE;
+            for(List<NodeType> row : Map)
+                cols = Math.max(row.size(), cols);
         }
     }
     
     public DeadlockPattern() {
     	
     }
-    
-  	public static DeadlockPattern getPatternFromFile(String filename) throws IOException
-  	{
-  		return getPatternFromFile(filename, true);
-  	}
-  	
-	public static DeadlockPattern getPatternFromFile(String filename, boolean initHash) throws IOException
-	{
-		FileReader rawInput = new FileReader(filename);
-		BufferedReader br = new BufferedReader(rawInput);
-		
-		List<String> buffer = new ArrayList<>();
-		
-		while(true)
-		{
-			String tmp = br.readLine();
-			if(tmp == null)
-				break;
-			buffer.add(tmp);			
-		}
-		br.close();
-	
-		
-		return new DeadlockPattern(buffer, initHash);
-	}
-	
+
+    public static DeadlockPattern getPatternFromFile(String filename) throws IOException
+    {
+            return getPatternFromFile(filename, true);
+    }
+
+    public static DeadlockPattern getPatternFromFile(String filename, boolean initHash) throws IOException
+    {
+            FileReader rawInput = new FileReader(filename);
+            BufferedReader br = new BufferedReader(rawInput);
+
+            List<String> buffer = new ArrayList<>();
+
+            while(true)
+            {
+                    String tmp = br.readLine();
+                    if(tmp == null)
+                            break;
+                    buffer.add(tmp);			
+            }
+            br.close();
+
+
+            return new DeadlockPattern(buffer, initHash);
+    }
+
     private void buildMap(List<String> rows)
     {        
         //IDCounter = 1;

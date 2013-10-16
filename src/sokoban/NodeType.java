@@ -36,6 +36,40 @@ public enum NodeType
     	return this.c;
     }
     
+    public boolean isBlockNode()
+    {
+        boolean isBlockNode = 
+            this == NodeType.BLOCK || 
+            this == NodeType.BLOCK_ON_GOAL;
+        return isBlockNode;
+    }
+    
+    public boolean isSpaceNode()
+    {
+        boolean isSpaceNode = 
+            this == NodeType.SPACE || 
+            this == NodeType.GOAL || 
+            this == NodeType.PLAYER_ON_GOAL || 
+            this == NodeType.PLAYER;
+        return isSpaceNode;
+    }
+    
+    public boolean isGoalNode()
+    {
+        boolean isGoalNode = 
+            this == NodeType.GOAL || 
+            this == NodeType.PLAYER_ON_GOAL;
+        return isGoalNode;   
+    }
+    
+    public boolean isPlayerNode()
+    {
+        boolean isPlayerNode = 
+            this == NodeType.PLAYER || 
+            this == NodeType.PLAYER_ON_GOAL;
+        return isPlayerNode;   
+    }
+    
     public static NodeType parse(char c)
 	{
     	for(NodeType type : NodeType.values())

@@ -5,11 +5,16 @@
 package sokoban.fredmaster2;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import sokoban.BoardPosition;
 import sokoban.NodeType;
+import sokoban.Direction;
 
 /**
  *
@@ -20,6 +25,8 @@ public class LiveAnalyser {
 	private Analyser analyser;
 	private PathFinder pathfinder;
     
+        public static boolean VERBOSE = true;
+        
 	public LiveAnalyser(Analyser analyser, PathFinder finder)
 	{
 		this.analyser = analyser;
@@ -187,6 +194,176 @@ public class LiveAnalyser {
     private boolean isBlockingType(NodeType type)
     {
         return isBlockType(type) || type == NodeType.WALL;
+    }
+    
+    /**
+     * Returns a list of corral areas and (or only) the area of where the
+     * player is.
+     * 
+     * A corral area is an area which a player cannot reach except by pushing
+     * a block.
+     * 
+     * Area's will hold a field pointing to a list of blocks that are acting
+     * as fences (creating the corrol fence). These should be prioritized so that
+     * a corral area can be solved as fast as possible. This is so called 'corrol pruning'.
+     * 
+     * @param board
+     * @return 
+     */
+    public List<Area> getAreas(BoardState board)
+    {
+        // A list containing all the nodes "visited"
+        Set<BoardPosition> visited = new HashSet<>();
+        List<Area> list = new ArrayList<>();
+        
+        int areaCounter = 1;
+        
+        //**************************//
+        // Iterpret areas from map //
+        //*********************** //
+        
+        for(int r = 0; r < board.getRowsCount(); r++)
+        {
+            for(int c = 0; c < board.getColumnsCount(r); c++)
+            {
+                BoardPosition p = new BoardPosition(r,c);
+                NodeType nodeType = board.getNode(p);
+                
+                if( !visited.contains(p) && nodeType.isSpaceNode() )
+                {
+                    Area area = new Area(areaCounter++, board);
+                    setCorralArea(board, area, p, visited);
+                    list.add(area);
+                }
+            }
+        }
+
+        // If there is only a play area there is no point to continue
+        if(list.size() <= 1)
+            return list;
+        
+        //**************************//
+        // Find the corral fences  //
+        //*********************** //
+        
+        // !!!!!!!!!!!!!!
+        // The following code segments can probably be implemented in a better way.
+        // !!!!!!!!!!!!!!        
+        
+        // A list of block nodes that are fence candidates for the corral areas
+        Map<BoardPosition, CorralFenceCandidate> fenceCandidates = new HashMap<>();
+        
+        // This part is crucial, we must find out which blocks are 'touched'
+        // by more then 1 area
+        for(Area a: list)
+        {
+            for(BoardPosition p: board.getBlockNodes())
+            {
+                // For every a try to match every block
+                if(board.getNode(p).isBlockNode())
+                {
+                    CorralFenceCandidate c = fenceCandidates.get(p);
+                    if(c == null)
+                    {
+                        c = new CorralFenceCandidate(p);
+                        fenceCandidates.put(p, c);
+                    }
+                    c.addCorralArea(a);
+                }
+            }
+        }
+        
+        //******************************//
+        // Add the fences to the area **//
+        //******************************//
+        
+        // Naive merge
+        for(CorralFenceCandidate f : fenceCandidates.values())
+        {
+            for(Area a: list)
+            {
+                if(f.isNodeOf(a))
+                {
+                    if(f.isPartOfCorralAreaFence())
+                    {
+                        a.addAsFenceNode(f.getBoardPosition(), board.getNode(f.getBoardPosition()));
+                    }
+                    else
+                    {
+                        a.add(f.getBoardPosition(), board.getNode(f.getBoardPosition()));
+                    }
+                }
+            }
+        }
+        return list;
+    }
+    
+    public Map<Area, List<BoardPosition>> getBlockAreas(BoardState board, List<Area> corrals, BoardPosition movedBlock)
+    {
+        boolean hasAllBoxesOnGoals = true;
+        boolean isACombinedCorral = false;
+        
+        for(Area cArea: corrals)
+        {
+            // This is the "Play area", lets skip it
+            if(!cArea.isCorralArea())
+                break;
+            
+            for(BoardPosition box: board.getBlockNodes())
+            {
+                Direction[] dirs = { Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT };
+                for(Direction d : dirs)
+                {
+                    BoardPosition N = board.getNeighbour(box, d);
+                    BoardPosition O = board.getNeighbour(box, d.opposite());
+
+//                    if(cArea.)
+
+
+                }
+            }
+        }
+        
+        
+        return null;
+    }
+    
+    private void setCorralArea(BoardState board, Area area, BoardPosition spaceNode, Set<BoardPosition> visited)
+    {
+        NodeType nodeType = board.getNode(spaceNode);
+        area.add(spaceNode, nodeType);
+        visited.add(spaceNode);
+        
+        for(BoardPosition neighbour: board.getNeighbours(spaceNode))
+        {
+            NodeType neighbourType = board.getNode(neighbour);
+            if( !visited.contains(neighbour) && ( neighbourType.isSpaceNode()) )
+            {
+                // If unvisited expand!
+                setCorralArea(board, area, neighbour, visited);
+            }
+            else if(neighbourType.isBlockNode())
+            {
+                //area.add(neighbour, neighbourType);
+                visitNeighbouringBlocks(board, area, neighbour, new HashSet<BoardPosition>());
+            }
+        }
+    }
+    
+    private void visitNeighbouringBlocks(BoardState board, Area area, BoardPosition blockNode, Set<BoardPosition> visited)
+    {
+        NodeType nodeType = board.getNode(blockNode);
+        area.add(blockNode, nodeType);
+        visited.add(blockNode);
+        for(BoardPosition blockNeighbour: board.getNeighbours(blockNode))
+        {
+            NodeType neighbourType = board.getNode(blockNeighbour);
+            if( !visited.contains(blockNeighbour) && ( neighbourType.isBlockNode()) )
+            {
+                // If unvisited expand!
+                visitNeighbouringBlocks(board, area, blockNeighbour, visited);
+            }
+        }
     }
     
     public static void main(String args[]) throws IOException

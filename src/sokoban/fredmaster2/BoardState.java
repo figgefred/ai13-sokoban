@@ -67,18 +67,32 @@ public class BoardState implements Cloneable
     
     private void setInvalidFields(List<List<NodeType>> map)
     {
+        
     	for(int row = 0; row < rows; ++row) {
+            int lastWallIndex = 0;
             boolean firstWall = false;
             for(int col = 0; col < map.get(row).size(); ++col)
             {    			
                 NodeType type = map.get(row).get(col);
-                if(type != NodeType.WALL)
+                if(type != NodeType.WALL && !firstWall)
                     map.get(row).set(col, NodeType.INVALID);
-                else
+                else if(!firstWall)
+                {
                     firstWall = true;
+                }
+                else if(type == NodeType.WALL)
+                {
+                    lastWallIndex = col;
+                }
                 
-                if(firstWall)
-                    break;
+                
+                
+                //if(firstWall)
+//                    break;
+            }
+            for(int col = lastWallIndex+1; col < map.get(row).size(); ++col)
+            {
+                map.get(row).set(col, NodeType.INVALID);
             }
     	}
     }
@@ -101,30 +115,30 @@ public class BoardState implements Cloneable
     	
     }
     
-  	public static BoardState getBoardFromFile(String filename) throws IOException
-  	{
-  		return getBoardFromFile(filename, true);
-  	}
-  	
-	public static BoardState getBoardFromFile(String filename, boolean initHash) throws IOException
-	{
-		FileReader rawInput = new FileReader(filename);
-		BufferedReader br = new BufferedReader(rawInput);
-		
-		List<String> buffer = new ArrayList<>();
-		
-		while(true)
-		{
-			String tmp = br.readLine();
-			if(tmp == null)
-				break;
-			buffer.add(tmp);			
-		}
-		br.close();
-	
-		
-		return new BoardState(buffer, initHash);
-	}
+    public static BoardState getBoardFromFile(String filename) throws IOException
+    {
+        return getBoardFromFile(filename, true);
+    }
+
+    public static BoardState getBoardFromFile(String filename, boolean initHash) throws IOException
+    {
+        FileReader rawInput = new FileReader(filename);
+        BufferedReader br = new BufferedReader(rawInput);
+
+        List<String> buffer = new ArrayList<>();
+
+        while(true)
+        {
+                String tmp = br.readLine();
+                if(tmp == null)
+                        break;
+                buffer.add(tmp);			
+        }
+        br.close();
+
+
+        return new BoardState(buffer, initHash);
+    }
     
     
     private void buildBoard(List<String> rows)
@@ -214,6 +228,40 @@ public class BoardState implements Cloneable
     public List<BoardPosition> getNeighbours(BoardPosition pos)
     {
         return getNeighbours(pos.Row, pos.Column);
+    }
+    
+    public BoardPosition getNeighbour(BoardPosition p, Direction dir)
+    {
+        BoardPosition pNew = null;
+        int n = -1;
+        switch(dir)
+        {
+            case UP:
+                n = p.Row -1;
+                if(n < 0)
+                    break;
+                pNew = new BoardPosition(n, p.Column);
+                break;
+            case DOWN:
+                n = p.Row +1;
+                if(n >= getRowsCount())
+                    break;
+                pNew = new BoardPosition(n, p.Column);
+                break;
+            case LEFT:
+                n = p.Column - 1;
+                if(n < 0)
+                    break;
+                pNew = new BoardPosition(p.Row, n);
+                break;
+            case RIGHT:
+                n = p.Column +1;
+                if(n >= getColumnsCount(p.Row))
+                    break;
+                pNew = new BoardPosition(p.Row, n);
+                break;
+        }
+        return pNew;
     }
     
     public List<BoardPosition> getNeighbours(int row, int col)

@@ -406,9 +406,9 @@ public class Analyser {
 		{
                     if(deadlockFinder.isBadState(board, pushedBlock))
                         return Integer.MIN_VALUE;
-		} else if(deadlockFinder.isBadState(board)) {
+		} /*else if(deadlockFinder.isBadState(board)) {
                     return Integer.MIN_VALUE;
-		}
+		}*/
 		/*if(has4x4Block(board))
 			return Integer.MIN_VALUE;*/
                 
@@ -423,16 +423,16 @@ public class Analyser {
 		List<BoardPosition> blocks = board.getBlockNodes();	
 		HashMap<BoardPosition, List<BoardPosition>> reachMap = new HashMap<>(); 
                 int b = 0; 
-		/*
+		
 		for(BoardPosition block : blocks)
 		{			
 			if(board.getNode(block) == NodeType.BLOCK_ON_GOAL)
-                            blockDist[b] = -100;
+                            blockDist[b] =-50;
 			else if(board.isInCorner(block)) {
                             return Integer.MIN_VALUE;		
 			}
 			b++;	
-		} */
+		}
 		
 		int i = 0;
 		for(BoardPosition goal : board.getGoalNodes())
@@ -470,12 +470,14 @@ public class Analyser {
 			val -= goalDist[i];
 			val -= blockDist[i];
 		}
-		
+		/*
 		if(bipartiteMatcher.maxBipartiteMatchCount(reachMap, board) < board.getGoalNodes().size())
                     return Integer.MIN_VALUE;
-		
+		*/
+                
+                
                 //int val = 0;
-                List<BoardPosition> goals = (List) GoalQueue;
+                /*List<BoardPosition> goals = (List) GoalQueue;
                 
                 int weightIncrement = 100;
                 int penaltyWeight = goals.size()*weightIncrement;
@@ -488,22 +490,71 @@ public class Analyser {
                     }
                     penaltyWeight -= weightIncrement;
                 }
+                */
                 
                 int blockLastPushedIndex = board.getBlockLastMovedIndex();
-                penaltyWeight = (goals.size()*weightIncrement)/4;
                 // If not -1, then a block has been pushed sometime ago - lets prioritize it!
                 if(blockLastPushedIndex != -1)
                 {
                     BoardPosition block = board.getBlockNodes().get(blockLastPushedIndex);
                     if(pushedBlock.equals(block))
                     {
-                        val += penaltyWeight;
+                        val += 100;
                     }
-                    else
-                    {
-                        val -= penaltyWeight;
-                    } 
                 }
+                
+                
+                        
+                boolean hasBlockNeighbour = false;
+                if(pushedBlock == null)
+                {
+                    hasBlockNeighbour = true;
+                }
+                else
+                {
+                    // Flag bool to true if we pushed a block to a neighbouring block
+                    for(BoardPosition neighbour: board.getNeighbours(pushedBlock))
+                    {
+                        if(board.getNode(neighbour).isBlockNode())
+                        {
+                            hasBlockNeighbour = true;
+                        }
+                    }
+                }
+                
+                // We just make expensive lookup if we pushed into block
+                if(hasBlockNeighbour)
+                {
+                    List<Area> areas = deadlockFinder.getAreas(board);
+                    // Whooop, corral area found!!
+                    if(areas.size() > 1)
+                    {
+                        for(Area a: areas)
+                        {
+                            if(a.isCorralArea())
+                            {
+                                for(BoardPosition p: a.getFencePositions())
+                                {
+                                    // Give GIANT bonus if pushing one of the fence blocks
+                                    // This of course in order to solve the corral area ASAP
+                                    if(p.equals(pushedBlock))
+                                    {
+                                        val += 1000;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+               // System.out.println(board);
+                /*List<Area> l = deadlockFinder.getAreas(board);
+                for(Area a: l)
+                {
+                    System.out.println(a);
+                }*/
+                //try {Thread.sleep(1000000);}catch(InterruptedException ex){}
+                
 		return val;
 	}
         
@@ -544,9 +595,10 @@ public class Analyser {
 		
 		return false;		
 	}
+       
 	
 	public static void main(String[] args) throws IOException {
-		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest3");
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
 		System.out.println(board);
 		Analyser analyser = new Analyser(board);
 		System.out.println(analyser);

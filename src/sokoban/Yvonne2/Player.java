@@ -23,8 +23,8 @@ public class Player {
 	public volatile boolean shouldStop = false;
 	Move winMove=null;
 	public static boolean IDA =false;
-	public static boolean WIKIDA=true;
-	public static boolean ASTAR=false;
+	public static boolean WIKIDA=false;
+	public static boolean ASTAR=true;
 
 	private BoardState initialState;
 
@@ -151,19 +151,23 @@ public class Player {
 		    
 		    while(!openSet.isEmpty()){
 		    	Move current = openSet.poll();
+				
+		    	System.out.println(current.board);
+				
+
 		    	if(current.board.isWin())
 		    		return current;
 		    	
-		    	closedSet.add(current.hashCode());
+		    	closedSet.add(current.board.hashCode());
 		    	for(Move neighbour : current.getNextMoves()){
 		    	
 		    		int tentG=neighbour.pushes;
 		    		int tentF=tentG+neighbour.getHeuristicValue();
-		    	//	if(closedSet.contains(neighbour.hashCode()) && tentF >=neighbour.getFValue()){
+		    		if(closedSet.contains(neighbour.board.hashCode()) && tentF >=(neighbour.getHeuristicValue()+neighbour.pushes)){
 		    			continue;
 		    		}
-		    		/*
-		    		if(!openSetHash.contains(neighbour.board.hashCode()) || tentF <neighbour.getFValue()){
+		    		
+		    		if(!openSetHash.contains(neighbour.board.hashCode()) || tentF <(neighbour.getHeuristicValue()+neighbour.pushes)){
 		    			g.put(neighbour.board.hashCode(), tentG);
 		    			neighbour.f=tentF;
 		    			if(!openSetHash.contains(neighbour.board.hashCode())){
@@ -171,7 +175,7 @@ public class Player {
 		    				openSetHash.add(neighbour.board.hashCode());
 		    			}
 		    		}
-		    	}*/
+		    	}
 		    }
 		    return null;
 	}else{
@@ -183,7 +187,6 @@ public class Player {
 			while(!openSet.isEmpty() && !shouldStop)
 			{
 				Move node = openSet.poll();
-
 				if(VERBOSE) {
 					System.out.println(openSet.size() + " " + closedSet.size());
 					System.out.println("Pushes : " + node.pushes);
@@ -240,7 +243,7 @@ public class Player {
 	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-			BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
+			BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest2");
 	//	BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest");
 
 		System.out.println(board);

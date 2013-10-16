@@ -120,8 +120,9 @@ public class Player {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		//BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
-                BoardState board = BoardState.getBoardFromFile("test100/test000.in");
+		BoardState board;
+                board = BoardState.getBoardFromFile("testing/simpleplaytest5");
+                //board = BoardState.getBoardFromFile("test100/test030.in");
                 Player.VERBOSE = true;
                 
 		System.out.println(board);
