@@ -27,7 +27,6 @@ public class BoardState implements Cloneable
     private int cols;
     private BoardPosition lastPushedBlock;
     
-    
     // fult, kanske ska byta interna kartan till samma typ av matris sen?
     public BoardState(NodeType[][] map) {
     	Goals = new ArrayList<BoardPosition>();
@@ -42,6 +41,7 @@ public class BoardState implements Cloneable
     			NodeType type = map[row][col];
     			if(type == NodeType.GOAL || type == NodeType.PLAYER_ON_GOAL || type == NodeType.BLOCK_ON_GOAL)
     				Goals.add(new BoardPosition(row, col));    		
+    			
     		}
     	}
     }
@@ -105,7 +105,6 @@ public class BoardState implements Cloneable
     
     private void buildBoard(List<String> rows)
     {   
-        
         char[] columns = null;
         String tmp ;
         for(int row = 0; row < rows.size(); row++)
@@ -424,8 +423,9 @@ public class BoardState implements Cloneable
     	Map[row][col] = (orig == NodeType.BLOCK_ON_GOAL) ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER;    	
     	Map[newrow][newcol] = (dest == NodeType.GOAL) ? NodeType.BLOCK_ON_GOAL : NodeType.BLOCK;
     	
+    	//blocks.remove(new BoardPosition(row, col));
     	lastPushedBlock = new BoardPosition(newrow, newcol);    	
-    	
+    	//blocks.add(lastPushedBlock);
     }
     
     /***

@@ -3,6 +3,7 @@ package sokoban.Tethik;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -77,15 +78,20 @@ public class PathFinder {
 	}
 	
 	public boolean isReachable(BoardState board, BoardPosition goal) {
-		if(board_hash != board.hashCode())
+		if(board_hash != board.hashCode()) {
 			mapPlayerDistance(board);
+			pathCache.clear();
+		}
 		
 		return (playerDistMatrix[goal.Row][goal.Column] < Integer.MAX_VALUE);			
 	}
+	
+	private HashMap<BoardPosition, Path> pathCache = new HashMap<BoardPosition, Path>();
 
 	public Path getPath(BoardState board, BoardPosition goal) {
-		if(board_hash != board.hashCode())
+		if(board_hash != board.hashCode()) {
 			mapPlayerDistance(board);
+		}
 		
 		if(!isReachable(board, goal))
 			return null;		
@@ -97,8 +103,7 @@ public class PathFinder {
 		traversal:
 		while(!(pos = positionStack.peek()).equals(board.getPlayerNode())) {
 			
-			int distance = playerDistMatrix[pos.Row][pos.Column];
-			
+			int distance = playerDistMatrix[pos.Row][pos.Column];			
 			for(BoardPosition neighbour : board.getNeighbours(pos))
 			{			
 				if(playerDistMatrix[neighbour.Row][neighbour.Column] < distance)
@@ -112,8 +117,9 @@ public class PathFinder {
 		}
 		
 		//positionStack.pop();
-		
-		return new Path(positionStack);
+		Path path = new Path(positionStack);
+	//	pathCache.put(goal, path);
+		return path;
 	}
 		
 	public static void main(String[] args) throws IOException {

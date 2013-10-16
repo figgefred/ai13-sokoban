@@ -48,16 +48,16 @@ public class Move implements Comparable<Move> {
 			// now do pathfinding to see if player can reach it..
 			for(BoardPosition candidate : pushPositions)
 			{
-				Path toPush;
+				Path getThere;
 				if(candidate.equals(playerPos))
-					toPush = new Path(candidate);
+					getThere = new Path(candidate);
 				else
-					toPush = pathfinder.getPath(board, candidate);		
+					getThere = pathfinder.getPath(board, candidate);		
 				
-				if(toPush == null) // no path found
+				if(getThere == null) // no path found
 					continue;				
 				
-				toPush.append(blockPos);
+				Path toPush = getThere.cloneAndAppend(blockPos);
 				
 				BoardState newBoard = (BoardState) board.clone();
 				// move the player along the path.
@@ -94,5 +94,10 @@ public class Move implements Comparable<Move> {
 		else if(o.getHeuristicValue() < this.getHeuristicValue())
 			return -1;
 		return 0;
+	}
+	
+	@Override
+	public int hashCode() {
+		return board.hashCode();
 	}
 }

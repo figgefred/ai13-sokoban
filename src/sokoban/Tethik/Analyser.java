@@ -167,7 +167,7 @@ public class Analyser {
 	}
 	
 	
-	private void printDistanceMatrix(BoardState board) {
+	private void printDistanceMatrix(BoardState board) {	
 		//mapDistancesToGoals(board);
 		
 		StringBuilder builder = new StringBuilder();		
@@ -194,14 +194,16 @@ public class Analyser {
 		System.out.println(builder.toString());
 	}
 	
+	public boolean isDeadlock(BoardState board) {
+		return true;
+	}
+	
 	public int getHeuristicValue(BoardState board) {
 		this.board = board;
 		
-		if(board.isWin()) {				
-			return Integer.MAX_VALUE;
-		}		
-		
-		
+//		if(board.isWin()) {				
+//			return Integer.MAX_VALUE;
+//		}		
 		
 //		if(pushedBlock != null)
 //		{
@@ -211,13 +213,12 @@ public class Analyser {
 //			return Integer.MIN_VALUE;
 //		}
 //		
-//		
 //		if(deadlockerFinder2.isDeadLock(board)) 
 //			return Integer.MIN_VALUE;
 		
 		
-		if(has4x4Block(board))
-			return Integer.MIN_VALUE;
+//		if(has4x4Block(board))
+//			return Integer.MIN_VALUE;
 		
 		for(int i = 0; i < goalDist.length; i++) {
 			goalDist[i] = Integer.MAX_VALUE;
@@ -226,20 +227,18 @@ public class Analyser {
 		
 		
 		List<BoardPosition> blocks = board.getBlockNodes();	
-		
-		HashMap<BoardPosition, List<BoardPosition>> reachMap = new HashMap<>(); 
-		
 		int b = 0; 
 		for(BoardPosition block : blocks)
 		{			
-			if(board.getNode(block) == NodeType.BLOCK_ON_GOAL)
+			 if(board.getNode(block) == NodeType.BLOCK_ON_GOAL) {
 				blockDist[b] = 0;
-			else if(board.isInCorner(block)) {
+			 } else if(isBadPosition(block) || is4x4Block(board, block)) {
 				return Integer.MIN_VALUE;		
-			}
+			} 
 			b++;	
 		} 
 		
+		HashMap<BoardPosition, List<BoardPosition>> reachMap = new HashMap<>(); 
 		int i = 0;
 		for(BoardPosition goal : board.getGoalNodes())
 		{		
@@ -283,43 +282,50 @@ public class Analyser {
 		return val;		
 	}
 	
-	private boolean has4x4Block(BoardState board) {
+	private boolean is4x4BlockTopLeftCorner(BoardState board, BoardPosition pos) {
+		if(!board.isBlockingNode(pos))
+			return false;
 		
-		for(int row = 0; row < board.getRowsCount() - 1; ++row)
-			mainloop:
-			for(int col = 0; col < board.getColumnsCount() - 1; ++col) {
-				
-				if(!board.isBlockingNode(new BoardPosition(row, col)))
-					continue;
-				
-				NodeType nodes[] = new NodeType[] {
-					board.getNode(row, col),
-					board.getNode(row, col+1),
-					board.getNode(row+1, col),
-					board.getNode(row+1, col+1)
-				};
-				
-				
-				
-				boolean atLeastOneIsBlock = false;
-				for(NodeType node : nodes)
-				{
-					if(!board.isBlockingNode(node))
-						continue mainloop;
-					
-					atLeastOneIsBlock = atLeastOneIsBlock || node == NodeType.BLOCK;
-				}
-				
-				if(atLeastOneIsBlock) 				
-					return true;
-				
-			}
+		NodeType nodes[] = new NodeType[] {
+			board.getNode(pos.Row, pos.Column),
+			board.getNode(pos.Row, pos.Column+1),
+			board.getNode(pos.Row+1, pos.Column),
+			board.getNode(pos.Row+1, pos.Column+1)
+		};		
 		
+		boolean atLeastOneIsBlock = false;
+		for(NodeType node : nodes)
+		{
+			if(!board.isBlockingNode(node))
+				return false;			
+			atLeastOneIsBlock = atLeastOneIsBlock || node == NodeType.BLOCK;
+		}
+		
+		return (atLeastOneIsBlock);		
+	}
+	
+	private boolean is4x4Block(BoardState board, BoardPosition block) {
+		BoardPosition leftDown = new BoardPosition(block.Row-1, block.Column-1);
+		BoardPosition leftTop = new BoardPosition(block.Row, block.Column-1);
+		BoardPosition rightDown = new BoardPosition(block.Row-1, block.Column);
+		return is4x4BlockTopLeftCorner(board, block) 
+				|| is4x4BlockTopLeftCorner(board, leftDown)
+				|| is4x4BlockTopLeftCorner(board, rightDown)
+				|| is4x4BlockTopLeftCorner(board, leftTop);
+	}
+	
+	private boolean has4x4Block(BoardState board) {		
+		for(int row = 0; row < board.getRowsCount() - 1; ++row)			
+			for(int col = 0; col < board.getColumnsCount() - 1; ++col) {				
+				if(is4x4BlockTopLeftCorner(board, new BoardPosition(row, col)))
+					return true;			
+				
+			}		
 		return false;		
 	}
 	
 	public static void main(String[] args) throws IOException {
-		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest3");
 		System.out.println(board);
 		Analyser analyser = new Analyser(board);
 		System.out.println(analyser);

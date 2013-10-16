@@ -1,13 +1,13 @@
-package sokoban.Tethik;
+package sokoban.Tethik.old;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import sokoban.Tethik.*;
 
 /**
  * Kommer inte på någon vettig abstraktion för deadlocks än. Så hårdkodade mönster får hjälpa till lite istället...
  * @author tethik
- *
  */
 public class DeadlockFinder {
 

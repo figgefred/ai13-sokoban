@@ -1,4 +1,4 @@
-package sokoban.Tethik;
+package sokoban.Tethik.old;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -8,6 +8,7 @@ import java.util.List;
 
 import sokoban.BoardPosition;
 import sokoban.NodeType;
+import sokoban.Tethik.*;
 
 public class DeadlockPattern {
 	

@@ -2,6 +2,7 @@ package sokoban.Tethik;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
@@ -48,7 +49,8 @@ public class Player {
         	if(node.board.isWin())        	
         		return node;        	
         	
-        	for(Move neighbour: node.getNextMoves())
+        	List<Move> moves = node.getNextMoves();
+        	for(Move neighbour : moves)
         	{	            		       		
         		if (closedSet.contains(neighbour.board.hashCode())) {        			
                 	continue;
@@ -77,8 +79,7 @@ public class Player {
 		if(win != null) {		
 			//System.out.println(win.path);
 			return win.path;
-		}			
-	
+		}				
 		
 		//System.out.println();
 		return null;
@@ -93,13 +94,15 @@ public class Player {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BoardState board = BoardState.getBoardFromFile("test100/test099.in");
+		//BoardState board = BoardState.getBoardFromFile("test100/test099.in");
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
 		
 		System.out.println(board);
 		Player noob = new Player(board);
 		Path path = noob.play();
 		System.out.println(path);
-		board.movePlayer(path);
+		if(path != null)
+			board.movePlayer(path);
 		System.out.println(board);
 	}
 }
