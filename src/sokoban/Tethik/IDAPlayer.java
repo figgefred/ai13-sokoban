@@ -1,8 +1,12 @@
 package sokoban.Tethik;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+
 
 import sokoban.BoardPosition;
 
@@ -12,7 +16,7 @@ public class IDAPlayer {
 	private PathFinder pathfinder;
 	private BoardState initialState;
 	public volatile boolean shouldStop = false;
-	public static boolean VERBOSE = true;
+	public static volatile boolean VERBOSE = true;
 	
 	public IDAPlayer(BoardState initialState) {
 		this.initialState = initialState;
@@ -55,6 +59,7 @@ public class IDAPlayer {
 		
 		winMove=null;
 		visitedStates.add(node);
+		
 //		if(deadlockStates.contains(node)) {
 //			System.out.println("Old Deadlock found..");
 //			return Integer.MIN_VALUE;
@@ -86,6 +91,7 @@ public class IDAPlayer {
 		}
 				
 		List<Move> moves = node.getNextMoves();		
+		Collections.sort(moves);		
 		for(Move child : moves) {		
 			if(visitedStates.contains(child))
 				continue;
