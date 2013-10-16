@@ -17,6 +17,7 @@ import java.util.Set;
 import sokoban.BoardPosition;
 import sokoban.NodeType;
 import sokoban.Direction;
+
 /**
  *
  * @author figgefred
@@ -30,7 +31,7 @@ public class BoardState implements Cloneable
     private int BlockLastMovedIndex = -1; // Unset it is '-1' - no block was pushed
     
     private List<List<NodeType>> Map = new ArrayList<>();
-    private Set<BoardPosition> Goals;
+    private List<BoardPosition> Goals;
     private BoardPosition CurrentNode;
     
     private int rows;
@@ -39,7 +40,7 @@ public class BoardState implements Cloneable
     
     // fult, kanske ska byta interna kartan till samma typ av matris sen?
     public BoardState(NodeType[][] map, boolean initZobrist) {
-    	Goals = new HashSet<BoardPosition>();
+    	Goals = new ArrayList<BoardPosition>();
     	rows = map.length;
     	cols = Integer.MIN_VALUE;
     	for(int row = 0; row < rows; ++row) {
@@ -63,6 +64,48 @@ public class BoardState implements Cloneable
         
         setInvalidFields(Map);
         
+    }
+    
+    private void sortGoals()
+    {
+        java.util.Collections.sort(Goals, new java.util.Comparator<BoardPosition>() {
+
+			@Override
+			public int compare(BoardPosition o1, BoardPosition o2) {
+				NodeType[] n1 = getNeighbourTypes(o1);
+				
+				int val1 = 0;
+				int val2 = 0;
+				
+				int w1 = 0;
+				int w2 = 0;
+				
+				NodeType[] n2 = getNeighbourTypes(o2);
+				
+				for(int i = 0; i < n1.length; i++) {
+					switch(n1[i]) {
+					case WALL: val1 += 10; break;
+					case GOAL: val1 += 8; break;
+					default: break;
+					}
+					
+					switch(n2[i]) {
+					case WALL: val2 += 10; break;
+					case GOAL: val2 += 8; break;
+					default: break;
+					}
+					/*
+					if(n1[i] == NodeType.WALL)
+						w1++;
+					
+					if(n2[i] == NodeType.WALL)
+						w2++;
+						*/
+				}
+				
+				return val1 > val2 ? -1 : val1 < val2 ? 1 : 0;
+			}
+		});
     }
     
     private void setInvalidFields(List<List<NodeType>> map)
@@ -145,7 +188,7 @@ public class BoardState implements Cloneable
     {
         
         //IDCounter = 1;
-        Goals = new HashSet<>();
+        Goals = new ArrayList<>();
         Map = new ArrayList<>();
         
         char[] columns = null;
@@ -392,7 +435,7 @@ public class BoardState implements Cloneable
         return CurrentNode;
     }
     
-    public Set<BoardPosition> getGoalNodes()
+    public List<BoardPosition> getGoalNodes()
     {
         return Goals;
     }
@@ -645,6 +688,21 @@ public class BoardState implements Cloneable
             return blocks;*/
             return BlockIndex;
         }
+        
+    public NodeType[] getNeighbourTypes(BoardPosition pos)
+    {
+    	return getNeighbourTypes(pos.Row, pos.Column);
+    }
+    
+    public NodeType[] getNeighbourTypes(int row, int col)
+    {
+    	return new NodeType[] {
+    		getNode(row + 1, col),
+    		getNode(row - 1, col),
+    		getNode(row, col + 1),
+    		getNode(row, col - 1)
+    	};
+    }
   	
   	@SuppressWarnings("unchecked")
 	@Override

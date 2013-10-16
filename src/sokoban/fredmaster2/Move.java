@@ -12,12 +12,16 @@ public class Move implements Comparable<Move> {
 	public BoardState board;
 	public Path path;
 	private Integer heuristic_value = null;
+        
+        private LiveAnalyser LiveAnalyser;
 	
         public Move(PathFinder pathfinder, Analyser analyser)
         {
             //super();
             this.pathfinder = pathfinder;
             this.analyser = analyser;
+            
+            this.LiveAnalyser = analyser.LiveAnalyser;
         }
         
 	/*public static void initPreanalyser(BoardState board) {
@@ -41,8 +45,26 @@ public class Move implements Comparable<Move> {
 	
 	public List<Move> getNextMoves() {
 		List<Move> possibleMoves = new ArrayList<Move>();
-		List<BoardPosition> blocks = board.getBlockNodes();
-		BoardPosition playerPos = board.getPlayerNode();		
+		List<BoardPosition> blocks = null;
+                BoardPosition playerPos = board.getPlayerNode();		
+                
+                List<Area> l = LiveAnalyser.getAreas(board);
+                if(l != null && l.size() > 1)
+                {
+                    blocks = new ArrayList<>();
+                    for(Area a: l)
+                    {
+                        if(a.isCorralArea())
+                        {
+                            for(BoardPosition fencePos: a.getFencePositions())
+                            {
+                                blocks.add(fencePos);
+                            }
+                        }
+                    }
+                }
+                else 
+                    blocks = board.getBlockNodes();
 		
 		/* Block move based */
 		for(BoardPosition blockPos : blocks)
