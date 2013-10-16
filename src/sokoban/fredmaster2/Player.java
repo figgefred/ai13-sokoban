@@ -19,6 +19,7 @@ public class Player {
         public static boolean VERBOSE = false;
         public volatile boolean shouldStop;
     
+        public static boolean DO_GOAL_SORTING = true;
     
 	private BoardState initialState;
 	
@@ -123,8 +124,22 @@ public class Player {
 		BoardState board;
                 //board = BoardState.getBoardFromFile("testing/simpleplaytest3");
                 //board = BoardState.getBoardFromFile("test100/test059.in");
-                board = BoardState.getBoardFromFile("test100/test063.in");
+                
+                //board = BoardState.getBoardFromFile("test100/test009.in");
+                //board = BoardState.getBoardFromFile("test100/test019.in");
+                //board = BoardState.getBoardFromFile("test100/test029.in");
+                //board = BoardState.getBoardFromFile("test100/test029.in");
+                //board = BoardState.getBoardFromFile("test100/test039.in");
+                //board = BoardState.getBoardFromFile("test100/test049.in");
+                //board = BoardState.getBoardFromFile("test100/test059.in");
+                board = BoardState.getBoardFromFile("test100/test069.in");
+                //board = BoardState.getBoardFromFile("test100/test079.in");
+                //board = BoardState.getBoardFromFile("test100/test089.in");
+                //board = BoardState.getBoardFromFile("test100/test099.in");
                 Player.VERBOSE = false;
+                
+                Move.CORRAL_LIVE_DETECTION = true;
+                Player.DO_GOAL_SORTING = true;
                 
 		System.out.println(board);
 		Player noob = new Player(board);

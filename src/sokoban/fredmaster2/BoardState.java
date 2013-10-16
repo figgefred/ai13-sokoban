@@ -60,7 +60,9 @@ public class BoardState implements Cloneable
     	}
     	
         if(initZobrist)
+        {
             initZobristTable(rows, cols);
+        }
         
         setInvalidFields(Map);
         
@@ -152,6 +154,9 @@ public class BoardState implements Cloneable
         	initZobristTable(Map.size(), cols);
         }
         setInvalidFields(Map);
+        
+        if(Player.DO_GOAL_SORTING)
+            sortGoals();
     }
     
     public BoardState() {

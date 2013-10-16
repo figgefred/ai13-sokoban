@@ -13,6 +13,7 @@ public class Move implements Comparable<Move> {
 	public Path path;
 	private Integer heuristic_value = null;
         
+        public static boolean CORRAL_LIVE_DETECTION = true;
         private LiveAnalyser LiveAnalyser;
 	
         public Move(PathFinder pathfinder, Analyser analyser)
@@ -48,20 +49,25 @@ public class Move implements Comparable<Move> {
 		List<BoardPosition> blocks = null;
                 BoardPosition playerPos = board.getPlayerNode();		
                 
-                List<Area> l = LiveAnalyser.getAreas(board);
-                if(l != null && l.size() > 1)
+                if(CORRAL_LIVE_DETECTION)
                 {
-                    blocks = new ArrayList<>();
-                    for(Area a: l)
+                    List<Area> l = LiveAnalyser.getAreas(board);
+                    if(l != null && l.size() > 1)
                     {
-                        if(a.isCorralArea())
+                        blocks = new ArrayList<>();
+                        for(Area a: l)
                         {
-                            for(BoardPosition fencePos: a.getFencePositions())
+                            if(a.isCorralArea())
                             {
-                                blocks.add(fencePos);
+                                for(BoardPosition fencePos: a.getFencePositions())
+                                {
+                                    blocks.add(fencePos);
+                                }
                             }
                         }
                     }
+                    else 
+                        blocks = board.getBlockNodes();
                 }
                 else 
                     blocks = board.getBlockNodes();

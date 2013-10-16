@@ -257,11 +257,12 @@ public class LiveAnalyser {
         // by more then 1 area
         for(Area a: list)
         {
-            for(BoardPosition p: board.getBlockNodes())
+            //for(BoardPosition p: board.getBlockNodes())
+            for(BoardPosition p: a.getAreaPositions())
             {
-                // For every a try to match every block
                 if(board.getNode(p).isBlockNode())
                 {
+                    // For every a try to match every block
                     CorralFenceCandidate c = fenceCandidates.get(p);
                     if(c == null)
                     {
@@ -344,8 +345,8 @@ public class LiveAnalyser {
             }
             else if(neighbourType.isBlockNode())
             {
-                //area.add(neighbour, neighbourType);
-                visitNeighbouringBlocks(board, area, neighbour, new HashSet<BoardPosition>());
+                area.add(neighbour, neighbourType);
+                //visitNeighbouringBlocks(board, area, neighbour, new HashSet<BoardPosition>());
             }
         }
     }
