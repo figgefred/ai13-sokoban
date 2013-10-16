@@ -20,15 +20,24 @@ public class Main {
 				new InputStreamReader(System.in));
 		
 		String line;
-		while(br.ready()) {
-			line = br.readLine();
-			b.add(line);
+                line = br.readLine();
+		while(line != null) {
+                    if(line.equals(""))
+                        break;
+                    b.add(line);
+                    line = br.readLine();
 		} // End while
 		
+                Player.DO_BIPARTITE_MATCHING = true;
+                Player.DO_CORRAL_LIVE_DETECTION = true;
+                Player.DO_DEADLOCKS_CONSTANTCHECK = true;
+                Player.DO_DEADLOCKS_4x4 = true;
+                Player.DO_GOAL_SORTING = false;
+                
 		//System.out.println(board);
 		BoardState board = new BoardState(b, true);
 		Player noob = new Player(board);
-		noob.play();
+		System.out.println(noob.play());
 	}
 
 }

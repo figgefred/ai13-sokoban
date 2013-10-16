@@ -2,9 +2,11 @@ package tester;
 
 import java.io.IOException;
 
-import sokoban.Tethik.BoardState;
-import sokoban.Tethik.Path;
-import sokoban.Tethik.Player;
+// Tethik normal:
+//import sokoban.Tethik.*;
+
+// Fred:
+import sokoban.fredmaster2.*;
 
 public class TestJob implements Runnable {
 
@@ -13,6 +15,7 @@ public class TestJob implements Runnable {
 	public String message = "";
 	public volatile boolean isRunning = true;
 	public Player play0r;
+//	public IDAPlayer play0r;
 	
 	public TestJob(String filename) {
 		this.filename = filename;
@@ -24,7 +27,7 @@ public class TestJob implements Runnable {
 	
 	@Override
 	public void run() {
-		isRunning = true;
+		isRunning = true;		
 		BoardState board = null;
 		try {
 			board = BoardState.getBoardFromFile(filename, false);
@@ -37,11 +40,18 @@ public class TestJob implements Runnable {
 		try {
 			play0r = new Player(board);
 			Path path = play0r.play();
+			
 			if(path != null) {			
-				board.movePlayer(path);				
+				board.movePlayer(path);
 				result = board.isWin();
 				if(!result)
 					message = "Finished, but wrong path: " + path.toString();
+			} else if(!play0r.shouldStop) {
+				result = board.isWin();
+				message = "Path is null?!";
+			} else {
+				result = false;
+				message = "Timeout!";
 			}
 		} catch(IllegalArgumentException ex) {
 			result = false;			

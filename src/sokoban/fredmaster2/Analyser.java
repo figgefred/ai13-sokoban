@@ -32,7 +32,7 @@ public class Analyser {
 	private int blockDist[];
 	
 	//private DeadlockFinder deadlockerFinder = new DeadlockFinder();
-	private LiveAnalyser deadlockFinder;
+	public LiveAnalyser LiveAnalyser;
 	
 	private BoardState board;
 	private int rows;
@@ -52,8 +52,8 @@ public class Analyser {
 		this.board = board;
 		constructTableAndWorkbench();
 		// Hitta distanser?
-		mapDistancesToGoals(new BoardState(workbench, true));
-		deadlockFinder = new LiveAnalyser(this, new PathFinder());
+		mapDistancesToGoals(new BoardState(workbench, false));
+		LiveAnalyser = new LiveAnalyser(this, new PathFinder());
                 
               //  setGoalToBlockMapping();
                 setGoalQueueOrder();
@@ -402,16 +402,20 @@ public class Analyser {
 			return Integer.MAX_VALUE;
 		}		
 		
-		if(pushedBlock != null)
-		{
-                    if(deadlockFinder.isBadState(board, pushedBlock))
-                        return Integer.MIN_VALUE;
-		} /*else if(deadlockFinder.isBadState(board)) {
-                    return Integer.MIN_VALUE;
-		}*/
-		/*if(has4x4Block(board))
-			return Integer.MIN_VALUE;*/
-                
+                if(Player.DO_DEADLOCKS_CONSTANTCHECK)
+                {
+                    if(pushedBlock != null)
+                    {
+                        if(isBadPosition(pushedBlock))
+                        {
+                            return Integer.MIN_VALUE;
+                        }
+                        else if(Player.DO_DEADLOCKS_4x4 && LiveAnalyser.is4x4Block(board, pushedBlock))
+                        {
+                            return Integer.MIN_VALUE;
+                        }
+                    }
+                }
                 
 		//mapDistancesToGoals(board);
 		
@@ -460,6 +464,10 @@ public class Analyser {
 			++i;
 		}	
                 
+		
+		if(Player.DO_BIPARTITE_MATCHING && bipartiteMatcher.maxBipartiteMatchCount(reachMap, board) < board.getGoalNodes().size())
+                    return Integer.MIN_VALUE;
+                
 		int val = 0;
 		for(i = 0; i < board.getGoalNodes().size(); ++i) {
 			if(goalDist[i] == Integer.MAX_VALUE || blockDist[i] == Integer.MAX_VALUE)
@@ -470,10 +478,8 @@ public class Analyser {
 			val -= goalDist[i];
 			val -= blockDist[i];
 		}
-		/*
-		if(bipartiteMatcher.maxBipartiteMatchCount(reachMap, board) < board.getGoalNodes().size())
-                    return Integer.MIN_VALUE;
-		*/
+
+		
                 
                 
                 //int val = 0;
@@ -502,57 +508,7 @@ public class Analyser {
                         val += 100;
                     }
                 }
-                
-                
-                        
-                boolean hasBlockNeighbour = false;
-                if(pushedBlock == null)
-                {
-                    hasBlockNeighbour = true;
-                }
-                else
-                {
-                    // Flag bool to true if we pushed a block to a neighbouring block
-                    for(BoardPosition neighbour: board.getNeighbours(pushedBlock))
-                    {
-                        if(board.getNode(neighbour).isBlockNode())
-                        {
-                            hasBlockNeighbour = true;
-                        }
-                    }
-                }
-                
-                // We just make expensive lookup if we pushed into block
-                if(hasBlockNeighbour)
-                {
-                    List<Area> areas = deadlockFinder.getAreas(board);
-                    // Whooop, corral area found!!
-                    if(areas.size() > 1)
-                    {
-                        for(Area a: areas)
-                        {
-                            if(a.isCorralArea())
-                            {
-                                for(BoardPosition p: a.getFencePositions())
-                                {
-                                    // Give GIANT bonus if pushing one of the fence blocks
-                                    // This of course in order to solve the corral area ASAP
-                                    if(p.equals(pushedBlock))
-                                    {
-                                        val += 1000;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                
-               // System.out.println(board);
-                /*List<Area> l = deadlockFinder.getAreas(board);
-                for(Area a: l)
-                {
-                    System.out.println(a);
-                }*/
+
                 //try {Thread.sleep(1000000);}catch(InterruptedException ex){}
                 
 		return val;

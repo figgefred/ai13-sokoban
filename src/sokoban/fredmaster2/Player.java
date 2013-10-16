@@ -19,6 +19,11 @@ public class Player {
         public static boolean VERBOSE = false;
         public volatile boolean shouldStop;
     
+        public static boolean DO_GOAL_SORTING = true;
+        public static boolean DO_DEADLOCKS_CONSTANTCHECK = true;
+        public static boolean DO_DEADLOCKS_4x4 = true;
+        public static boolean DO_BIPARTITE_MATCHING = true;
+        public static boolean DO_CORRAL_LIVE_DETECTION = true;
     
 	private BoardState initialState;
 	
@@ -103,10 +108,10 @@ public class Player {
 		Move win = getVictoryPath(initial);
 		if(win != null) {
 			//System.out.println(win.board);
-			System.out.println(win.path);
 			return win.path;
 		} else {
-			//System.out.println("wat?");			
+                    if(VERBOSE)
+                        System.out.println("wat?");			
                     return null;
 		}
 		/*
@@ -121,17 +126,54 @@ public class Player {
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
 		BoardState board;
-                board = BoardState.getBoardFromFile("testing/simpleplaytest5");
-                //board = BoardState.getBoardFromFile("test100/test030.in");
-                Player.VERBOSE = true;
+                //board = BoardState.getBoardFromFile("testing/simpleplaytest3");
+                //board = BoardState.getBoardFromFile("testing/level3");
+                //board = BoardState.getBoardFromFile("test100/test099.in");
+                //board = BoardState.getBoardFromFile("test100/test004.in");
+                board = BoardState.getBoardFromFile("test100/test092.in");
+                
+            // Can solve
+                //board = BoardState.getBoardFromFile("test100/test059.in");
+                //board = BoardState.getBoardFromFile("test100/test069.in");
+                //board = BoardState.getBoardFromFile("test100/test092.in");
+                
+            // Cant't solve
+                //board = BoardState.getBoardFromFile("test100/test089.in");
+                
+                // IDA dålig
+                //board = BoardState.getBoardFromFile("test100/test036.in");
+                //board = BoardState.getBoardFromFile("test100/test069.in");
+                
+                
+                //board = BoardState.getBoardFromFile("test100/test009.in");
+                //board = BoardState.getBoardFromFile("test100/test019.in");
+                //board = BoardState.getBoardFromFile("test100/test029.in");
+                //board = BoardState.getBoardFromFile("test100/test029.in");
+                //board = BoardState.getBoardFromFile("test100/test039.in");
+                //board = BoardState.getBoardFromFile("test100/test049.in");
+                //board = BoardState.getBoardFromFile("test100/test059.in");
+                //board = BoardState.getBoardFromFile("test100/test069.in");
+                //board = BoardState.getBoardFromFile("test100/test079.in");
+                //board = BoardState.getBoardFromFile("test100/test089.in");
+                //board = BoardState.getBoardFromFile("test100/test099.in");
+                Player.VERBOSE = false;
+                
+                Player.DO_BIPARTITE_MATCHING = true;
+                Player.DO_CORRAL_LIVE_DETECTION = true;
+                Player.DO_DEADLOCKS_CONSTANTCHECK = true;
+                Player.DO_DEADLOCKS_4x4 = true;
+                Player.DO_GOAL_SORTING = false;
                 
 		System.out.println(board);
 		Player noob = new Player(board);
 		Path path = noob.play();
-		board.movePlayer(path);
-		System.out.println(board);
+                
+                System.out.println( (path == null?"no path": path.toString()) );
+                
+                if(path != null)
+                {
+                    board.movePlayer(path);
+                    System.out.println(board);
+                }
 	}
 }
-
-
-
