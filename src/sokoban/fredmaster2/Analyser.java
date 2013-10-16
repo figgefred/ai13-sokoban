@@ -52,7 +52,7 @@ public class Analyser {
 		this.board = board;
 		constructTableAndWorkbench();
 		// Hitta distanser?
-		mapDistancesToGoals(new BoardState(workbench, true));
+		mapDistancesToGoals(new BoardState(workbench, false));
 		LiveAnalyser = new LiveAnalyser(this, new PathFinder());
                 
               //  setGoalToBlockMapping();
@@ -464,6 +464,10 @@ public class Analyser {
 			++i;
 		}	
                 
+		
+		if(bipartiteMatcher.maxBipartiteMatchCount(reachMap, board) < board.getGoalNodes().size())
+                    return Integer.MIN_VALUE;
+                
 		int val = 0;
 		for(i = 0; i < board.getGoalNodes().size(); ++i) {
 			if(goalDist[i] == Integer.MAX_VALUE || blockDist[i] == Integer.MAX_VALUE)
@@ -474,10 +478,8 @@ public class Analyser {
 			val -= goalDist[i];
 			val -= blockDist[i];
 		}
-		/*
-		if(bipartiteMatcher.maxBipartiteMatchCount(reachMap, board) < board.getGoalNodes().size())
-                    return Integer.MIN_VALUE;
-		*/
+
+		
                 
                 
                 //int val = 0;

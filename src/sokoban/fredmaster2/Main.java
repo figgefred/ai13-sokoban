@@ -29,12 +29,14 @@ public class Main {
 		} // End while
 		
                 Player.DO_GOAL_SORTING = false;
+                Player.DO_DEADLOCKS_4x4 = true;
+                Player.DO_DEADLOCKS_CHECKS = true;
                 Move.CORRAL_LIVE_DETECTION = true;
                 
 		//System.out.println(board);
 		BoardState board = new BoardState(b, true);
 		Player noob = new Player(board);
-		noob.play();
+		System.out.println(noob.play());
 	}
 
 }

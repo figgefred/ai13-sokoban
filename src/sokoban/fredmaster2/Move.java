@@ -49,6 +49,7 @@ public class Move implements Comparable<Move> {
 		List<BoardPosition> blocks = null;
                 BoardPosition playerPos = board.getPlayerNode();		
                 
+                boolean isRealCorral = false;
                 if(CORRAL_LIVE_DETECTION)
                 {
                     List<Area> l = LiveAnalyser.getAreas(board);
@@ -59,6 +60,8 @@ public class Move implements Comparable<Move> {
                         {
                             if(a.isCorralArea())
                             {
+                                if(a.getFencePositions().size() > 0)
+                                    isRealCorral = true;
                                 for(BoardPosition fencePos: a.getFencePositions())
                                 {
                                     blocks.add(fencePos);
@@ -69,7 +72,8 @@ public class Move implements Comparable<Move> {
                     else 
                         blocks = board.getBlockNodes();
                 }
-                else 
+                
+                if(!isRealCorral)
                     blocks = board.getBlockNodes();
 		
 		/* Block move based */

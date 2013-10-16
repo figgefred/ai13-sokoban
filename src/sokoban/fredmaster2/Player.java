@@ -106,7 +106,6 @@ public class Player {
 		Move win = getVictoryPath(initial);
 		if(win != null) {
 			//System.out.println(win.board);
-			System.out.println(win.path);
 			return win.path;
 		} else {
                     if(VERBOSE)
@@ -126,13 +125,15 @@ public class Player {
 	public static void main(String[] args) throws IOException, InterruptedException {
 		BoardState board;
                 //board = BoardState.getBoardFromFile("testing/simpleplaytest3");
-                //board = BoardState.getBoardFromFile("test100/test098.in");
-                //board = BoardState.getBoardFromFile("test100/test092.in");
+                //board = BoardState.getBoardFromFile("testing/level3");
+                //board = BoardState.getBoardFromFile("test100/test099.in");
+                //board = BoardState.getBoardFromFile("test100/test004.in");
+                board = BoardState.getBoardFromFile("test100/test092.in");
                 
             // Can solve
                 //board = BoardState.getBoardFromFile("test100/test059.in");
                 //board = BoardState.getBoardFromFile("test100/test069.in");
-                board = BoardState.getBoardFromFile("test100/test092.in");
+                //board = BoardState.getBoardFromFile("test100/test092.in");
                 
             // Cant't solve
                 //board = BoardState.getBoardFromFile("test100/test089.in");
@@ -153,7 +154,7 @@ public class Player {
                 //board = BoardState.getBoardFromFile("test100/test079.in");
                 //board = BoardState.getBoardFromFile("test100/test089.in");
                 //board = BoardState.getBoardFromFile("test100/test099.in");
-                Player.VERBOSE = true;
+                Player.VERBOSE = false;
                 
                 Move.CORRAL_LIVE_DETECTION = true;
                 Player.DO_GOAL_SORTING = false;
@@ -163,10 +164,13 @@ public class Player {
 		System.out.println(board);
 		Player noob = new Player(board);
 		Path path = noob.play();
-		board.movePlayer(path);
-		System.out.println(board);
+                
+                System.out.println( (path == null?"no path": path.toString()) );
+                
+                if(path != null)
+                {
+                    board.movePlayer(path);
+                    System.out.println(board);
+                }
 	}
 }
-
-
-
