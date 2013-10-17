@@ -8,16 +8,23 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import sokoban.BoardPosition;
+import sokoban.NodeType;
+
 /**
  *
  * @author figgefred
  */
 public class LiveAnalyser {
    	
+	private Analyser analyser;
+	private PathFinder pathfinder;
     
-	public LiveAnalyser()
-	{}
-	
+	public LiveAnalyser(Analyser analyser, PathFinder finder)
+	{
+		this.analyser = analyser;
+		this.pathfinder = finder;
+	}
 	
     public boolean isBadState(BoardState state, BoardPosition block)
     {
@@ -26,6 +33,16 @@ public class LiveAnalyser {
                 ||
                 isDeadlockState(state, new HashSet<BoardPosition>(),block)
                 ;
+    }
+    
+    public boolean isBadState(BoardState board)
+    {
+    	for(BoardPosition block : board.getBlockNodes())
+    		if(board.getNode(block) == NodeType.BLOCK && isBadState(board, block)) {
+    			return true;
+    		}
+    	
+    	return false;
     }
     
     private boolean isDeadlockState(BoardState state, Set<BoardPosition> tmpBlock, BoardPosition block)
@@ -44,18 +61,22 @@ public class LiveAnalyser {
         
         // Check if there are any walls blocking horizontally
         // Or of course if there is any block already checked that is blocking
-        boolean horizontalWallBlocking = 
-                (left.Column >= 0 && state.getNode(left) == NodeType.WALL) 
-                ||
-                (right.Column < state.getColumnsCount(right.Row) && state.getNode(right) == NodeType.WALL)
-                ;
+        boolean horizontalWallBlocking = (left.Column >= 0 && state.getNode(left) == NodeType.WALL)
+			|| (right.Column < state.getColumnsCount() && state.getNode(right) == NodeType.WALL);
+        
+        horizontalWallBlocking = horizontalWallBlocking || 
+        		((left.Column >= 0 && analyser.isBadPosition(left)) && 
+        				(right.Column < state.getColumnsCount() && analyser.isBadPosition(right)));
+        
+        
+        
         
         // Check same as above just vertical
-        boolean verticalWallBlocking = 
-                (up.Row >= 0 && state.getNode(up) == NodeType.WALL) 
-                ||
-                (down.Row < state.getRowsCount() && state.getNode(down) == NodeType.WALL)   
-                ;
+        boolean verticalWallBlocking = (up.Row >= 0 && state.getNode(up) == NodeType.WALL) 
+                || (down.Row < state.getRowsCount() && state.getNode(down) == NodeType.WALL)   
+                || ((up.Row >= 0 && analyser.isBadPosition(up)) 
+                && (down.Row < state.getRowsCount() && analyser.isBadPosition(down)));
+                
         
         // Can block be moved?
         // Note we have to iterate over all blocks to check one of them
@@ -82,21 +103,21 @@ public class LiveAnalyser {
         // Mark this block as checked - avoid stackoverflow
         tmpBlock.add(block);
         boolean deadlockState = 
-                (
-                    (verticalWallBlocking)
-                    ||
-                    (up.Row >= 0 && isBlockType(state.getNode(up)) && (tmpBlock.contains(up) || isDeadlockState(state, tmpBlock, up)))
-                    ||
-                    (down.Row < state.getRowsCount() && isBlockType(state.getNode(down)) && (tmpBlock.contains(down) || isDeadlockState(state, tmpBlock, down)))
-                )
-                &&
-                (
-                    (horizontalWallBlocking)
-                    ||
-                    (left.Column >= 0 && isBlockType(state.getNode(left)) && (tmpBlock.contains(left) || isDeadlockState(state, tmpBlock, left)))
-                    ||
-                    (right.Column < state.getColumnsCount(right.Row) && isBlockType(state.getNode(right)) && (tmpBlock.contains(right) || isDeadlockState(state, tmpBlock, right)))
-                );
+            (
+                (verticalWallBlocking)
+                ||
+                (up.Row >= 0 && isBlockType(state.getNode(up)) && (tmpBlock.contains(up) || isDeadlockState(state, tmpBlock, up)))
+                ||
+                (down.Row < state.getRowsCount() && isBlockType(state.getNode(down)) && (tmpBlock.contains(down) || isDeadlockState(state, tmpBlock, down)))
+            )
+            &&
+            (
+                (horizontalWallBlocking)
+                ||
+                (left.Column >= 0 && isBlockType(state.getNode(left)) && (tmpBlock.contains(left) || isDeadlockState(state, tmpBlock, left)))
+                ||
+                (right.Column < state.getColumnsCount() && isBlockType(state.getNode(right)) && (tmpBlock.contains(right) || isDeadlockState(state, tmpBlock, right)))
+            );
         return deadlockState;
     }
     
@@ -115,7 +136,7 @@ public class LiveAnalyser {
         {
             for(int c = cmin; c <= cmax; c++)    
             {
-                if( (r >= 0 && r < state.getRowsCount()) && (c >= 0 && c < state.getColumnsCount(r)) )
+                if( (r >= 0 && r < state.getRowsCount()) && (c >= 0 && c < state.getColumnsCount()) )
                 {
                     segments[r-rmin][c-cmin] = state.getNode(r, c);
                 }
@@ -177,7 +198,11 @@ public class LiveAnalyser {
             "testing/deadlocktest2",
             "testing/deadlocktest3",
             "testing/deadlocktest4",
-            "testing/deadlocktest5"
+            "testing/deadlocktest5",
+            "testing/deadlocktest6",
+            "testing/deadlocktest7",
+            "testing/deadlocktest9",
+            "testing/deadlocktest10",
         };
         for(String file: files)
         {
@@ -186,7 +211,7 @@ public class LiveAnalyser {
             for(int r = 0; r < board.getRowsCount(); r++)
             {
                 p = null;
-                for(int c = 0; c < board.getColumnsCount(r); c++)
+                for(int c = 0; c < board.getColumnsCount(); c++)
                 {
                     if(board.getNode(r, c) == NodeType.BLOCK_ON_GOAL)
                     {
@@ -200,10 +225,12 @@ public class LiveAnalyser {
             if(p == null)
                 System.out.println("ERROR! Expected a BLOCK_ON_GOAL ('*') node to investigate.");
             
-            LiveAnalyser analyser = new LiveAnalyser();
+            Analyser bestanalyser = new Analyser(board);
+            PathFinder finder = new PathFinder();
+            LiveAnalyser analyser = new LiveAnalyser(bestanalyser, finder);
             System.out.println(board);
             Set<BoardPosition> visitedBlock = new HashSet<BoardPosition>();
-	System.out.println("Analyser verdict: State deadlock? - " + analyser.isDeadlockState(board, visitedBlock, p));
+            System.out.println("Analyser verdict: State deadlock? - " + analyser.isDeadlockState(board, visitedBlock, p));
             System.out.println("Visited: " + visitedBlock);
         }
     }

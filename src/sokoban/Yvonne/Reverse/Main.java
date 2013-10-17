@@ -6,25 +6,20 @@ import java.io.InputStreamReader;
 import java.util.Vector;
 
 public class Main {
-long startTime;
+
 	/**
-	 * Read the board.
-	 * Add the lines to vector b.
-	 * 
 	 * @param args
 	 */
 
 	public static void main(String[] args) throws IOException, InterruptedException {
 //		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
-		long start = System.currentTimeMillis();
-
+		
 		Vector<String> b = new Vector<String>();
 		
 		BufferedReader br = new BufferedReader(
 				new InputStreamReader(System.in));
 		
 		String line;
-		
 		while(br.ready()) {
 			line = br.readLine();
 			b.add(line);
@@ -32,9 +27,8 @@ long startTime;
 		
 		//System.out.println(board);
 		BoardState board = new BoardState(b);
-		System.out.println("Ending state: "+ board.getEndingState());
-		Player player = new Player(board.getEndingState());
-		player.play();
+		Player noob = new Player(board);
+		noob.play();
 	}
 
 }
