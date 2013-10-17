@@ -1,0 +1,69 @@
+package sokoban.Tethik;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import sokoban.BoardPosition;
+import sokoban.NodeType;
+
+public class SingleBlockMove extends Move {
+
+	private Integer heuristic_value = null;
+	public BoardPosition block;
+	public int goalindex;
+	
+	public SingleBlockMove(Analyser analyser, PathFinder pathfinder, BoardPosition block, int goalindex) {
+		super(analyser, pathfinder);
+		this.block = block;
+		this.goalindex = goalindex;
+	}
+	
+	public int getHeuristicValue() {
+		if(heuristic_value != null)
+			return heuristic_value;
+	
+		heuristic_value = analyser.getHeuristicValue(board, block, goalindex);
+		return heuristic_value; 
+	}
+
+	public boolean isWin() {
+		return board.get(block) == NodeType.BLOCK_ON_GOAL;
+	}
+	
+	public List<Move> getNextPushMoves() {
+		List<Move> possibleMoves = new ArrayList<Move>();
+		BoardPosition playerPos = board.getPlayerNode();	
+
+		List<BoardPosition> pushPositions = board.getPushingPositions(block);
+		
+		// now do pathfinding to see if player can reach it..
+		for(BoardPosition candidate : pushPositions)
+		{
+			Path getThere;
+			if(candidate.equals(playerPos))
+				getThere = new Path(candidate);
+			else
+				getThere = pathfinder.getPath(board, candidate);		
+			
+			if(getThere == null) // no path found
+				continue;				
+			
+			Path toPush = getThere.cloneAndAppend(block);
+			
+			BoardState newBoard = (BoardState) board.clone();
+			// move the player along the path.
+			newBoard.movePlayer(toPush);
+			// push the block by moving towards the block.
+			newBoard.movePlayerTo(block);
+			
+			SingleBlockMove move = new SingleBlockMove(analyser, pathfinder, newBoard.getLastPushedBlock(), goalindex);
+			move.board = newBoard;
+			move.path = path.cloneAndAppend(toPush);
+			move.pushes = pushes + 1;
+			possibleMoves.add(move);					
+		}	
+		
+		return possibleMoves;
+	}
+
+}

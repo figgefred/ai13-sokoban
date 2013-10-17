@@ -10,14 +10,20 @@ import java.util.Queue;
 /***
  * A* variant on boardstate
  * @author tethik
- * 
  */
 public class Player {	
 	
 	private Queue<Move> openSet;
     private HashSet<Integer> closedSet;
-    public static boolean VERBOSE = true;
+    
     public volatile boolean shouldStop = false;
+    
+    public static boolean VERBOSE = true;
+    public static boolean DO_GOAL_SORTING = true;
+    public static boolean DO_DEADLOCKS_CONSTANTCHECK = true;
+    public static boolean DO_DEADLOCKS_4x4 = true;
+    public static boolean DO_BIPARTITE_MATCHING = true;
+    public static boolean DO_CORRAL_LIVE_DETECTION = false;
     
 	private BoardState initialState;
 	
@@ -50,23 +56,16 @@ public class Player {
         		return node;        	
         	
         	List<Move> moves = node.getNextMoves();
-//        	System.err.println("Moves:");
         	for(Move neighbour : moves)
-        	{	            	
-//        		System.err.println(neighbour.pushes + " " + neighbour.getHeuristicValue());
-    			
-        		
-        		if (closedSet.contains(neighbour.board.hashCode())) {        			
+        	{	
+        		if(closedSet.contains(neighbour.board.hashCode())) {        			
                 	continue;
         		}
         		
-    			closedSet.add(neighbour.board.hashCode());
-    			
+    			closedSet.add(neighbour.board.hashCode());    			
     		
     			if(neighbour.getHeuristicValue() > Integer.MIN_VALUE)
     				openSet.add(neighbour);  	
-    			
-    			
         	}
         }
 
@@ -96,23 +95,28 @@ public class Player {
 //			System.out.println(nextMove.path);
 //			System.out.println(nextMove.getHeuristicValue());
 //		}
-//		
+		
 		return null;
 		
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
 //		BoardState board = BoardState.getBoardFromFile("test100/test099.in");
-		BoardState board = BoardState.getBoardFromFile("test100/test001.in");
+		BoardState board = BoardState.getBoardFromFile("test100/test002.in");
 //		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest5");
+		
+		long timeStart = System.currentTimeMillis();
 		
 		System.out.println(board);
 		Player noob = new Player(board);
 		Path path = noob.play();
+		long timeStop = System.currentTimeMillis();
 		System.out.println(path);
 		if(path != null)
 			board.movePlayer(path);
 		System.out.println(board);
+		
+		System.out.println("Time: " + (timeStop - timeStart) + " ms");
 	}
 }
 
