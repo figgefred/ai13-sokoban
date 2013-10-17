@@ -26,10 +26,9 @@ public class Analyser {
 	private boolean badTable[][];
 	private NodeType workbench[][];
 	private int distanceMatrix[][][];
+	
 	private int goalDist[];
 	private int blockDist[];
-	
-	//private DeadlockFinder deadlockerFinder2 = new DeadlockFinder();
 	
 	private BoardState board;
 	private int rows;
@@ -159,8 +158,6 @@ public class Analyser {
 	
 	
 	private void printDistanceMatrix(BoardState board) {	
-		//mapDistancesToGoals(board);
-		
 		StringBuilder builder = new StringBuilder();		
 		for(int i = 0; i < distanceMatrix.length; i++)
 		{
@@ -186,37 +183,13 @@ public class Analyser {
 		System.out.println(builder.toString());
 	}
 	
-	public boolean isDeadlock(BoardState board) {
-		return true;
-	}
-	
 	public int getHeuristicValue(BoardState board) {
 		this.board = board;
-		
-//		if(board.isWin()) {				
-//			return Integer.MAX_VALUE;
-//		}		
-		
-//		if(pushedBlock != null)
-//		{
-//			if(deadlockFinder.isBadState(board, pushedBlock))
-//				return Integer.MIN_VALUE;
-//		} else if(deadlockFinder.isBadState(board)) {
-//			return Integer.MIN_VALUE;
-//		}
-//		
-//		if(deadlockerFinder2.isDeadLock(board)) 
-//			return Integer.MIN_VALUE;
-		
-		
-//		if(has4x4Block(board))
-//			return Integer.MIN_VALUE;
 		
 		for(int i = 0; i < goalDist.length; i++) {
 			goalDist[i] = Integer.MAX_VALUE;
 			blockDist[i] = Integer.MAX_VALUE;
 		}
-		
 		
 		List<BoardPosition> blocks = board.getBlockNodes();	
 		int b = 0; 
@@ -276,6 +249,16 @@ public class Analyser {
 		return val;		
 	}
 	
+	public int getHeuristicValue(BoardState board, BoardPosition block, int goalindex) {
+		if(is4x4Block(board, block) || (board.get(block) != NodeType.BLOCK_ON_GOAL && isBadPosition(block)))
+			return Integer.MIN_VALUE;
+		
+		if(distanceMatrix[goalindex][block.Row][block.Column] == Integer.MAX_VALUE)
+			return Integer.MIN_VALUE;
+		
+		return -distanceMatrix[goalindex][block.Row][block.Column];
+	}
+	
 	private boolean is4x4BlockTopLeftCorner(BoardState board, BoardPosition pos) {
 		if(!board.isBlockingNode(pos))
 			return false;
@@ -308,6 +291,7 @@ public class Analyser {
 				|| is4x4BlockTopLeftCorner(board, leftTop);
 	}
 	
+	@SuppressWarnings("unused")
 	private boolean has4x4Block(BoardState board) {		
 		for(int row = 0; row < board.getRowsCount() - 1; ++row)			
 			for(int col = 0; col < board.getColumnsCount() - 1; ++col) {				

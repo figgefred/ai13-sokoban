@@ -14,10 +14,12 @@ public class SingleBlockPlayer {
 	
 	
 	private PathFinder pathfinder;
+	private Analyser analyser;
 	public static boolean VERBOSE = false;
 	
-	public SingleBlockPlayer() {	
-		pathfinder = new PathFinder();
+	public SingleBlockPlayer(Analyser analyser) {			
+		this.analyser = analyser;
+		this.pathfinder = new PathFinder();
 	}
 	
 	public List<Move> findGoalMoves(Move root, BoardPosition block) {
@@ -26,7 +28,20 @@ public class SingleBlockPlayer {
 			return new ArrayList<Move>();
 		
 		BoardState board = root.board;
-		Path path = root.path; 
+		Path path = root.path;
+		
+//		List<BoardPosition> pushPositions = board.getPushingPositions(block);		
+//		boolean canReach = false;		
+//		for(BoardPosition pushPos : pushPositions)
+//		{
+//			if(pathfinder.isReachable(board, pushPos)) {
+//				canReach = true;
+//				break;
+//			}
+//		}		
+//		if(!canReach)
+//			return new ArrayList<Move>();
+
 		
 		ArrayList<Move> goalmoves = new ArrayList<Move>();
 		BoardState clone = (BoardState) board.clone();
@@ -45,25 +60,29 @@ public class SingleBlockPlayer {
 			clone.set(goal, NodeType.SPACE);			
 		}
 		
-		for(BoardPosition goal : board.getGoalNodes()) {
-			if(goal.equals(block))
+		int goalindex = 0;
+		for(BoardPosition goal : board.getGoalNodes()) {		
+			if(goal.equals(block)) {
+				goalindex++;
 				continue;
-			if(clone.get(goal) == NodeType.WALL)
-				continue;
+			}
 			
+			if(clone.get(goal) == NodeType.WALL) {
+				goalindex++;
+				continue;
+			}
+	
 			clone.set(goal, NodeType.GOAL);
 			clone.RecalculateGoalNodes();
-			Analyser analyser = new Analyser(clone);
-			Move initial = new Move(analyser, pathfinder);
+			SingleBlockMove initial = new SingleBlockMove(analyser, pathfinder, block, goalindex);
 			initial.board = clone;		
 			initial.path = new Path();
 			
-			Move move = getVictoryPath(initial);
+			Move move = getGoalPath(initial);
 			
 			if(move != null) {
 				Move normalised = new Move(root.analyser, root.pathfinder);
 				normalised.board = (BoardState) board.clone();
-//				System.out.println(move.path);
 				normalised.board.movePlayer(move.path);
 				normalised.path = path.cloneAndAppend(move.path);
 				normalised.pushes = root.pushes + move.pushes;
@@ -71,12 +90,13 @@ public class SingleBlockPlayer {
 			}
 			
 			clone.set(goal, NodeType.SPACE);
+			goalindex++;
 		}		
 		
 		return goalmoves;
 	}
 	
-	public Move getVictoryPath(Move initialPosition)
+	public Move getGoalPath(SingleBlockMove initialPosition)
 	{
 		Queue<Move> openSet = new PriorityQueue<Move>();
 		HashSet<Integer> closedSet = new HashSet<Integer>();
@@ -93,7 +113,7 @@ public class SingleBlockPlayer {
 	        	System.out.println(node.board);
         	}
         	
-        	if(node.board.isWin())        	
+        	if(node.isWin())        	
         		return node;        	
         	
         	List<Move> moves = node.getNextPushMoves();
@@ -115,29 +135,26 @@ public class SingleBlockPlayer {
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
 		//BoardState board = BoardState.getBoardFromFile("test100/test099.in");
-		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest5");
+		BoardState board = BoardState.getBoardFromFile("testing/level3");
 		
 		System.out.println(board);
-		SingleBlockPlayer noob = new SingleBlockPlayer();
-		SingleBlockPlayer.VERBOSE = false;
-		BoardPosition block = board.getBlockNodes().get(0);
-		
 		Analyser analyser = new Analyser(board);
 		PathFinder pathfinder = new PathFinder();
-		Move initial = new Move(analyser, pathfinder);	
-		initial.board = board;
-		initial.path = new Path();
-		for(Move move : noob.findGoalMoves(initial, block)) {			
-			System.out.println(move.path.getPath().size() + ", " + move.getHeuristicValue() + ", " + move.board.hashCode());
-        	System.out.println(move.board);
+		SingleBlockPlayer noob = new SingleBlockPlayer(analyser);
+		SingleBlockPlayer.VERBOSE = false;
+		
+//		BoardPosition block = board.getBlockNodes().get(0);
+		for(BoardPosition block : board.getBlockNodes())
+		{	
+			Move initial = new Move(analyser, pathfinder);	
+			initial.board = board;
+			initial.path = new Path();
+			for(Move move : noob.findGoalMoves(initial, block)) {			
+				System.out.println(move.path.getPath().size() + ", " + move.getHeuristicValue() + ", " + move.board.hashCode());
+	        	System.out.println(move.board);
+			}
 		}
 		
-		
-		
-//		System.out.println(path);
-//		if(path != null)
-//			board.movePlayer(path);
-//		System.out.println(board);
 	}
 
 }

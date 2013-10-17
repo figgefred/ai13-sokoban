@@ -12,26 +12,50 @@ public class Move implements Comparable<Move> {
 	public Path path;
 	private Integer heuristic_value = null;
 	public int pushes = 1;
-	private SingleBlockPlayer singleBlockPlayer = new SingleBlockPlayer();
+	
+	private SingleBlockPlayer singleBlockPlayer;
+	private int heuristic_bonus = 0;
 	
 	public Move(Analyser analyser, PathFinder pathfinder) {
 		this.pathfinder = pathfinder;
 		this.analyser = analyser;
+		singleBlockPlayer = new SingleBlockPlayer(analyser);
 	}
-	
 
 	public int getHeuristicValue() {
 		if(heuristic_value != null)
 			return heuristic_value;
 		
-//		BoardPosition lastpos = path.get(path.getPath().size() - 2);
-//		BoardPosition pushedBlock = null;
-//		if(lastpos != null) {
-//			Direction pushDirection = lastpos.getDirection(board.getPlayerNode());
-//			pushedBlock = board.getPlayerNode().getNeighbouringPosition(pushDirection);
-//		}
+
+		
 		heuristic_value = analyser.getHeuristicValue(board);
+		
+		if(heuristic_value == Integer.MAX_VALUE || heuristic_value == Integer.MIN_VALUE)
+			return heuristic_value;
+		
+		if(Player.DO_CORRAL_LIVE_DETECTION)
+        {
+            List<CorralArea> l = LiveAnalyser.getAreas(board);
+            if(l != null && l.size() > 1)
+            {
+                for(CorralArea a: l)
+                {
+                    if(a.isCorralArea())
+                    {
+                        if(!a.getFencePositions().contains(board.getLastPushedBlock()))
+                        {
+                        	heuristic_value += 1;
+                        }
+                    }
+                }
+            }
+        }
+		
 		return heuristic_value; 
+	}
+	
+	public boolean isWin() {
+		return board.isWin();
 	}
 	
 	public List<Move> getNextPushMoves() {
@@ -70,6 +94,7 @@ public class Move implements Comparable<Move> {
 				move.board = newBoard;
 				move.path = path.cloneAndAppend(toPush);
 				move.pushes = pushes + 1;
+				move.heuristic_bonus = this.heuristic_bonus;
 				possibleMoves.add(move);					
 			}	
 		}

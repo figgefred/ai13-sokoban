@@ -79,14 +79,11 @@ public class PathFinder {
 	
 	public boolean isReachable(BoardState board, BoardPosition goal) {
 		if(board_hash != board.hashCode()) {
-			mapPlayerDistance(board);
-			pathCache.clear();
+			mapPlayerDistance(board);			
 		}
 		
 		return (playerDistMatrix[goal.Row][goal.Column] < Integer.MAX_VALUE);			
 	}
-	
-	private HashMap<BoardPosition, Path> pathCache = new HashMap<BoardPosition, Path>();
 
 	public Path getPath(BoardState board, BoardPosition goal) {
 		if(board_hash != board.hashCode()) {
