@@ -34,7 +34,7 @@ public class BoardState implements Cloneable
     private List<List<NodeType>> Map = new ArrayList<>();
     private List<BoardPosition> Goals;
     private BoardPosition CurrentNode;
-    private List<Tunnel> Tunnels;
+    private Tunnels Tunnels;
     
     
     private int rows;
@@ -65,53 +65,64 @@ public class BoardState implements Cloneable
         if(initZobrist)
         {
             initZobristTable(rows, cols);
+            setAllTunnels();
+            setInvalidFields(Map);
         }
-        
-        setInvalidFields(Map);
-        
     }
     
     private void setAllTunnels()
     {
-        Tunnels = new ArrayList<>();
+        Tunnels = new Tunnels();
+        Set<BoardPosition> markedAsTunnel = new HashSet<BoardPosition>();
+        // First we look for VERTICAL entrances
         for(int i = 0; i < getRowsCount(); i++)
         {
-            for(int j = 0; j < getColumnsCount(j); j++)
+            for(int j = 0; j < getColumnsCount(i); j++)
             {
-                    BoardPosition centerP = new BoardPosition(i, j);
-                    
-                    if(getNode(centerP).isTunnelSpaceNode())
+                BoardPosition centerP = new BoardPosition(i, j);
+
+                if(getNode(centerP).isTunnelSpaceNode())
+                {
+                    boolean horizontal = false;
+                    // UP || DOWN
+                    BoardPosition p1 = new BoardPosition(i, j-1);
+                    BoardPosition p3 = new BoardPosition(i, j+1);
+                    if(getNode(p1).isWallNode() && getNode(p3).isWallNode())
                     {
-                        boolean horizontal = false;
-                        // UP || DOWN
-                        BoardPosition p1 = new BoardPosition(i, j-1);
-                        BoardPosition p3 = new BoardPosition(i, j+1);
-                        if(getNode(p1).isWallNode() && getNode(centerP).isWallNode())
+                        Tunnel t = new Tunnel(this);
+                        expandTunnel(t, centerP, Direction.DOWN, markedAsTunnel);
+                        if(!t.isEmpty())
+                                Tunnels.add(t);
+                    }
+                    else
+                        horizontal = true;
+                    if(horizontal)
+                    {
+                        p1 = new BoardPosition(i-1, j);
+                        p3 = new BoardPosition(i+1, j);    
+                        if(getNode(p1).isWallNode() && getNode(p3).isWallNode())
                         {
                             Tunnel t = new Tunnel(this);
-                            Tunnels.add(t);
-                            expandTunnel(t, centerP, Direction.NONE);
-                        }
-                        else
-                            horizontal = true;
-                        if(horizontal)
-                        {
-                            p1 = new BoardPosition(i-1, j);
-                            p3 = new BoardPosition(i+1, j);    
-                            if(getNode(p1).isWallNode() && getNode(centerP).isWallNode())
-                            {
-                                Tunnel t = new Tunnel(this);
+                            expandTunnel(t, centerP, Direction.RIGHT, markedAsTunnel);    
+                            if(!t.isEmpty())
                                 Tunnels.add(t);
-                                expandTunnel(t, centerP, Direction.NONE);    
-                            }
                         }
                     }
+                }
             }
         }
+        
+        // Now we look for HORIZONTAL entrances
     }
     
-    private void expandTunnel(Tunnel t, BoardPosition p, Direction direction)
+    private void expandTunnel(Tunnel tunnel, BoardPosition p, Direction direction, Set<BoardPosition> visited)
     {
+        // Add head position
+        if(visited.contains(p))
+            return;
+        tunnel.add(p);
+        visited.add(p);
+        
         BoardPosition p1;
         BoardPosition p2;
         BoardPosition p3;
@@ -151,16 +162,30 @@ public class BoardState implements Cloneable
             }
         }
             
-        // Add head position
-        t.add(p);
-        if(getNode(p1).isWallNode() && getNode(p2).isTunnelSpaceNode() && getNode(p3).isWallNode())
+        
+        if(!visited.contains(p2) )
         {
-            expandTunnel(t, p, direction);
+            boolean appended = tunnel.add(p2);
+            visited.add(p2);
+            while(appended)
+            {    
+                appended = false;
+                for(BoardPosition n: this.getNeighbours(p2))
+                {
+                    if(tunnel.add(n))
+                    {
+                        p2 = n;
+                        visited.add(n);
+                        appended = true;
+                        break;
+                    }
+                }   
+            }
         }
     }
     
     
-    public List<Tunnel> getTunnels()
+    public Tunnels getTunnels()
     {
         return Tunnels;
     }
@@ -248,8 +273,9 @@ public class BoardState implements Cloneable
     	for(List<NodeType> row : Map)
     		cols = Math.max(row.size(), cols);
         if(initZobrist) { 
-        	initZobristTable(Map.size(), cols);
+            initZobristTable(Map.size(), cols);
         }
+        setAllTunnels();
         setInvalidFields(Map);
         
         if(Player.DO_GOAL_SORTING)
