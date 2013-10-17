@@ -100,7 +100,7 @@ public class DeadlockPattern {
 	    		for(int r = 0; r < rows; ++r) {
 	    			for(int c = 0; c < Map.get(r).size(); ++c)
 	    			{    				
-	    				NodeType node = board.getNode(pos.Row + r, pos.Column + c);	    				
+	    				NodeType node = board.get(pos.Row + r, pos.Column + c);	    				
 	    				NodeType patt = Map.get(r).get(c);
 	    				
 	    				// Tolka pattern filer lite olika:
@@ -131,7 +131,7 @@ public class DeadlockPattern {
 	    		for(int r = 0; r < rows; ++r) {
 	    			for(int c = 0; c < Map.get(r).size(); ++c)
 	    			{    				
-	    				NodeType node = board.getNode(pos.Row + r, pos.Column + c);
+	    				NodeType node = board.get(pos.Row + r, pos.Column + c);
 	    				NodeType patt = Map.get(rows - 1 - r).get(c);
 	    				
 	    				// Tolka pattern filer lite olika:
@@ -162,7 +162,7 @@ public class DeadlockPattern {
 	    		for(int r = 0; r < rows; ++r) {
 	    			for(int c = 0; c < Map.get(r).size(); ++c)
 	    			{    				
-	    				NodeType node = board.getNode(pos.Row + r, pos.Column + c);
+	    				NodeType node = board.get(pos.Row + r, pos.Column + c);
 	    				NodeType patt = Map.get(r).get(Map.get(r).size() - 1 - c);
 	    				
 	    				// Tolka pattern filer lite olika:

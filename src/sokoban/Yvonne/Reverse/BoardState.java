@@ -277,11 +277,7 @@ public class BoardState implements Cloneable
      */
     public List<BoardPosition> getPullingPositions(int row, int col)
     {
-    	//NodeType node = getNode(row, col);
-    	/* 
-    	if(node != NodeType.BLOCK && node != NodeType.BLOCK_ON_GOAL)
-    		 throw new IllegalArgumentException("Cant get pushing positions for non blocks: ("+row+" "+col+ " " + node + ")");
-    	*/
+ 
     	
 		 List<BoardPosition> positions = new ArrayList<>();
 		 // UP and DOWN
@@ -370,13 +366,54 @@ public class BoardState implements Cloneable
     	return true;
     }
     
-    
-    public void movePlayerTo2(int row, int col){
-    	Direction dir = getDirection(new BoardPosition(row,col), CurrentNode);
-    	moveBlockTo(CurrentNode.Row, CurrentNode.Column, dir);
-    	
-    	
+    public boolean isBlockBehind(Direction dir, int row, int col){
+    	switch(dir)
+    	{
+    	case UP:
+    		if(Map.get(row+2).get(col)==NodeType.BLOCK ||Map.get(row+2).get(col)==NodeType.BLOCK )
+    			return true;
+    		break;
+    	case DOWN:
+    		if(Map.get(row-2).get(col)==NodeType.BLOCK ||Map.get(row-2).get(col)==NodeType.BLOCK )
+    			return true;    		
+    		break;
+    	case LEFT:
+    		if(Map.get(row).get(col+2)==NodeType.BLOCK ||Map.get(row).get(col+2)==NodeType.BLOCK )
+    			return true;
+    		break;
+    	case RIGHT:
+    		if(Map.get(row).get(col-2)==NodeType.BLOCK ||Map.get(row).get(col-2)==NodeType.BLOCK )
+    			return true;
+    		break;
+		default:
+			break;
+    	}
+    	return false;
     }
+    
+    
+    
+    public boolean isValidPosition(int row, int col){
+    	if(row < 0 || row >= Map.size())
+    		throw new IllegalArgumentException("Position is out of bounds (x = " + row + ")");
+    
+    	int diff = col - CurrentNode.Column + row - CurrentNode.Row;
+    	if(Math.abs(diff) > 1)
+    		throw new IllegalArgumentException("Can't move player more than one coordinate");
+    	
+    	NodeType type = Map.get(row).get(col);
+		if(type == NodeType.BLOCK || type == NodeType.BLOCK_ON_GOAL)
+		{
+			System.out.println(row+ " "+col);
+			throw new IllegalArgumentException ("Invalid destination");
+		
+		
+		} else if(type != NodeType.SPACE && type != NodeType.GOAL) {
+			// Wall or other invalid move
+			throw new IllegalArgumentException("Invalid move: \n" + CurrentNode + "\n  " + row + " " + col + " is " + type);
+		}
+    return true;
+		}
     
     /***
      * Moves the player to target position. Resetting the old position to its normal value.
@@ -391,45 +428,13 @@ public class BoardState implements Cloneable
     	if(new BoardPosition(row, col).equals(CurrentNode))
     		return;
     	
-    	if(row < 0 || row >= Map.size())
-    		throw new IllegalArgumentException("Position is out of bounds (x = " + row + ")");
-    
-    	int diff = col - CurrentNode.Column + row - CurrentNode.Row;
-    	if(Math.abs(diff) > 1)
-    		throw new IllegalArgumentException("Can't move player more than one coordinate");
-    	
-    	NodeType type = Map.get(row).get(col);
-		if(type == NodeType.BLOCK || type == NodeType.BLOCK_ON_GOAL)
-		{
-			System.out.println(row+ " "+col);
-			throw new IllegalArgumentException ("Invalid destination");
-			/*
-			// Check if block can be pushed	(and if so do so)	
-			if(diff > 0) 
-			{
-				if(row > CurrentNode.Row) // South
-					pushBlock(row, col, row+1, col);					
-				else
-					pushBlock(row, col, row, col+1); // East
-			}
-			else { 
-				if(row < CurrentNode.Row) // North
-					pushBlock(row, col, row-1, col);
-				else
-					pushBlock(row, col, row, col-1); // West
-					
-			}*/
-		
-		} else if(type != NodeType.SPACE && type != NodeType.GOAL) {
-			// Wall or other invalid move
-			throw new IllegalArgumentException("Invalid move: \n" + CurrentNode + "\n  " + row + " " + col + " is " + type);			
-		} else {			
-			// Set new position (otherwise push will)
-			
+    	if(isValidPosition(row,col)){
 			Direction dir = getDirection(CurrentNode, new BoardPosition(row,col));
-			moveBlockTo(CurrentNode.Row, CurrentNode.Column, dir);
-		}
-    	
+		//	moveBlockTo(CurrentNode.Row, CurrentNode.Column, dir);
+			if(isBlockBehind(dir,row,col)){
+				pullBlock(dir,row,col);
+			}
+ 
 		// Reset old position
     	NodeType playerType = Map.get(CurrentNode.Row).get(CurrentNode.Column);
 		Map.get(CurrentNode.Row).set(CurrentNode.Column, (playerType == NodeType.PLAYER_ON_GOAL) ? NodeType.GOAL : NodeType.SPACE);
@@ -445,16 +450,23 @@ public class BoardState implements Cloneable
 		}
 		
 		CurrentNode = new BoardPosition(row, col);	
+    }
 
     }
     
     
     public void movePlayer(Path path) {
+    	System.out.println("last pos: "+path.last().Row+" "+path.last().Column);
+    //	path.getPath().remove(path.last());
+    	//System.out.println("last pos: "+path.last().Row+" "+path.last().Column);
     	for(BoardPosition pos : path.getPath())
     	{
+    		System.out.println("pos "+pos.Row+" "+pos.Column);
 //    		if(pos != null && pos.equals(CurrentNode))
             if(pos.equals(CurrentNode))
     			continue;
+            if(Map.get(pos.Row).get(pos.Column)==NodeType.BLOCK ||Map.get(pos.Row).get(pos.Column)==NodeType.BLOCK_ON_GOAL)
+            	continue;
 //                else if(pos != null)
              movePlayerTo(pos);
     	}
@@ -463,22 +475,45 @@ public class BoardState implements Cloneable
     /*
      * Doesnt control if moves are valid
      */
-    public void pullBlock(BoardPosition from, BoardPosition to) {
-    	pullBlock(from.Row, from.Column, to.Row, to.Column);
+    public void pullBlock(Direction dir, BoardPosition to) {
+    	pullBlock(dir, to.Row, to.Column);
     }
     
-    public void pullBlock(int row, int col, int newrow, int newcol) {
-    	NodeType orig = Map.get(row).get(col);
-    	NodeType dest = Map.get(newrow).get(newcol); // Block destination
+    public void pullBlock(Direction dir, int row, int col) {
+    	NodeType dest = Map.get(row).get(col);
+    	int oldRow=row;
+    	int oldCol=col;
+    	NodeType origin;
     	
-    	// Beräkna nya player position
+
+    	switch(dir)
+    	{
+    	case UP:
+    		oldRow++;
+    		break;
+    	case DOWN:
+    		oldRow++;   		
+    		break;
+    	case LEFT:
+    		oldCol++;
+    		break;
+    	case RIGHT:
+    		oldCol--;
+    		break;
+    	}
+    	
+    	origin=Map.get(oldRow).get(oldCol);	
+    	
+    //	NodeType dest = Map.get(newrow).get(newcol); // Block destination
+    	
+    	/*// Beräkna nya player position
     	int newPlayerRow = newrow + (newrow - row);
     	int newPlayerCol = newcol + (newcol - col);
     	NodeType playerDest = Map.get(newPlayerRow).get(newPlayerCol);
-    	
-    	if(playerDest != NodeType.SPACE && playerDest != NodeType.GOAL)
+    	*/
+    	if(dest != NodeType.SPACE && dest != NodeType.GOAL)
     		throw new IllegalArgumentException("Can't move player to that pos");
-    	if(orig != NodeType.BLOCK && orig != NodeType.BLOCK_ON_GOAL)
+    /*	if(orig != NodeType.BLOCK && orig != NodeType.BLOCK_ON_GOAL)
     		throw new IllegalArgumentException("Pull was called to none block");
     	if(dest != NodeType.PLAYER && dest != NodeType.PLAYER_ON_GOAL)
     		throw new IllegalArgumentException("You need a player to pull block");
@@ -490,25 +525,42 @@ public class BoardState implements Cloneable
     	else { // Is block
     		Map.get(row).set(col, NodeType.SPACE);
     		updateHashCode(row, col, NodeType.BLOCK, NodeType.SPACE);
-    	}
+    	
     	
     	if(dest == NodeType.PLAYER) {
     		Map.get(newrow).set(newcol, NodeType.BLOCK);
     		updateHashCode(newrow, newcol, NodeType.PLAYER, NodeType.BLOCK);
-    	}
+    	}}
     	else { // Player on goal
     		Map.get(newrow).set(newcol, NodeType.BLOCK_ON_GOAL);
     		updateHashCode(newrow, newcol, NodeType.PLAYER_ON_GOAL, NodeType.BLOCK_ON_GOAL);
     	}
+    	*/
     		
-    	if(playerDest == NodeType.SPACE) {
-    		Map.get(newPlayerRow).set(newPlayerCol, NodeType.PLAYER);
-    		updateHashCode(newPlayerRow, newPlayerCol, NodeType.SPACE, NodeType.PLAYER);
+    	//update the new pos player is moving to
+    	if(dest == NodeType.SPACE) {
+    		Map.get(row).set(col, NodeType.PLAYER);
+    		updateHashCode(row, col, NodeType.SPACE, NodeType.PLAYER);
+    		if(origin==NodeType.PLAYER){
+    		Map.get(oldRow).set(oldCol, NodeType.BLOCK);
+    		updateHashCode(oldRow, oldCol, NodeType.PLAYER, NodeType.BLOCK);
+    		}else{
+        		Map.get(oldRow).set(oldCol, NodeType.BLOCK_ON_GOAL);
+        		updateHashCode(oldRow, oldCol, NodeType.PLAYER_ON_GOAL, NodeType.BLOCK_ON_GOAL);
+    		}
+    	}else if(dest == NodeType.GOAL){
+    		Map.get(row).set(col, NodeType.PLAYER_ON_GOAL);
+    		updateHashCode(row, col, NodeType.GOAL, NodeType.PLAYER_ON_GOAL);
+    		if(origin==NodeType.PLAYER){
+        		Map.get(oldRow).set(oldCol, NodeType.BLOCK);
+        		updateHashCode(oldRow, oldCol, NodeType.PLAYER, NodeType.BLOCK);
+        		}else{
+            		Map.get(oldRow).set(oldCol, NodeType.BLOCK_ON_GOAL);
+            		updateHashCode(oldRow, oldCol, NodeType.PLAYER_ON_GOAL, NodeType.BLOCK_ON_GOAL);
+        		}
     	}
-    	else { // Goal
-    		Map.get(newPlayerRow).set(newPlayerCol, NodeType.PLAYER_ON_GOAL);
-    		updateHashCode(newPlayerRow, newPlayerCol, NodeType.GOAL, NodeType.PLAYER_ON_GOAL);
-    	}
+    	
+    	
     	
     	
     }
@@ -786,11 +838,11 @@ public class BoardState implements Cloneable
                 NodeType type = endState.Map.get(r).get(c);
                 if(type == NodeType.BLOCK)
                 {
-                    endState.Map.get(r).set(c, NodeType.SPACE);
+                    endState.Map.get(r).set(c, NodeType.GOAL);
                 }
                 else if(type == NodeType.GOAL)
                 {
-                    endState.Map.get(r).set(c, NodeType.BLOCK_ON_GOAL);
+                    endState.Map.get(r).set(c, NodeType.BLOCK);
                 }
             }
         }

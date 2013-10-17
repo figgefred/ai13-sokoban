@@ -6,12 +6,13 @@ import java.util.List;
 import sokoban.BoardPosition;
 
 public class Move implements Comparable<Move> {
-	private PathFinder pathfinder = new PathFinder();
-	private Analyser analyser = null;
+	public PathFinder pathfinder = new PathFinder();
+	public Analyser analyser = null;
 	public BoardState board;
 	public Path path;
 	private Integer heuristic_value = null;
 	public int pushes = 1;
+	private SingleBlockPlayer singleBlockPlayer = new SingleBlockPlayer();
 	
 	public Move(Analyser analyser, PathFinder pathfinder) {
 		this.pathfinder = pathfinder;
@@ -33,10 +34,10 @@ public class Move implements Comparable<Move> {
 		return heuristic_value; 
 	}
 	
-	public List<Move> getNextMoves() {
+	public List<Move> getNextPushMoves() {
 		List<Move> possibleMoves = new ArrayList<Move>();
 		List<BoardPosition> blocks = board.getBlockNodes();
-		BoardPosition playerPos = board.getPlayerNode();		
+		BoardPosition playerPos = board.getPlayerNode();	
 		
 		/* Block move based */
 		for(BoardPosition blockPos : blocks)
@@ -70,9 +71,26 @@ public class Move implements Comparable<Move> {
 				move.path = path.cloneAndAppend(toPush);
 				move.pushes = pushes + 1;
 				possibleMoves.add(move);					
-			}		
-						
+			}	
+		}
+		
+		return possibleMoves;
+	}
+	
+	public List<Move> getNextMoves() {
+		
+		List<BoardPosition> blocks = board.getBlockNodes();
+		List<Move> possibleMoves = getNextPushMoves();
+		
+//		int sum = 0;
+		/* Block move based */
+		for(BoardPosition blockPos : blocks)
+		{
+			List<Move> goalPushingMoves = singleBlockPlayer.findGoalMoves(this, blockPos);
+			possibleMoves.addAll(goalPushingMoves);
+//			sum += goalPushingMoves.size();
 		} 
+		//System.err.println("Found " + sum + " goalpush moves " + possibleMoves.size());
 		
 		return possibleMoves;
 	}

@@ -30,7 +30,6 @@ public class Move implements Comparable<Move> {
 		System.out.println("getnextmoves");
 		for(BoardPosition blockPos : blocks)
 		{
-		System.out.println("blockpos");	
 
 			// hitta ställen man kan göra förflyttningar av block.
 			// skriva om sen..
@@ -42,7 +41,6 @@ public class Move implements Comparable<Move> {
 			// now do pathfinding to see if player can reach it..
 			for(BoardPosition candidate : pullPositions)
 			{
-	    		System.out.println("pp");
 
 				Path toDrag;
 				if(candidate.equals(playerPos)){
@@ -63,7 +61,7 @@ public class Move implements Comparable<Move> {
 				// move the player along the path.
 				newBoard.movePlayer(toDrag);
 				// push the block by moving towards the block.
-				newBoard.movePlayerTo(blockPos);
+
 				
 				Move move = new Move();
 				move.board = newBoard;

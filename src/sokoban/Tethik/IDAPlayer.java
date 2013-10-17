@@ -51,14 +51,12 @@ public class IDAPlayer {
 	}
 	
 //	private HashSet<Integer> deadlockStates = new HashSet<Integer>();
-	private HashSet<Move> visitedStates = new HashSet<Move>();
+	private HashMap<Move, Integer> visitedStates = new HashMap<Move, Integer>();
 	
 	public int search(Move node, int bound) {
 		if(shouldStop)
 			return Integer.MIN_VALUE;
 		
-		winMove=null;
-		visitedStates.add(node);
 		
 //		if(deadlockStates.contains(node)) {
 //			System.out.println("Old Deadlock found..");
@@ -82,6 +80,8 @@ public class IDAPlayer {
 		if(lb > bound)	
 			return lb;		
 		
+		//visitedStates.put(node, h);
+		
 		if(h == Integer.MAX_VALUE || h == Integer.MIN_VALUE)
 			return h;
 		
@@ -92,37 +92,51 @@ public class IDAPlayer {
 				
 		List<Move> moves = node.getNextMoves();		
 		Collections.sort(moves);		
+		int min = Integer.MAX_VALUE;
 		for(Move child : moves) {		
-			if(visitedStates.contains(child))
-				continue;
 			
-			int t = search(child,bound);
+			int t;
+			if(visitedStates.containsKey(child))
+				t = visitedStates.get(child);
+			else {
+				t = search(child,bound);
+				
+				if(t == Integer.MIN_VALUE)
+					visitedStates.put(child, t);
+			}
 			
 			if(t == Integer.MAX_VALUE) 
 				return t; //return found, go back up the tree
-		}		
-		return Integer.MIN_VALUE;
+
+			if(t > Integer.MIN_VALUE)
+				min = Math.min(t, min);
+		}	
+		
+		if(min < Integer.MAX_VALUE)
+			return min;
+		else
+			return Integer.MIN_VALUE;			
 	}
 	
 	public Move idaStar(Move root){
 		
 		int bound = root.getHeuristicValue() * -1;
 		
-		while(true){
+		while(true) {
 			int t = search(root,bound);
 			
 			if(t == Integer.MAX_VALUE) 
 				return winMove; //return found			
 			
 			if(t == Integer.MIN_VALUE) 
-				return null; //not found
+				return null; //return not found
 			
 			bound=t;
+			//visitedStates.clear();
 		}
 	}
 	
-	public Path play() {		
-		
+	public Path play() {				
 		Move initial = new Move(analyser, pathfinder);
 		initial.board = initialState;
 		initial.path = new Path();
@@ -136,7 +150,7 @@ public class IDAPlayer {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		//BoardState board = BoardState.getBoardFromFile("test100/test099.in");
+//		BoardState board = BoardState.getBoardFromFile("test100/test001.in");
 		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
 		
 		System.out.println(board);
