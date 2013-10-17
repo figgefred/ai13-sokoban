@@ -24,24 +24,8 @@ public class SingleBlockPlayer {
 	
 	public List<Move> findGoalMoves(Move root, BoardPosition block) {
 		
-		if(root.board.get(block) == NodeType.BLOCK_ON_GOAL)
-			return new ArrayList<Move>();
-		
 		BoardState board = root.board;
 		Path path = root.path;
-		
-//		List<BoardPosition> pushPositions = board.getPushingPositions(block);		
-//		boolean canReach = false;		
-//		for(BoardPosition pushPos : pushPositions)
-//		{
-//			if(pathfinder.isReachable(board, pushPos)) {
-//				canReach = true;
-//				break;
-//			}
-//		}		
-//		if(!canReach)
-//			return new ArrayList<Move>();
-
 		
 		ArrayList<Move> goalmoves = new ArrayList<Move>();
 		BoardState clone = (BoardState) board.clone();

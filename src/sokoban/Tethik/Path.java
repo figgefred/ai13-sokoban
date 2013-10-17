@@ -72,6 +72,10 @@ public class Path {
     	return get(0);
     }
     
+    public int size() {
+    	return Nodes.size();
+    }
+    
     public boolean contains(BoardPosition pos) {
     	return Nodes.contains(pos);
     }

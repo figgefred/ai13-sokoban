@@ -120,7 +120,7 @@ public class IDAPlayer {
 	
 	public Move idaStar(Move root){
 		
-		int bound = root.getHeuristicValue() * -1;
+		int bound = root.getHeuristicValue();
 		
 		while(true) {
 			int t = search(root,bound);
@@ -132,7 +132,6 @@ public class IDAPlayer {
 				return null; //return not found
 			
 			bound=t;
-			//visitedStates.clear();
 		}
 	}
 	
@@ -150,8 +149,8 @@ public class IDAPlayer {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-//		BoardState board = BoardState.getBoardFromFile("test100/test001.in");
-		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
+		BoardState board = BoardState.getBoardFromFile("test100/test036.in");
+//		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest5");
 		
 		System.out.println(board);
 		IDAPlayer noob = new IDAPlayer(board);

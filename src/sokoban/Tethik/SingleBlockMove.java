@@ -48,18 +48,21 @@ public class SingleBlockMove extends Move {
 			if(getThere == null) // no path found
 				continue;				
 			
-			Path toPush = getThere.cloneAndAppend(block);
-			
 			BoardState newBoard = (BoardState) board.clone();
 			// move the player along the path.
-			newBoard.movePlayer(toPush);
+			newBoard.haxMovePlayer(getThere);
 			// push the block by moving towards the block.
 			newBoard.movePlayerTo(block);
 			
 			SingleBlockMove move = new SingleBlockMove(analyser, pathfinder, newBoard.getLastPushedBlock(), goalindex);
 			move.board = newBoard;
-			move.path = path.cloneAndAppend(toPush);
+			move.path = path.cloneAndAppend(getThere);
+			move.path.append(block);
 			move.pushes = pushes + 1;
+			
+//			if(move.getHeuristicValue() < this.getHeuristicValue())
+//				continue; 
+			
 			possibleMoves.add(move);					
 		}	
 		

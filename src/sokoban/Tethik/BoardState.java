@@ -167,6 +167,7 @@ public class BoardState implements Cloneable
     }
     
     public void set(int row, int col, NodeType type) {
+    	updateHashCode(row, col, Map[row][col], type);
     	Map[row][col] = type;
     }
     
@@ -311,7 +312,7 @@ public class BoardState implements Cloneable
      */
     public void movePlayerTo(int row, int col)
     {
-    	if(new BoardPosition(row, col).equals(CurrentNode))
+    	if(CurrentNode.Row == row && CurrentNode.Column == col)
     		return;
     	
     	if(row < 0 || row >= rows)
@@ -344,35 +345,12 @@ public class BoardState implements Cloneable
 			// Wall or other invalid move
 			throw new IllegalArgumentException("Invalid move: \n" + CurrentNode + "\n  " + row + " " + col + " is " + type);			
 		} else {			
-			// Update hash
-			if(type == NodeType.GOAL)
-			{
-				updateHashCode(row, col, NodeType.GOAL, NodeType.PLAYER_ON_GOAL);
-			}
-			else
-			{
-				updateHashCode(row, col, NodeType.SPACE, NodeType.PLAYER);
-			}
-			
-			// Set new position (otherwise push will)
-			Map[row][col] = type == NodeType.GOAL ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER;
+			set(row,col,type == NodeType.GOAL ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER);
 		}
-		
-    	
+			
 		// Reset old position
     	NodeType playerType = Map[CurrentNode.Row][CurrentNode.Column];
-		Map[CurrentNode.Row][CurrentNode.Column] = (playerType == NodeType.PLAYER_ON_GOAL) ? NodeType.GOAL : NodeType.SPACE;
-
-		// Update hash
-		if(playerType == NodeType.PLAYER_ON_GOAL)
-		{
-			updateHashCode(CurrentNode.Row, CurrentNode.Column, NodeType.PLAYER_ON_GOAL, NodeType.GOAL);
-		}
-		else
-		{
-			updateHashCode(CurrentNode.Row, CurrentNode.Column, NodeType.PLAYER, NodeType.SPACE);
-		}
-		
+    	set(CurrentNode.Row, CurrentNode.Column, (playerType == NodeType.PLAYER_ON_GOAL) ? NodeType.GOAL : NodeType.SPACE);
 		CurrentNode = new BoardPosition(row, col);	
     }
     
@@ -382,7 +360,20 @@ public class BoardState implements Cloneable
             if(pos.equals(CurrentNode))
     			continue;
              movePlayerTo(pos);
-    	}
+    	}    	
+    }
+    
+    public void haxMovePlayer(Path path) {
+    	if(CurrentNode.equals(path.last()))
+    		return;
+    	
+    	NodeType player = get(CurrentNode);
+    	NodeType target = get(path.last());
+    	NodeType prevOnPlayer = (player == NodeType.PLAYER_ON_GOAL ? NodeType.GOAL : NodeType.SPACE);
+    	NodeType newOnTarget = (target == NodeType.GOAL ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER);
+    	set(CurrentNode, prevOnPlayer);
+    	set(path.last(), newOnTarget);
+		CurrentNode = path.last();
     }
     
     private void pushBlock(int row, int col, int newrow, int newcol) {
@@ -394,30 +385,10 @@ public class BoardState implements Cloneable
     	if(dest != NodeType.GOAL && dest != NodeType.SPACE)
     		throw new IllegalArgumentException("Can't push block, something is in the way: " + dest.toString() + " " + row + "," + col + " " + newrow +"," + newcol);    	
     	
-    	if(orig == NodeType.BLOCK_ON_GOAL)
-    	{
-    		updateHashCode(row, col, NodeType.BLOCK_ON_GOAL, NodeType.PLAYER_ON_GOAL);
-    	}
-    	else // Is block
-    	{
-    		updateHashCode(row, col, NodeType.BLOCK, NodeType.PLAYER);
-    	}
+    	set(row, col, (orig == NodeType.BLOCK_ON_GOAL) ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER);
+    	set(newrow, newcol, (dest == NodeType.GOAL) ? NodeType.BLOCK_ON_GOAL : NodeType.BLOCK);
     	
-    	if(dest == NodeType.GOAL)
-    	{
-    		updateHashCode(newrow, newcol, NodeType.GOAL, NodeType.BLOCK_ON_GOAL);
-    	}
-    	else // Is space
-    	{
-    		updateHashCode(newrow, newcol, NodeType.SPACE, NodeType.BLOCK);
-    	}
-    	
-    	Map[row][col] = (orig == NodeType.BLOCK_ON_GOAL) ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER;    	
-    	Map[newrow][newcol] = (dest == NodeType.GOAL) ? NodeType.BLOCK_ON_GOAL : NodeType.BLOCK;
-    	
-    	//blocks.remove(new BoardPosition(row, col));
     	lastPushedBlock = new BoardPosition(newrow, newcol);    	
-    	//blocks.add(lastPushedBlock);
     }
     
     /***
@@ -436,8 +407,8 @@ public class BoardState implements Cloneable
     public boolean isWin() {
 	    for(BoardPosition goal : Goals)
 	    {
-	            if(get(goal) != NodeType.BLOCK_ON_GOAL)
-	                    return false;
+            if(get(goal) != NodeType.BLOCK_ON_GOAL)
+                    return false;
 	    }
 	    return true;
     }

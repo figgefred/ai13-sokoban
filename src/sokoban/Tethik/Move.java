@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sokoban.BoardPosition;
+import sokoban.NodeType;
 
 public class Move implements Comparable<Move> {
 	public PathFinder pathfinder = new PathFinder();
@@ -14,7 +15,6 @@ public class Move implements Comparable<Move> {
 	public int pushes = 1;
 	
 	private SingleBlockPlayer singleBlockPlayer;
-	private int heuristic_bonus = 0;
 	
 	public Move(Analyser analyser, PathFinder pathfinder) {
 		this.pathfinder = pathfinder;
@@ -26,30 +26,10 @@ public class Move implements Comparable<Move> {
 		if(heuristic_value != null)
 			return heuristic_value;
 		
-
-		
 		heuristic_value = analyser.getHeuristicValue(board);
 		
-		if(heuristic_value == Integer.MAX_VALUE || heuristic_value == Integer.MIN_VALUE)
-			return heuristic_value;
-		
-		if(Player.DO_CORRAL_LIVE_DETECTION)
-        {
-            List<CorralArea> l = LiveAnalyser.getAreas(board);
-            if(l != null && l.size() > 1)
-            {
-                for(CorralArea a: l)
-                {
-                    if(a.isCorralArea())
-                    {
-                        if(!a.getFencePositions().contains(board.getLastPushedBlock()))
-                        {
-                        	heuristic_value += 1;
-                        }
-                    }
-                }
-            }
-        }
+//		if(heuristic_value == Integer.MAX_VALUE || heuristic_value == Integer.MIN_VALUE)
+//			return heuristic_value;
 		
 		return heuristic_value; 
 	}
@@ -64,11 +44,11 @@ public class Move implements Comparable<Move> {
 		BoardPosition playerPos = board.getPlayerNode();	
 		
 		/* Block move based */
-		for(BoardPosition blockPos : blocks)
+		for(BoardPosition block : blocks)
 		{
 			// hitta ställen man kan göra förflyttningar av block.
 			// skriva om sen..
-			List<BoardPosition> pushPositions = board.getPushingPositions(blockPos);
+			List<BoardPosition> pushPositions = board.getPushingPositions(block);
 		
 			// now do pathfinding to see if player can reach it..
 			for(BoardPosition candidate : pushPositions)
@@ -82,19 +62,17 @@ public class Move implements Comparable<Move> {
 				if(getThere == null) // no path found
 					continue;				
 				
-				Path toPush = getThere.cloneAndAppend(blockPos);
-				
 				BoardState newBoard = (BoardState) board.clone();
 				// move the player along the path.
-				newBoard.movePlayer(toPush);
+				newBoard.haxMovePlayer(getThere);
 				// push the block by moving towards the block.
-				newBoard.movePlayerTo(blockPos);
+				newBoard.movePlayerTo(block);
 				
 				Move move = new Move(analyser, pathfinder);
 				move.board = newBoard;
-				move.path = path.cloneAndAppend(toPush);
+				move.path = path.cloneAndAppend(getThere);
+				move.path.append(block);
 				move.pushes = pushes + 1;
-				move.heuristic_bonus = this.heuristic_bonus;
 				possibleMoves.add(move);					
 			}	
 		}
@@ -104,18 +82,21 @@ public class Move implements Comparable<Move> {
 	
 	public List<Move> getNextMoves() {
 		
-		List<BoardPosition> blocks = board.getBlockNodes();
+		
 		List<Move> possibleMoves = getNextPushMoves();
 		
-//		int sum = 0;
-		/* Block move based */
-		for(BoardPosition blockPos : blocks)
+		List<BoardPosition> blocks = board.getBlockNodes();
+		for(BoardPosition block : blocks)
 		{
-			List<Move> goalPushingMoves = singleBlockPlayer.findGoalMoves(this, blockPos);
+			if(board.get(block) == NodeType.BLOCK_ON_GOAL)
+				continue;
+			
+			List<Move> goalPushingMoves = singleBlockPlayer.findGoalMoves(this, block);
 			possibleMoves.addAll(goalPushingMoves);
-//			sum += goalPushingMoves.size();
+			
+			if(goalPushingMoves.size() > 0)
+				break;
 		} 
-		//System.err.println("Found " + sum + " goalpush moves " + possibleMoves.size());
 		
 		return possibleMoves;
 	}

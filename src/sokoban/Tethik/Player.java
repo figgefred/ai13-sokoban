@@ -66,6 +66,8 @@ public class Player {
     		
     			if(neighbour.getHeuristicValue() > Integer.MIN_VALUE)
     				openSet.add(neighbour);  	
+    			else if(neighbour.isWin())
+    				return neighbour;
         	}
         }
 
@@ -85,19 +87,8 @@ public class Player {
 		if(win != null) {
 			return win.path;
 		}				
-		
-		//System.out.println();
-		//return null;
-		
-//		for(Move nextMove : initial.getNextMoves())
-//		{
-//			System.out.println(nextMove.board);
-//			System.out.println(nextMove.path);
-//			System.out.println(nextMove.getHeuristicValue());
-//		}
-		
+				
 		return null;
-		
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {

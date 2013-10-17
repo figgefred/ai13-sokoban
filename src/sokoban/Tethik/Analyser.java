@@ -259,6 +259,14 @@ public class Analyser {
 		return -distanceMatrix[goalindex][block.Row][block.Column];
 	}
 	
+	public int getHeuristicValue(BoardState board, BoardPosition block) {
+		int min = Integer.MAX_VALUE;
+		for(int i = 0; i < board.getGoalNodes().size(); ++i)
+			min = Math.min(min, distanceMatrix[i][block.Row][block.Column]);
+		
+		return -min;
+	}
+	
 	private boolean is4x4BlockTopLeftCorner(BoardState board, BoardPosition pos) {
 		if(!board.isBlockingNode(pos))
 			return false;
