@@ -49,6 +49,28 @@ public class Move implements Comparable<Move> {
                 BoardPosition playerPos = board.getPlayerNode();		
                 
                 boolean isRealCorral = false;
+                
+                /*
+                Tunnel tunnel = null;
+                for(BoardPosition block: board.getBlockNodes())
+                {
+                    for(Tunnel t: board.getTunnels().get())
+                    {
+                        if(t.contains(block))
+                            tunnel = t;
+                    }
+                }
+                
+                if(tunnel != null)
+                {
+                    tunnel.getPath(playerPos)
+                }
+                
+                Move move = new Move(pathfinder, analyser);
+                move.board = newBoard;
+                move.path = path.cloneAndAppend(toPush);
+                 */
+                
                /* if(Player.DO_CORRAL_LIVE_DETECTION)
                 {
                     List<CorralArea> l = LiveAnalyser.getAreas(board);
@@ -87,9 +109,9 @@ public class Move implements Comparable<Move> {
 			{
 				Path toPush;
 				if(candidate.equals(playerPos))
-					toPush = new Path(candidate);
+                                    toPush = new Path(candidate);
 				else
-					toPush = pathfinder.getPath(board, candidate);		
+                                    toPush = pathfinder.getPath(board, candidate);		
 				
 				if(toPush == null) // no path found
 					continue;				

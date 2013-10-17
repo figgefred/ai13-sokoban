@@ -498,8 +498,6 @@ public class Analyser {
                     }
                 }
 		
-                
-                
                 //int val = 0;
                 /*List<BoardPosition> goals = (List) GoalQueue;
                 

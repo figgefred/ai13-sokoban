@@ -24,6 +24,7 @@ public class Player {
         public static boolean DO_DEADLOCKS_4x4 = true;
         public static boolean DO_BIPARTITE_MATCHING = true;
         public static boolean DO_CORRAL_LIVE_DETECTION = true;
+        public static boolean DO_TUNNEL_MACRO_MOVE = true;
     
 	private BoardState initialState;
 	
@@ -60,8 +61,10 @@ public class Player {
         	
         	//Integer tentative_g = node.getHeuristicValue() + 100;
         	
+                
+                
         	for(Move neighbour: node.getNextMoves())
-        	{	       		                		
+        	{	       		                    
         		if(neighbour.board.isWin())
         			return neighbour;
         		
@@ -73,15 +76,14 @@ public class Player {
         		
         		
         		if (closedSet.contains(neighbour.board) || to_g == Integer.MIN_VALUE) {        			
-                	continue;
+                            continue;
         		}
-        		
         		
         		if(!toVisitSet.contains(neighbour.board))
         		{        		        			
         			openSet.add(neighbour);
         			toVisitSet.add(neighbour.board);
-        		}        		        		
+        		}
         	}
         	
         	
@@ -128,15 +130,15 @@ public class Player {
 		BoardState board;
                 //board = BoardState.getBoardFromFile("testing/simpleplaytest5");
                 //board = BoardState.getBoardFromFile("testing/level3");
-                //board = BoardState.getBoardFromFile("test100/test099.in");
+                board = BoardState.getBoardFromFile("test100/test013.in");
                 //board = BoardState.getBoardFromFile("test100/test004.in");
                 //board = BoardState.getBoardFromFile("test100/test086.in");
-                board = BoardState.getBoardFromFile("test100/test016.in");
+                //board = BoardState.getBoardFromFile("test100/test016.in");
                 
             // Can solve
                 //board = BoardState.getBoardFromFile("test100/test059.in");
                 //board = BoardState.getBoardFromFile("test100/test069.in");
-                //board = BoardState.getBoardFromFile("test100/test092.in");
+               // board = BoardState.getBoardFromFile("test100/test092.in");
                 
             // Cant't solve
                 //board = BoardState.getBoardFromFile("test100/test089.in");
@@ -166,6 +168,10 @@ public class Player {
                 Player.DO_GOAL_SORTING = false;
                 
 		System.out.println(board);
+                System.out.println(board.getTunnels());
+                try{Thread.sleep(500000);}catch(InterruptedException ex){}
+                
+                
 		Player noob = new Player(board);
 		Path path = noob.play();
                 
