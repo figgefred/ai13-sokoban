@@ -27,7 +27,11 @@ public class TimingRunner implements Runnable {
 		while((timetaken = System.currentTimeMillis() - starttime) < timetorun) {			
 			if(!runnableToTime.isRunning)
 			{
-				System.out.print("+");
+				if(runnableToTime.result)
+					System.out.print("+");
+				else
+					System.out.println("-");
+				
 				return;
 			}
 			try {
