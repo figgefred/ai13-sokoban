@@ -159,7 +159,7 @@ public class Player {
                 //board = BoardState.getBoardFromFile("test100/test079.in");
                 //board = BoardState.getBoardFromFile("test100/test089.in");
                 //board = BoardState.getBoardFromFile("test100/test099.in");
-                Player.VERBOSE = true;
+                Player.VERBOSE = false;
                 
                 Player.DO_BIPARTITE_MATCHING = true;
                 Player.DO_CORRAL_LIVE_DETECTION = true;

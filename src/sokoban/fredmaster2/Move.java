@@ -75,7 +75,7 @@ public class Move implements Comparable<Move> {
                 {
                     List<CorralArea> l = LiveAnalyser.getAreas(board);
                     if(l != null && l.size() > 1)
-                    {
+                    {   
                         CorralArea playerArea = null;
                         blocks = new ArrayList<>();
                         for(CorralArea a: l)

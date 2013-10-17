@@ -27,13 +27,15 @@ public class LiveAnalyser {
    	
 	private Analyser analyser;
 	private PathFinder pathfinder;
-    
+        private Map<BoardState, List<CorralArea>> CachedAreas;
+        
         private static boolean VERBOSE = Player.VERBOSE;
         
 	public LiveAnalyser(Analyser analyser, PathFinder finder)
 	{
 		this.analyser = analyser;
 		this.pathfinder = finder;
+                CachedAreas = new HashMap<>();
 	}
 	
     public boolean isBadState(BoardState state, BoardPosition block)
@@ -173,6 +175,11 @@ public class LiveAnalyser {
         return isBlockType(type) || type == NodeType.WALL;
     }
     
+    private List<CorralArea> getCachedArea(BoardState state)
+    {
+        return CachedAreas.get(state);
+    }
+    
     /**
      * Returns a list of corral areas and (or only) the area of where the
      * player is.
@@ -189,9 +196,15 @@ public class LiveAnalyser {
      */
     public List<CorralArea> getAreas(BoardState board)
     {
+        List<CorralArea> list = getCachedArea(board);
+        if(list != null)
+        {
+            return list;
+        }
+        
         // A list containing all the nodes "visited"
         Set<BoardPosition> visited = new HashSet<>();
-        List<CorralArea> list = new ArrayList<>();
+        list = new ArrayList<>();
         
         int areaCounter = 1;
         
@@ -273,6 +286,7 @@ public class LiveAnalyser {
                 }
             }
         }
+        CachedAreas.put(board, list);
         return list;
     }
     
