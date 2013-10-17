@@ -71,11 +71,12 @@ public class Move implements Comparable<Move> {
                 move.path = path.cloneAndAppend(toPush);
                  */
                 
-               /* if(Player.DO_CORRAL_LIVE_DETECTION)
+                if(Player.DO_CORRAL_LIVE_DETECTION)
                 {
                     List<CorralArea> l = LiveAnalyser.getAreas(board);
                     if(l != null && l.size() > 1)
                     {
+                        CorralArea playerArea = null;
                         blocks = new ArrayList<>();
                         for(CorralArea a: l)
                         {
@@ -88,11 +89,22 @@ public class Move implements Comparable<Move> {
                                     blocks.add(fencePos);
                                 }
                             }
+                            else
+                            {
+                                playerArea = a;
+                            }
                         }
+                        if(playerArea != null)
+                        {
+                            for(BoardPosition p: playerArea.getNoFenceBlockPositions())
+                            {
+                                blocks.add(p);
+                            }
+                        }   
                     }
                     else 
                         blocks = board.getBlockNodes();
-                }*/
+                }
                 
                 if(!isRealCorral)
                     blocks = board.getBlockNodes();

@@ -130,9 +130,9 @@ public class Player {
 		BoardState board;
                 //board = BoardState.getBoardFromFile("testing/simpleplaytest5");
                 //board = BoardState.getBoardFromFile("testing/level3");
-                board = BoardState.getBoardFromFile("test100/test013.in");
+               /// board = BoardState.getBoardFromFile("test100/test092.in");
                 //board = BoardState.getBoardFromFile("test100/test004.in");
-                //board = BoardState.getBoardFromFile("test100/test086.in");
+                board = BoardState.getBoardFromFile("test100/test086.in");
                 //board = BoardState.getBoardFromFile("test100/test016.in");
                 
             // Can solve
@@ -168,8 +168,8 @@ public class Player {
                 Player.DO_GOAL_SORTING = false;
                 
 		System.out.println(board);
-                System.out.println(board.getTunnels());
-                try{Thread.sleep(500000);}catch(InterruptedException ex){}
+//                System.out.println(board.getTunnels());
+            //    try{Thread.sleep(500000);}catch(InterruptedException ex){}
                 
                 
 		Player noob = new Player(board);

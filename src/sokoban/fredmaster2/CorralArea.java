@@ -27,6 +27,7 @@ public class CorralArea
 {
     private int ID;
     private Set<BoardPosition> Positions = new HashSet<BoardPosition>();
+    private Set<BoardPosition> NoFenceBlocks = new HashSet<BoardPosition>();
     private Set<BoardPosition> Fence = new HashSet<BoardPosition>();
     private boolean ContainsGoal;
     private boolean ContainsPlayer;
@@ -65,6 +66,8 @@ public class CorralArea
             //Board = (BoardState) board.clone();
         if(Positions == null)
             Positions = new HashSet<BoardPosition>();
+        if(NoFenceBlocks == null)
+            NoFenceBlocks = new HashSet<BoardPosition>();
         ID = id;
     }
         
@@ -85,6 +88,8 @@ public class CorralArea
                 ContainsPlayer = true;
             if(nodeType.isGoalNode())
                 ContainsGoal = true;
+            if(nodeType.isBlockNode())
+                NoFenceBlocks.add(p);
         }
         return added;
     }
@@ -130,6 +135,11 @@ public class CorralArea
     public Set<BoardPosition> getFencePositions()
     {
         return Fence;
+    }
+    
+    public Set<BoardPosition> getNoFenceBlockPositions()
+    {
+        return NoFenceBlocks;
     }
     
     /**
