@@ -81,7 +81,7 @@ public class Tunnels {
                     }
                 }
                 if(noTunnel)
-                    sb.append(InitState.getNode(p).getChar());
+                    sb.append(InitState.get(p).getChar());
             }
             sb.append("\n");
         }
