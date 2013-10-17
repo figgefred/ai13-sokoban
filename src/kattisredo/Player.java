@@ -1,7 +1,9 @@
 package kattisredo;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
@@ -14,11 +16,15 @@ import java.util.Queue;
 public class Player {	
 	
 	private Queue<Move> openSet;
-    private HashSet<BoardState> closedSet;
-    private HashSet<BoardState> toVisitSet;
-    private static boolean VERBOSE = false;
+    private HashSet<Integer> closedSet;
+    public static boolean VERBOSE = false;
+    public volatile boolean shouldStop = false;
+    
+    private int COUNT_MAX = 1000;
+    private int COUNT = 0;
     
 	private BoardState initialState;
+	
 	
 	public Player(BoardState initialState)
 	{		
@@ -30,104 +36,100 @@ public class Player {
 
 	public Move getVictoryPath(Move initialPosition)
 	{
+		System.err.println();
 		openSet = new PriorityQueue<Move>();
-		closedSet = new HashSet<BoardState>();
-		toVisitSet = new HashSet<BoardState>();
+		closedSet = new HashSet<Integer>();
     	openSet.add(initialPosition);
     	
-        while(!openSet.isEmpty())
+        while(!openSet.isEmpty() && !shouldStop)
         {
         	Move node = openSet.poll();
+        	//System.out.println(node);
         	
         	if(VERBOSE) {
-	        	System.out.println(openSet.size() + " " + toVisitSet.size());
+        		/*
+        		if(COUNT++ == COUNT_MAX) {
+        			System.out.println(PathFinder.COUNT);
+        			System.exit(0);
+        		}
+        		*/
+        		
+	        	System.out.println(openSet.size() + " " + closedSet.size());
+	        	System.out.println("Pushes : " + node.pushes);
 	        	System.out.println(node.path.getPath().size() + ", " + node.getHeuristicValue() + ", " + closedSet.size() + ", " + node.board.hashCode());
 	        	System.out.println(node.board);
         	}
-        	
+
         	if(node.board.isWin())        	
-        		return node;        	
+        		return node;
+
+        	List<Move> nextMoves = node.getNextMoves();
         	
-        	if(node.getHeuristicValue() == Integer.MIN_VALUE)
-        		return null;
-        	
-        	//Integer tentative_g = node.getHeuristicValue() + 100;
-        	
-        	for(Move neighbour: node.getNextMoves())
-        	{	       		                		
-        		if(neighbour.board.isWin())
-        			return neighbour;
-        		
-        		Integer to_g = neighbour.getHeuristicValue();        		
-        		
-        		//System.out.println(neighbour.board);
-        		//System.out.println(to_g);
-        		//System.out.println(tentative_g);
-        		
-        		
-        		if (closedSet.contains(neighbour.board) || to_g == Integer.MIN_VALUE) {        			
+        	for(Move neighbour: nextMoves)
+        	{	            		       		
+        		if (closedSet.contains(neighbour.board.hashCode())) {        			
                 	continue;
         		}
-        		
-        		
-        		if(!toVisitSet.contains(neighbour.board))
-        		{        		        			
-        			openSet.add(neighbour);
-        			toVisitSet.add(neighbour.board);
-        		}        		        		
-        	}
-        	
-        	
-        	if(closedSet.contains(node.board)) {        		
-        		System.err.println("hash collision!");
-        	}
-        	toVisitSet.remove(node.board);
-        	closedSet.add(node.board);
 
+    			closedSet.add(neighbour.board.hashCode());
+
+    			if(neighbour.getHeuristicValue() > Integer.MIN_VALUE)
+    				openSet.add(neighbour);  	
+        	}
         }
 
 		return null;
 	}
 	
 	
-	public Path play() throws InterruptedException {				
+	public Path play() {				
 		
-		Move initial = new Move();
+		Analyser analyser = new Analyser(initialState);
+		PathFinder pathfinder = new PathFinder();
+		Move initial = new Move(analyser, pathfinder);
 		initial.board = initialState;
 		initial.path = new Path();
-		Move.initPreanalyser(initialState);		
-		
 		
 		Move win = getVictoryPath(initial);
-		if(win != null) {
-			//System.out.println(win.board);
+		if(win != null) {		
 			System.out.println(win.path);
-		} else {
-			System.out.println("wat?");			
+			return win.path;
 		}
+	
 		
-		return win.path;
-		
+		//System.out.println();
+		return null;
 		/*
 		for(Move nextMove : initial.getNextMoves())
 		{
 			System.out.println(nextMove.board);
-			System.out.println(nextMove.path)4
+			System.out.println(nextMove.path)
 			System.out.println(nextMove.getHeuristicValue())
 		}
 		*/
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BoardState board = BoardState.getBoardFromFile("testing/level3");
+		long timeStart = System.currentTimeMillis();
+		BoardState board = BoardState.getBoardFromFile("test100/test003.in");
+		BoardState orig = (BoardState) board.clone();
 		
 		System.out.println(board);
 		Player noob = new Player(board);
 		Path path = noob.play();
+		System.out.println(path);
 		board.movePlayer(path);
 		System.out.println(board);
+		
+		orig.movePlayer(path);
+		System.out.println(orig);
+		
+		long timeStop = System.currentTimeMillis();
+		
+		System.out.println("Time: " + (timeStop - timeStart) + " ms");
 	}
 }
+
 
 
 

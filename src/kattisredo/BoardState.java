@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package kattisredo;
 
 import java.io.BufferedReader;
@@ -13,19 +9,25 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+
 /**
  *
  * @author figgefred
  */
 public class BoardState implements Cloneable
 {
+	// Is initialized in constructor and updated for every push made.
+	private List<BoardPosition> BlockIndex = new ArrayList<>();
+    private int BlockLastMovedIndex = -1; // Unset it is '-1' - no block was pushed
+
     // Game board
     private List<List<NodeType>> Map = new ArrayList<>();
     private Set<BoardPosition> Goals;
     private BoardPosition CurrentNode;
+    
     private int rows;
     private int cols;
-    
+        
     // fult, kanske ska byta interna kartan till samma typ av matris sen?
     public BoardState(NodeType[][] map) {
     	Goals = new HashSet<BoardPosition>();
@@ -43,7 +45,8 @@ public class BoardState implements Cloneable
     		}
     	}
     	
-    	initZobristTable(rows, cols);
+    	//initZobristTable(rows, cols);
+    	//System.err.println("zorbi!");
     }
     
     public BoardState(List<String> rows)
@@ -56,11 +59,10 @@ public class BoardState implements Cloneable
         // Init board
         buildBoard(rows);
         this.rows = rows.size();
-        if(initZobrist) {
-        	cols = Integer.MIN_VALUE;
-        	for(List<NodeType> row : Map)
-        		cols = Math.max(row.size(), cols);
-        		
+     	cols = Integer.MIN_VALUE;
+    	for(List<NodeType> row : Map)
+    		cols = Math.max(row.size(), cols);
+        if(initZobrist) { 
         	initZobristTable(Map.size(), cols);
         }
     }
@@ -314,20 +316,20 @@ public class BoardState implements Cloneable
     	{
 	    	switch(dir)
 	    	{
-	    	case UP:
-	    		pushBlock(fromRow, fromCol, fromRow - 1, fromCol);
-	    		break;
-	    	case DOWN:
-	    		pushBlock(fromRow, fromCol, fromRow + 1, fromCol);
-	    		break;
-	    	case LEFT:
-	    		pushBlock(fromRow, fromCol, fromRow, fromCol - 1);
-	    		break;
-	    	case RIGHT:
-	    		pushBlock(fromRow, fromCol, fromRow, fromCol + 1);
-	    		break;
-			default:
-				break;
+		    	case UP:
+		    		pushBlock(fromRow, fromCol, fromRow - 1, fromCol);
+		    		break;
+		    	case DOWN:
+		    		pushBlock(fromRow, fromCol, fromRow + 1, fromCol);
+		    		break;
+		    	case LEFT:
+		    		pushBlock(fromRow, fromCol, fromRow, fromCol - 1);
+		    		break;
+		    	case RIGHT:
+		    		pushBlock(fromRow, fromCol, fromRow, fromCol + 1);
+		    		break;
+				default:
+					break;
 	    	}
     	} catch(IllegalArgumentException ex)
     	{
@@ -508,26 +510,7 @@ public class BoardState implements Cloneable
         return isNoneBlockingNode(p.Row, p.Column);
     }
     
-    public Direction getDirection(BoardPosition from, BoardPosition to)
-	{
-	    if( from.Row-1 == to.Row && from.Column == to.Column )
-	    {
-	        return Direction.UP;
-	    }
-	    if(from.Row+1 == to.Row && from.Column == to.Column)
-	    {
-	        return Direction.DOWN;
-	    }
-	    if(from.Column-1 == to.Column && from.Row == to.Row)
-	    {
-	        return Direction.LEFT;
-	    }
-	    if(from.Column+1 == to.Column && from.Row == to.Row)
-	    {
-	        return Direction.RIGHT;
-	    }
-	    return Direction.NONE;
-	}
+    
     
 
     
@@ -572,7 +555,7 @@ public class BoardState implements Cloneable
 	 * Se: http://en.wikipedia.org/wiki/Zobrist_hashing
 	 */
 	private Integer zobrist_hash = null;
-	private static int zobrist_table[][][];
+	public static int zobrist_table[][][];
 
 	public static void initZobristTable(int rows, int cols) {		
 		NodeType[] vals = NodeType.values();
@@ -584,6 +567,7 @@ public class BoardState implements Cloneable
 				for(int i = 0; i < vals.length; ++i)
 					zobrist_table[row][col][i] = random.nextInt();
 		
+		//System.err.println("zobrist inited.");
 	}
 	
 	@Override
@@ -605,7 +589,9 @@ public class BoardState implements Cloneable
 					if(type == vals[val]) 						
 						break typeloop;					
 				
-				zobrist_hash ^= zobrist_table[row][col][val]; 
+				int[][] table = zobrist_table[row];
+				int[] tablerow = table[col];
+				zobrist_hash ^= tablerow[val]; 
 			}
 		}
 		
