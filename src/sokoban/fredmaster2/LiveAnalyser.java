@@ -28,6 +28,7 @@ public class LiveAnalyser {
 	private Analyser analyser;
 	private PathFinder pathfinder;
         private Map<BoardState, List<CorralArea>> CachedAreas;
+        private Map<BoardState, Map<BoardPosition, Integer>> HeuristicCache;
         
         private static boolean VERBOSE = Player.VERBOSE;
         
@@ -35,113 +36,23 @@ public class LiveAnalyser {
 	{
 		this.analyser = analyser;
 		this.pathfinder = finder;
-                CachedAreas = new HashMap<>();
+                if(Player.DO_CORRAL_CACHING)
+                    CachedAreas = new HashMap<>();
+                if(Player.DO_HEURISTIC_CACHING)
+                {
+                    HeuristicCache = new HashMap<>();
+                }
 	}
-	
-    public boolean isBadState(BoardState state, BoardPosition block)
-    {
-        return  
-            is4x4Block(state, block)
-            ||
-            isDeadlockState(state, new HashSet<BoardPosition>(),block)
-            ;
-    }
-    
-    public boolean isBadState(BoardState board)
-    {
-    	for(BoardPosition block : board.getBlockNodes())
-    		if(board.getNode(block) == NodeType.BLOCK && isBadState(board, block)) {
-    			return true;
-    		}
-    	
-    	return false;
-    }
-    
-    private boolean isDeadlockState(BoardState state, Set<BoardPosition> tmpBlock, BoardPosition block)
-    {
-        int r = block.Row;
-        int c = block.Column;
-        
-        BoardPosition left = new BoardPosition(r, c-1);
-        BoardPosition right = new BoardPosition(r, c+1);
-        BoardPosition up = new BoardPosition(r-1, c);
-        BoardPosition down = new BoardPosition(r+1, c);
-        
-        //***************//
-        // WALL BLOCKING //
-        //***************//
-        
-        // Check if there are any walls blocking horizontally
-        // Or of course if there is any block already checked that is blocking
-        boolean horizontalWallBlocking = (left.Column >= 0 && state.getNode(left) == NodeType.WALL)
-			|| (right.Column < state.getColumnsCount() && state.getNode(right) == NodeType.WALL);
-        
-        horizontalWallBlocking = horizontalWallBlocking || 
-        		((left.Column >= 0 && analyser.isBadPosition(left)) && 
-        				(right.Column < state.getColumnsCount() && analyser.isBadPosition(right)));
-        
-        
-        
-        
-        // Check same as above just vertical
-        boolean verticalWallBlocking = (up.Row >= 0 && state.getNode(up) == NodeType.WALL) 
-                || (down.Row < state.getRowsCount() && state.getNode(down) == NodeType.WALL)   
-                || ((up.Row >= 0 && analyser.isBadPosition(up)) 
-                && (down.Row < state.getRowsCount() && analyser.isBadPosition(down)));
-                
-        
-        // Can block be moved?
-        // Note we have to iterate over all blocks to check one of them
-        // is not a goal, since it could otherwise have been a good win state
-        if(horizontalWallBlocking && verticalWallBlocking)
-        {
-            tmpBlock.add(block);
-            for(BoardPosition pos: tmpBlock)
-            {
-                if(state.getNode(pos)==NodeType.BLOCK)
-                    return true;
-            }
-            return false;
-        }
-
-        //*****************//
-        // BLOCKS DEADLOCK //
-        //**************** //
-        
-        
-        // If blocking is both horizontal and vertical, well then the block is supposedly frozen
-        // But is it deadlocked?
-
-        // Mark this block as checked - avoid stackoverflow
-        tmpBlock.add(block);
-        boolean deadlockState = 
-            (
-                (verticalWallBlocking)
-                ||
-                (up.Row >= 0 && isBlockType(state.getNode(up)) && (tmpBlock.contains(up) || isDeadlockState(state, tmpBlock, up)))
-                ||
-                (down.Row < state.getRowsCount() && isBlockType(state.getNode(down)) && (tmpBlock.contains(down) || isDeadlockState(state, tmpBlock, down)))
-            )
-            &&
-            (
-                (horizontalWallBlocking)
-                ||
-                (left.Column >= 0 && isBlockType(state.getNode(left)) && (tmpBlock.contains(left) || isDeadlockState(state, tmpBlock, left)))
-                ||
-                (right.Column < state.getColumnsCount() && isBlockType(state.getNode(right)) && (tmpBlock.contains(right) || isDeadlockState(state, tmpBlock, right)))
-            );
-        return deadlockState;
-    }
    
 	private boolean is4x4BlockTopLeftCorner(BoardState board, BoardPosition pos) {
 		if(!board.isBlockingNode(pos))
 			return false;
 		
 		NodeType nodes[] = new NodeType[] {
-			board.getNode(pos.Row, pos.Column),
-			board.getNode(pos.Row, pos.Column+1),
-			board.getNode(pos.Row+1, pos.Column),
-			board.getNode(pos.Row+1, pos.Column+1)
+			board.get(pos.Row, pos.Column),
+			board.get(pos.Row, pos.Column+1),
+			board.get(pos.Row+1, pos.Column),
+			board.get(pos.Row+1, pos.Column+1)
 		};		
 		
 		boolean atLeastOneIsBlock = false;
@@ -165,6 +76,35 @@ public class LiveAnalyser {
 				|| is4x4BlockTopLeftCorner(board, leftTop);
 	}
     
+        public boolean setHeuristic(BoardState state, BoardPosition blockPushed, int val)
+        {
+            if(Player.DO_HEURISTIC_CACHING)
+            {
+                Map<BoardPosition, Integer> map = HeuristicCache.get(state);
+                if(map == null)
+                {
+                    map = new HashMap<>();
+                    HeuristicCache.put(state, map);
+                }
+                return (map.put(blockPushed, val)!= null);
+            }
+            return false;
+        }
+        
+        public Integer getHeuristicCacheVal(BoardState state, BoardPosition blockPushed)
+        {
+            if(Player.DO_HEURISTIC_CACHING)
+            {
+                Map<BoardPosition, Integer> map = HeuristicCache.get(state);
+                if(map == null)
+                    return null;
+                else
+                    return map.get(blockPushed);
+            }
+            else
+                return null;
+        }
+        
     private boolean isBlockType(NodeType type)
     {
         return type == NodeType.BLOCK || type == NodeType.BLOCK_ON_GOAL;
@@ -177,6 +117,8 @@ public class LiveAnalyser {
     
     private List<CorralArea> getCachedArea(BoardState state)
     {
+        if(CachedAreas == null)
+            return null;
         return CachedAreas.get(state);
     }
     
@@ -196,12 +138,15 @@ public class LiveAnalyser {
      */
     public List<CorralArea> getAreas(BoardState board)
     {
-        List<CorralArea> list = getCachedArea(board);
-        if(list != null)
+        List<CorralArea> list = null;
+        if(Player.DO_CORRAL_CACHING)
         {
-            return list;
+            list = getCachedArea(board);
+            if(list != null)
+            {
+                return list;
+            }
         }
-        
         // A list containing all the nodes "visited"
         Set<BoardPosition> visited = new HashSet<>();
         list = new ArrayList<>();
@@ -217,7 +162,7 @@ public class LiveAnalyser {
             for(int c = 0; c < board.getColumnsCount(r); c++)
             {
                 BoardPosition p = new BoardPosition(r,c);
-                NodeType nodeType = board.getNode(p);
+                NodeType nodeType = board.get(p);
                 
                 if( !visited.contains(p) && nodeType.isSpaceNode() )
                 {
@@ -250,7 +195,7 @@ public class LiveAnalyser {
             //for(BoardPosition p: board.getBlockNodes())
             for(BoardPosition p: a.getAreaPositions())
             {
-                if(board.getNode(p).isBlockNode())
+                if(board.get(p).isBlockNode())
                 {
                     // For every a try to match every block
                     CorralFenceCandidate c = fenceCandidates.get(p);
@@ -277,16 +222,18 @@ public class LiveAnalyser {
                 {
                     if(f.isPartOfCorralAreaFence())
                     {
-                        a.addAsFenceNode(f.getBoardPosition(), board.getNode(f.getBoardPosition()));
+                        a.addAsFenceNode(f.getBoardPosition(), board.get(f.getBoardPosition()));
                     }
                     else
                     {
-                        a.add(f.getBoardPosition(), board.getNode(f.getBoardPosition()));
+                        a.add(f.getBoardPosition(), board.get(f.getBoardPosition()));
                     }
                 }
             }
         }
-        CachedAreas.put(board, list);
+        if(Player.DO_CORRAL_CACHING)
+            CachedAreas.put(board, list);
+        
         return list;
     }
     
@@ -322,13 +269,13 @@ public class LiveAnalyser {
     
     private void setCorralArea(BoardState board, CorralArea area, BoardPosition spaceNode, Set<BoardPosition> visited)
     {
-        NodeType nodeType = board.getNode(spaceNode);
+        NodeType nodeType = board.get(spaceNode);
         area.add(spaceNode, nodeType);
         visited.add(spaceNode);
         
         for(BoardPosition neighbour: board.getNeighbours(spaceNode))
         {
-            NodeType neighbourType = board.getNode(neighbour);
+            NodeType neighbourType = board.get(neighbour);
             if( !visited.contains(neighbour) && ( neighbourType.isSpaceNode()) )
             {
                 // If unvisited expand!
@@ -344,12 +291,12 @@ public class LiveAnalyser {
     
     private void visitNeighbouringBlocks(BoardState board, CorralArea area, BoardPosition blockNode, Set<BoardPosition> visited)
     {
-        NodeType nodeType = board.getNode(blockNode);
+        NodeType nodeType = board.get(blockNode);
         area.add(blockNode, nodeType);
         visited.add(blockNode);
         for(BoardPosition blockNeighbour: board.getNeighbours(blockNode))
         {
-            NodeType neighbourType = board.getNode(blockNeighbour);
+            NodeType neighbourType = board.get(blockNeighbour);
             if( !visited.contains(blockNeighbour) && ( neighbourType.isBlockNode()) )
             {
                 // If unvisited expand!
@@ -396,4 +343,101 @@ public class LiveAnalyser {
 	//	Player noob = new Player(board);
 		//System.out.println(noob.play());
 	}
+        
+	
+    public boolean isBadState(BoardState state, BoardPosition block)
+    {
+        return  
+            is4x4Block(state, block)
+            ||
+            isDeadlockState(state, new HashSet<BoardPosition>(),block)
+            ;
+    }
+    
+    public boolean isBadState(BoardState board)
+    {
+    	for(BoardPosition block : board.getBlockNodes())
+    		if(board.get(block) == NodeType.BLOCK && isBadState(board, block)) {
+    			return true;
+    		}
+    	
+    	return false;
+    }
+    
+    private boolean isDeadlockState(BoardState state, Set<BoardPosition> tmpBlock, BoardPosition block)
+    {
+        int r = block.Row;
+        int c = block.Column;
+        
+        BoardPosition left = new BoardPosition(r, c-1);
+        BoardPosition right = new BoardPosition(r, c+1);
+        BoardPosition up = new BoardPosition(r-1, c);
+        BoardPosition down = new BoardPosition(r+1, c);
+        
+        //***************//
+        // WALL BLOCKING //
+        //***************//
+        
+        // Check if there are any walls blocking horizontally
+        // Or of course if there is any block already checked that is blocking
+        boolean horizontalWallBlocking = (left.Column >= 0 && state.get(left) == NodeType.WALL)
+			|| (right.Column < state.getColumnsCount() && state.get(right) == NodeType.WALL);
+        
+        horizontalWallBlocking = horizontalWallBlocking || 
+        		((left.Column >= 0 && analyser.isBadPosition(left)) && 
+        				(right.Column < state.getColumnsCount() && analyser.isBadPosition(right)));
+        
+        
+        
+        
+        // Check same as above just vertical
+        boolean verticalWallBlocking = (up.Row >= 0 && state.get(up) == NodeType.WALL) 
+                || (down.Row < state.getRowsCount() && state.get(down) == NodeType.WALL)   
+                || ((up.Row >= 0 && analyser.isBadPosition(up)) 
+                && (down.Row < state.getRowsCount() && analyser.isBadPosition(down)));
+                
+        
+        // Can block be moved?
+        // Note we have to iterate over all blocks to check one of them
+        // is not a goal, since it could otherwise have been a good win state
+        if(horizontalWallBlocking && verticalWallBlocking)
+        {
+            tmpBlock.add(block);
+            for(BoardPosition pos: tmpBlock)
+            {
+                if(state.get(pos)==NodeType.BLOCK)
+                    return true;
+            }
+            return false;
+        }
+
+        //*****************//
+        // BLOCKS DEADLOCK //
+        //**************** //
+        
+        
+        // If blocking is both horizontal and vertical, well then the block is supposedly frozen
+        // But is it deadlocked?
+
+        // Mark this block as checked - avoid stackoverflow
+        tmpBlock.add(block);
+        boolean deadlockState = 
+            (
+                (verticalWallBlocking)
+                ||
+                (up.Row >= 0 && isBlockType(state.get(up)) && (tmpBlock.contains(up) || isDeadlockState(state, tmpBlock, up)))
+                ||
+                (down.Row < state.getRowsCount() && isBlockType(state.get(down)) && (tmpBlock.contains(down) || isDeadlockState(state, tmpBlock, down)))
+            )
+            &&
+            (
+                (horizontalWallBlocking)
+                ||
+                (left.Column >= 0 && isBlockType(state.get(left)) && (tmpBlock.contains(left) || isDeadlockState(state, tmpBlock, left)))
+                ||
+                (right.Column < state.getColumnsCount() && isBlockType(state.get(right)) && (tmpBlock.contains(right) || isDeadlockState(state, tmpBlock, right)))
+            );
+        return deadlockState;
+    }
+
 }

@@ -197,7 +197,7 @@ public class CorralArea
                 for(int c = 0; c < Board.getColumnsCount(r);c++)
                 {
                     BoardPosition p = new BoardPosition(r, c);
-                    if(Positions.contains(p) && (!Board.getNode(p).isPlayerNode() ) )// && Board.getNode(p) != NodeType.WALL ) )
+                    if(Positions.contains(p) && (!Board.get(p).isPlayerNode() ) )// && Board.getNode(p) != NodeType.WALL ) )
                     {
                         sb.append(ID);
                     }
@@ -207,7 +207,7 @@ public class CorralArea
                     }
                     else
                     {
-                        sb.append(Board.getNode(p).getChar());
+                        sb.append(Board.get(p).getChar());
                     }
                 }
                 sb.append("\n");

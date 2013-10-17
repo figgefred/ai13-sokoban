@@ -42,14 +42,14 @@ public class Tunnel extends Region {
         
         if(Positions.isEmpty())
         {
-            ContainsGoal = StartingState.getNode(p).isGoalNode();
+            ContainsGoal = StartingState.get(p).isGoalNode();
             LookUpSet.add(p);
             return Positions.add(p);
         }
         else if(!LookUpSet.contains(p))
         {
             BoardPosition neighbour = Positions.peekLast();
-            if( StartingState.getNode(p).isTunnelSpaceNode())
+            if( StartingState.get(p).isTunnelSpaceNode())
             {
                 boolean up = ((neighbour.Row-p.Row ) == 1 && (neighbour.Column-p.Column ) == 0 );
                 boolean down = ((p.Row-neighbour.Row ) == 1 && (neighbour.Column-p.Column ) == 0 );
@@ -64,7 +64,7 @@ public class Tunnel extends Region {
                     {
                         return false;
                     }
-                    if(!StartingState.getNode(leftPos).isWallNode() || !StartingState.getNode(rightPos).isWallNode())
+                    if(!StartingState.get(leftPos).isWallNode() || !StartingState.get(rightPos).isWallNode())
                     {
                         return false;
                     }
@@ -77,7 +77,7 @@ public class Tunnel extends Region {
                     {
                         return false;
                     }
-                    if(!StartingState.getNode(upPos).isWallNode() || !StartingState.getNode(downPos).isWallNode())
+                    if(!StartingState.get(upPos).isWallNode() || !StartingState.get(downPos).isWallNode())
                     {
                         return false;
                     }
@@ -87,7 +87,7 @@ public class Tunnel extends Region {
                     return false;
                 }
                 if(!ContainsGoal)
-                    ContainsGoal = StartingState.getNode(p).isGoalNode();
+                    ContainsGoal = StartingState.get(p).isGoalNode();
 
                 Direction dir = Positions.peekLast().getDirection(p);
                 if(lastAddedDirection == Direction.NONE)
@@ -195,7 +195,7 @@ public class Tunnel extends Region {
                 }
                 else
                 {
-                    sb.append(StartingState.getNode(p).getChar());
+                    sb.append(StartingState.get(p).getChar());
                 }
             }
             sb.append("\n");
