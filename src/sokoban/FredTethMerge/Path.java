@@ -2,9 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package sokoban.Tethik;
+package sokoban.FredTethMerge;
 
 
+import sokoban.Tethik.*;
 import sokoban.BoardPosition;
 import sokoban.Direction;
 

@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package sokoban.fredmaster2;
+package sokoban.FredTethMerge;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,16 +25,14 @@ import sokoban.Direction;
  */
 public class LiveAnalyser {
    	
-	private Analyser analyser;
 	private PathFinder pathfinder;
         private Map<BoardState, List<CorralArea>> CachedAreas;
         private Map<BoardState, Map<BoardPosition, Integer>> HeuristicCache;
-        
+        private Map<BoardState, Map<BoardPosition, Boolean>> DeadlockCache;
         private static boolean VERBOSE = Player.VERBOSE;
         
-	public LiveAnalyser(Analyser analyser, PathFinder finder)
+	public LiveAnalyser(PathFinder finder)
 	{
-		this.analyser = analyser;
 		this.pathfinder = finder;
                 if(Player.DO_CORRAL_CACHING)
                     CachedAreas = new HashMap<>();
@@ -159,7 +157,7 @@ public class LiveAnalyser {
         
         for(int r = 0; r < board.getRowsCount(); r++)
         {
-            for(int c = 0; c < board.getColumnsCount(r); c++)
+            for(int c = 0; c < board.getColumnsCount(); c++)
             {
                 BoardPosition p = new BoardPosition(r,c);
                 NodeType nodeType = board.get(p);
@@ -237,35 +235,6 @@ public class LiveAnalyser {
         return list;
     }
     
-    public Map<CorralArea, List<BoardPosition>> getBlockAreas(BoardState board, List<CorralArea> corrals, BoardPosition movedBlock)
-    {
-        boolean hasAllBoxesOnGoals = true;
-        boolean isACombinedCorral = false;
-        
-        for(CorralArea cArea: corrals)
-        {
-            // This is the "Play area", lets skip it
-            if(!cArea.isCorralArea())
-                break;
-            
-            for(BoardPosition box: board.getBlockNodes())
-            {
-                Direction[] dirs = { Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT };
-                for(Direction d : dirs)
-                {
-                    BoardPosition N = board.getNeighbour(box, d);
-                    BoardPosition O = board.getNeighbour(box, d.opposite());
-
-//                    if(cArea.)
-
-
-                }
-            }
-        }
-        
-        
-        return null;
-    }
     
     private void setCorralArea(BoardState board, CorralArea area, BoardPosition spaceNode, Set<BoardPosition> visited)
     {
@@ -330,9 +299,8 @@ public class LiveAnalyser {
                 
 		//System.out.println(board);
 		BoardState board = new BoardState(b, true);
-                Analyser ana = new Analyser(board);
                 PathFinder pFinder = new PathFinder();
-                LiveAnalyser liveAnalyser = new LiveAnalyser(ana, pFinder);
+                LiveAnalyser liveAnalyser = new LiveAnalyser(pFinder);
                 
                 List<CorralArea> areas = liveAnalyser.getAreas(board);
                 for(CorralArea a: areas)
@@ -350,7 +318,7 @@ public class LiveAnalyser {
         return  
             is4x4Block(state, block)
             ||
-            isDeadlockState(state, new HashSet<BoardPosition>(),block)
+            isFrozenDeadlockState(state, new HashSet<BoardPosition>(),block)
             ;
     }
     
@@ -364,8 +332,19 @@ public class LiveAnalyser {
     	return false;
     }
     
-    private boolean isDeadlockState(BoardState state, Set<BoardPosition> tmpBlock, BoardPosition block)
+    public boolean isFrozenDeadlockState(BoardState state, Set<BoardPosition> tmpBlock, BoardPosition block)
     {
+        if(DeadlockCache == null)
+            DeadlockCache = new HashMap<>();
+        Map<BoardPosition, Boolean> map = DeadlockCache.get(state);
+        if(map != null)
+        {
+            Boolean b = map.get(state);
+            if(b != null)
+                return b.booleanValue();
+        }
+        
+        
         int r = block.Row;
         int c = block.Column;
         
@@ -384,8 +363,8 @@ public class LiveAnalyser {
 			|| (right.Column < state.getColumnsCount() && state.get(right) == NodeType.WALL);
         
         horizontalWallBlocking = horizontalWallBlocking || 
-        		((left.Column >= 0 && analyser.isBadPosition(left)) && 
-        				(right.Column < state.getColumnsCount() && analyser.isBadPosition(right)));
+        		((left.Column >= 0 ) && 
+        				(right.Column < state.getColumnsCount()));
         
         
         
@@ -393,8 +372,8 @@ public class LiveAnalyser {
         // Check same as above just vertical
         boolean verticalWallBlocking = (up.Row >= 0 && state.get(up) == NodeType.WALL) 
                 || (down.Row < state.getRowsCount() && state.get(down) == NodeType.WALL)   
-                || ((up.Row >= 0 && analyser.isBadPosition(up)) 
-                && (down.Row < state.getRowsCount() && analyser.isBadPosition(down)));
+                || ((up.Row >= 0 ) 
+                && (down.Row < state.getRowsCount() ));
                 
         
         // Can block be moved?
@@ -425,18 +404,26 @@ public class LiveAnalyser {
             (
                 (verticalWallBlocking)
                 ||
-                (up.Row >= 0 && isBlockType(state.get(up)) && (tmpBlock.contains(up) || isDeadlockState(state, tmpBlock, up)))
+                (up.Row >= 0 && isBlockType(state.get(up)) && (tmpBlock.contains(up) || isFrozenDeadlockState(state, tmpBlock, up)))
                 ||
-                (down.Row < state.getRowsCount() && isBlockType(state.get(down)) && (tmpBlock.contains(down) || isDeadlockState(state, tmpBlock, down)))
+                (down.Row < state.getRowsCount() && isBlockType(state.get(down)) && (tmpBlock.contains(down) || isFrozenDeadlockState(state, tmpBlock, down)))
             )
             &&
             (
                 (horizontalWallBlocking)
                 ||
-                (left.Column >= 0 && isBlockType(state.get(left)) && (tmpBlock.contains(left) || isDeadlockState(state, tmpBlock, left)))
+                (left.Column >= 0 && isBlockType(state.get(left)) && (tmpBlock.contains(left) || isFrozenDeadlockState(state, tmpBlock, left)))
                 ||
-                (right.Column < state.getColumnsCount() && isBlockType(state.get(right)) && (tmpBlock.contains(right) || isDeadlockState(state, tmpBlock, right)))
+                (right.Column < state.getColumnsCount() && isBlockType(state.get(right)) && (tmpBlock.contains(right) || isFrozenDeadlockState(state, tmpBlock, right)))
             );
+        
+        map = DeadlockCache.get(state);
+        if(map == null)
+        {
+            map = new HashMap<>();
+            DeadlockCache.put(state, map);
+        }
+        map.put(block, deadlockState);
         return deadlockState;
     }
 

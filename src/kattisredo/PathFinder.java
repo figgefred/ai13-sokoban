@@ -2,7 +2,9 @@ package kattisredo;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -13,65 +15,65 @@ public class PathFinder {
     
 	private int playerDistMatrix[][];
 	private int board_hash = 0;
-    
+	public static int COUNT = 0;
+	
     public PathFinder() {
         
     }
-    
+
 	private void mapPlayerDistance(BoardState board) {
 		playerDistMatrix = new int[board.getRowsCount()][board.getColumnsCount()];
 		Queue<BoardPosition> positions = new LinkedList<>();
 		Queue<Integer> distances = new LinkedList<Integer>();
 		Set<BoardPosition> visited = new HashSet<>();
-		
+
 		BoardPosition player = board.getPlayerNode();
-	
+
 		positions.add(player);
 		distances.add(0);
 		visited.add(player);
-		
+
 		playerDistMatrix[player.Row][player.Column] = 0;
-		
+
 		for(int i = 0; i < board.getRowsCount(); ++i)
 			for(int y = 0; y < board.getColumnsCount(); ++y)
 				playerDistMatrix[i][y] = Integer.MAX_VALUE;
-		
+
 		// BFS
 		while(!positions.isEmpty()) {
-		
+
 			BoardPosition pos = positions.poll();
 			int distance = distances.poll();
-			
+
 			// Uppdatera positions i matrisen
 			playerDistMatrix[pos.Row][pos.Column] = distance;
-			
+
 			++distance;				
-			
+
 			for(BoardPosition neighbour : board.getNeighbours(pos)) {
 				if(visited.contains(neighbour)) 
 					continue;
-				
+
 				NodeType node = board.getNode(neighbour);
 				visited.add(neighbour);
-				
+
 				if(node == NodeType.WALL || node == NodeType.INVALID || node == NodeType.BLOCK || node == NodeType.BLOCK_ON_GOAL) 
 					continue;
-								
+
 				positions.add(neighbour);
 				distances.add(distance);
-				
 			}
 		}
+
+		/*
+		for(int i = 0; i < board.getRowsCount(); ++i) {
+			for(int j = 0; j < board.getColumnsCount(); j++) {
+				System.out.print((playerDistMatrix[i][j] == Integer.MAX_VALUE) ? "#" : playerDistMatrix[i][j] % 10);
+			}
+			System.out.print("\n");
+		}
+		*/
 		
-//		for(int i = 0; i < board.getRowsCount(); ++i) {
-//			for(int y = 0; y < board.getColumnsCount(); ++y)
-//				if(playerDistMatrix[i][y] != Integer.MAX_VALUE)
-//					System.out.print(playerDistMatrix[i][y] + " ");
-//				else
-//					System.out.print("# ");
-//			System.out.println();
-//		}
-			
 		this.board_hash = board.hashCode();
 	}
 	

@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package sokoban.fredmaster2;
+package sokoban.FredTethMerge;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,7 +11,7 @@ import sokoban.NodeType;
 
 /**
  * An area is a region of a map where the player can move to. If a player cannot
- * move to an area, then an Area is flagged as being a corral area, which means that
+ * move to an area, then an CorralArea is flagged as being a corral area, which means that
  * isCorralArea() function returns true.
  * 
  * If a map contains no corrals areas then the resp. function creating the areas
@@ -23,32 +23,33 @@ import sokoban.NodeType;
  * 
  * @author figgefred
  */
-public class Area 
+public class CorralArea 
 {
     private int ID;
     private Set<BoardPosition> Positions = new HashSet<BoardPosition>();
+    private Set<BoardPosition> NoFenceBlocks = new HashSet<BoardPosition>();
     private Set<BoardPosition> Fence = new HashSet<BoardPosition>();
     private boolean ContainsGoal;
     private boolean ContainsPlayer;
     private BoardState Board;
     
     
-    public Area(int id)
+    public CorralArea(int id)
     {
         init(id, null);
     }
     
-    public Area(int id, BoardState board)
+    public CorralArea(int id, BoardState board)
     {
         init(id, board);
     }
     
-    public Area(int id, Set<BoardPosition> pos)
+    public CorralArea(int id, Set<BoardPosition> pos)
     {
         this(id, pos, null);
     }
     
-    public Area(int id, Set<BoardPosition> pos, BoardState board)
+    public CorralArea(int id, Set<BoardPosition> pos, BoardState board)
     {
         Positions  = pos;
         init(id, board);
@@ -65,6 +66,8 @@ public class Area
             //Board = (BoardState) board.clone();
         if(Positions == null)
             Positions = new HashSet<BoardPosition>();
+        if(NoFenceBlocks == null)
+            NoFenceBlocks = new HashSet<BoardPosition>();
         ID = id;
     }
         
@@ -85,6 +88,8 @@ public class Area
                 ContainsPlayer = true;
             if(nodeType.isGoalNode())
                 ContainsGoal = true;
+            if(nodeType.isBlockNode())
+                NoFenceBlocks.add(p);
         }
         return added;
     }
@@ -130,6 +135,11 @@ public class Area
     public Set<BoardPosition> getFencePositions()
     {
         return Fence;
+    }
+    
+    public Set<BoardPosition> getNoFenceBlockPositions()
+    {
+        return NoFenceBlocks;
     }
     
     /**
@@ -184,10 +194,10 @@ public class Area
         {
             for(int r = 0; r < Board.getRowsCount(); r++)
             {
-                for(int c = 0; c < Board.getColumnsCount(r);c++)
+                for(int c = 0; c < Board.getColumnsCount();c++)
                 {
                     BoardPosition p = new BoardPosition(r, c);
-                    if(Positions.contains(p) && (!Board.getNode(p).isPlayerNode() ) )// && Board.getNode(p) != NodeType.WALL ) )
+                    if(Positions.contains(p) && (!Board.get(p).isPlayerNode() ) )// && Board.getNode(p) != NodeType.WALL ) )
                     {
                         sb.append(ID);
                     }
@@ -197,7 +207,7 @@ public class Area
                     }
                     else
                     {
-                        sb.append(Board.getNode(p).getChar());
+                        sb.append(Board.get(p).getChar());
                     }
                 }
                 sb.append("\n");

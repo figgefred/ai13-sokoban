@@ -18,6 +18,7 @@ import sokoban.BoardPosition;
 import sokoban.NodeType;
 import sokoban.Direction;
 
+
 /**
  *
  * @author figgefred
@@ -33,6 +34,9 @@ public class BoardState implements Cloneable
     private List<List<NodeType>> Map = new ArrayList<>();
     private List<BoardPosition> Goals;
     private BoardPosition CurrentNode;
+    private Tunnels Tunnels;
+    
+    private BoardPosition lastPushedBlock;
     
     private int rows;
     private int cols;
@@ -62,10 +66,129 @@ public class BoardState implements Cloneable
         if(initZobrist)
         {
             initZobristTable(rows, cols);
+            setAllTunnels();
+            setInvalidFields(Map);
+        }
+    }
+    
+    private void setAllTunnels()
+    {
+        Tunnels = new Tunnels();
+        Set<BoardPosition> markedAsTunnel = new HashSet<BoardPosition>();
+        // First we look for VERTICAL entrances
+        for(int i = 0; i < getRowsCount(); i++)
+        {
+            for(int j = 0; j < getColumnsCount(i); j++)
+            {
+                BoardPosition centerP = new BoardPosition(i, j);
+
+                if(get(centerP).isTunnelSpaceNode())
+                {
+                    boolean horizontal = false;
+                    // UP || DOWN
+                    BoardPosition p1 = new BoardPosition(i, j-1);
+                    BoardPosition p3 = new BoardPosition(i, j+1);
+                    if(get(p1).isWallNode() && get(p3).isWallNode())
+                    {
+                        Tunnel t = new Tunnel(this);
+                        expandTunnel(t, centerP, Direction.DOWN, markedAsTunnel);
+                        if(!t.isEmpty())
+                                Tunnels.add(t);
+                    }
+                    else
+                        horizontal = true;
+                    if(horizontal)
+                    {
+                        p1 = new BoardPosition(i-1, j);
+                        p3 = new BoardPosition(i+1, j);    
+                        if(get(p1).isWallNode() && get(p3).isWallNode())
+                        {
+                            Tunnel t = new Tunnel(this);
+                            expandTunnel(t, centerP, Direction.RIGHT, markedAsTunnel);    
+                            if(!t.isEmpty())
+                                Tunnels.add(t);
+                        }
+                    }
+                }
+            }
         }
         
-        setInvalidFields(Map);
+        // Now we look for HORIZONTAL entrances
+    }
+    
+    private void expandTunnel(Tunnel tunnel, BoardPosition p, Direction direction, Set<BoardPosition> visited)
+    {
+        // Add head position
+        if(visited.contains(p))
+            return;
+        tunnel.add(p);
+        visited.add(p);
         
+        BoardPosition p1;
+        BoardPosition p2;
+        BoardPosition p3;
+        switch(direction)
+        {
+            case UP:
+            {
+                p1 = new BoardPosition(p.Row-1, p.Column-1);
+                p2 = new BoardPosition(p.Row-1, p.Column);
+                p3 = new BoardPosition(p.Row-1, p.Column+1);
+                break;
+            }
+            case DOWN:
+            {
+                p1 = new BoardPosition(p.Row+1, p.Column-1);
+                p2 = new BoardPosition(p.Row+1, p.Column);
+                p3 = new BoardPosition(p.Row+1, p.Column+1);
+                break;
+            }
+            case LEFT:
+            {
+                p1 = new BoardPosition(p.Row-1, p.Column-1);
+                p2 = new BoardPosition(p.Row, p.Column-1);
+                p3 = new BoardPosition(p.Row+1, p.Column-1);
+                break;
+            }
+            case RIGHT:
+            {
+                p1 = new BoardPosition(p.Row-1, p.Column+1);
+                p2 = new BoardPosition(p.Row, p.Column+1);
+                p3 = new BoardPosition(p.Row+1, p.Column+1);
+                break;
+            }
+            default: 
+            {
+                return;
+            }
+        }
+            
+        
+        if(!visited.contains(p2) )
+        {
+            boolean appended = tunnel.add(p2);
+            visited.add(p2);
+            while(appended)
+            {    
+                appended = false;
+                for(BoardPosition n: this.getNeighbours(p2))
+                {
+                    if(tunnel.add(n))
+                    {
+                        p2 = n;
+                        visited.add(n);
+                        appended = true;
+                        break;
+                    }
+                }   
+            }
+        }
+    }
+    
+    
+    public Tunnels getTunnels()
+    {
+        return Tunnels;
     }
     
     private void sortGoals()
@@ -151,8 +274,9 @@ public class BoardState implements Cloneable
     	for(List<NodeType> row : Map)
     		cols = Math.max(row.size(), cols);
         if(initZobrist) { 
-        	initZobristTable(Map.size(), cols);
+            initZobristTable(Map.size(), cols);
         }
+        setAllTunnels();
         setInvalidFields(Map);
         
         if(Player.DO_GOAL_SORTING)
@@ -161,6 +285,10 @@ public class BoardState implements Cloneable
     
     public BoardState() {
     	
+    }
+   
+    public BoardPosition getLastPushedBlock() {
+    	return lastPushedBlock;
     }
     
     public static BoardState getBoardFromFile(String filename) throws IOException
@@ -242,23 +370,33 @@ public class BoardState implements Cloneable
 		BoardPosition south = new BoardPosition(position.Row+1, position.Column);
 		BoardPosition west = new BoardPosition(position.Row, position.Column-1);
 		
-		if(getNode(north) == NodeType.WALL && getNode(east) == NodeType.WALL)
+		if(get(north) == NodeType.WALL && get(east) == NodeType.WALL)
 			return true;
 		
-		if(getNode(north) == NodeType.WALL && getNode(west) == NodeType.WALL)
+		if(get(north) == NodeType.WALL && get(west) == NodeType.WALL)
 			return true;
 		
-		if(getNode(south) == NodeType.WALL && getNode(west) == NodeType.WALL)
+		if(get(south) == NodeType.WALL && get(west) == NodeType.WALL)
 			return true;
 		
-		if(getNode(south) == NodeType.WALL && getNode(east) == NodeType.WALL)
+		if(get(south) == NodeType.WALL && get(east) == NodeType.WALL)
 			return true;
 		
 		
 		return false;
 	}
        
-    public NodeType getNode(int row, int col)
+    public void set(BoardPosition pos, NodeType type) {
+    	set(pos.Row, pos.Column, type);
+    }
+    
+    public void set(int row, int col, NodeType type) {
+    	updateHashCode(row, col, Map.get(row).get(col), type);
+    	Map.get(row).set(col, type);
+    }
+    
+        
+    public NodeType get(int row, int col)
     {
         if(row < 0 || row >= Map.size())
             return NodeType.INVALID;
@@ -268,9 +406,9 @@ public class BoardState implements Cloneable
         return Map.get(row).get(col);
     }
 	
-    public NodeType getNode(BoardPosition pos)
+    public NodeType get(BoardPosition pos)
     {
-        return getNode(pos.Row, pos.Column);
+        return get(pos.Row, pos.Column);
     }
     
     public List<BoardPosition> getNeighbours(BoardPosition pos)
@@ -339,26 +477,26 @@ public class BoardState implements Cloneable
         List<BoardPosition> positions = new ArrayList<>();
         // UP
         if(row > 1) {
-        	NodeType type = getNode(row-2,col);
+        	NodeType type = get(row-2,col);
         	if(type != NodeType.WALL && type != NodeType.INVALID)
         		positions.add(new BoardPosition(row-1,col));
         }
         // Down
         if(row < Map.size()-2) {
-        	NodeType type = getNode(row+2,col);
+        	NodeType type = get(row+2,col);
         	if(type != NodeType.WALL && type != NodeType.INVALID)
         	positions.add(new BoardPosition(row+1,col));
         }
         // LEFT
         if(col > 1) {
-        	NodeType type = getNode(row,col-2);
+        	NodeType type = get(row,col-2);
         	if(type != NodeType.WALL && type != NodeType.INVALID)
         		positions.add(new BoardPosition(row,col-1));
         }
         	
         //RIGHT
         if(col < Map.get(row).size()-2) {
-        	NodeType type = getNode(row,col+2);
+        	NodeType type = get(row,col+2);
         	if(type != NodeType.WALL && type != NodeType.INVALID)
         		positions.add(new BoardPosition(row,col+1));
         
@@ -416,7 +554,7 @@ public class BoardState implements Cloneable
     }
     
     public boolean isBlockingNode(BoardPosition position) {    	
-    	return isBlockingNode(getNode(position));
+    	return isBlockingNode(get(position));
     }   
     
     public int getRowsCount()
@@ -560,7 +698,7 @@ public class BoardState implements Cloneable
     }
     
     private void pushBlock(int row, int col, int newrow, int newcol) {
-    	NodeType orig = Map.get(row).get(col);
+   /* 	NodeType orig = Map.get(row).get(col);
     	NodeType dest = Map.get(newrow).get(newcol);
     	
     	if(orig != NodeType.BLOCK && orig != NodeType.BLOCK_ON_GOAL)
@@ -587,10 +725,19 @@ public class BoardState implements Cloneable
     	}
     	
     	Map.get(row).set(col, (orig == NodeType.BLOCK_ON_GOAL) ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER);
-    	
     	Map.get(newrow).set(newcol, (dest == NodeType.GOAL) ? NodeType.BLOCK_ON_GOAL : NodeType.BLOCK);
-        
-        
+     */
+    	NodeType orig = get(row, col);
+    	NodeType dest = get(newrow, newcol);
+    	
+    	if(orig != NodeType.BLOCK && orig != NodeType.BLOCK_ON_GOAL)
+    		throw new IllegalArgumentException("Push was called to push non-block: " + orig.toString());
+    	if(dest != NodeType.GOAL && dest != NodeType.SPACE)
+    		throw new IllegalArgumentException("Can't push block, something is in the way: " + dest.toString() + " " + row + "," + col + " " + newrow +"," + newcol);    	
+    	
+    	set(row, col, (orig == NodeType.BLOCK_ON_GOAL) ? NodeType.PLAYER_ON_GOAL : NodeType.PLAYER);
+    	set(newrow, newcol, (dest == NodeType.GOAL) ? NodeType.BLOCK_ON_GOAL : NodeType.BLOCK);
+    	
         BoardPosition from = new BoardPosition(row, col);
         BoardPosition to = new BoardPosition(newrow, newcol);
         for(int i = 0; i < BlockIndex.size(); i++)
@@ -602,7 +749,23 @@ public class BoardState implements Cloneable
                 break;
             }
         }
+        
+        lastPushedBlock = to;
     }
+    
+    public void RecalculateGoalNodes() {
+    	Goals = new ArrayList<BoardPosition>();
+    	for(int row = 0; row < rows; ++row) {
+    		 	
+    		for(int col = 0; col < getColumnsCount(row); ++col)
+    		{    			
+    			NodeType type = get(row, col);
+    			if(type == NodeType.GOAL || type == NodeType.PLAYER_ON_GOAL || type == NodeType.BLOCK_ON_GOAL)
+    				Goals.add(new BoardPosition(row, col));    		
+    			
+    		}
+    	}
+    }    
     
     /***
      * Moves the player to target position. Resetting the old position to its normal value
@@ -620,14 +783,14 @@ public class BoardState implements Cloneable
     public boolean isWin() {
 	    for(BoardPosition goal : Goals)
 	    {
-	            if(getNode(goal) != NodeType.BLOCK_ON_GOAL)
+	            if(get(goal) != NodeType.BLOCK_ON_GOAL)
 	                    return false;
 	    }
 	    return true;
     }
     
     public boolean isSpaceNode(int r, int c) {
-        NodeType type = getNode(r, c);
+        NodeType type = get(r, c);
         if(type == NodeType.INVALID)
             System.err.println("Referring to position " + r + ", " + c + " which refers to INVALID type");
         
@@ -642,7 +805,7 @@ public class BoardState implements Cloneable
     
     public boolean isNoneBlockingNode(int r, int c)
     {
-        NodeType type = getNode(r, c);
+        NodeType type = get(r, c);
         if(type == NodeType.INVALID)
             System.err.println("Referring to position " + r + ", " + c + " which refers to INVALID type");
         
@@ -702,10 +865,10 @@ public class BoardState implements Cloneable
     public NodeType[] getNeighbourTypes(int row, int col)
     {
     	return new NodeType[] {
-    		getNode(row + 1, col),
-    		getNode(row - 1, col),
-    		getNode(row, col + 1),
-    		getNode(row, col - 1)
+    		get(row + 1, col),
+    		get(row - 1, col),
+    		get(row, col + 1),
+    		get(row, col - 1)
     	};
     }
   	
@@ -727,6 +890,14 @@ public class BoardState implements Cloneable
                 for(BoardPosition p: BlockIndex)
                     newState.BlockIndex.add(new BoardPosition(p.Row, p.Column));
                 
+                if(Tunnels != null)
+                {
+                    for(Tunnel t: Tunnels.get())
+                    {
+                        newState.Tunnels = new Tunnels();
+                        newState.Tunnels.add(t);
+                    }
+                }
   		
   		return newState;
   	}
@@ -764,7 +935,7 @@ public class BoardState implements Cloneable
 		for(int row = 0; row < Map.size(); ++row) {
 			for(int col = 0; col < Map.get(row).size(); ++col)
 			{
-				NodeType type = getNode(row, col);
+				NodeType type = get(row, col);
 				int val = 0;
 				typeloop:
 				for(; val < vals.length; val++)
@@ -800,7 +971,7 @@ public class BoardState implements Cloneable
 		for(int row = 0; row < Map.size(); ++row) {
 			for(int col = 0; col < Map.get(row).size(); ++col)
 			{
-				if(getNode(row, col) != b.getNode(row, col))
+				if(get(row, col) != b.get(row, col))
 					return false;
 			}
 		}

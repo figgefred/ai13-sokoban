@@ -12,6 +12,8 @@ import java.util.Queue;
  *
  */
 public class Player {	
+    public static boolean CHEAT;
+    public static boolean FALLBACK;
 	
 	private Queue<Move> openSet;
         private HashSet<BoardState> closedSet;
@@ -24,6 +26,9 @@ public class Player {
         public static boolean DO_DEADLOCKS_4x4 = true;
         public static boolean DO_BIPARTITE_MATCHING = true;
         public static boolean DO_CORRAL_LIVE_DETECTION = true;
+        public static boolean DO_TUNNEL_MACRO_MOVE = true;
+        public static boolean DO_CORRAL_CACHING = true;
+        public static boolean DO_HEURISTIC_CACHING = true;
     
 	private BoardState initialState;
 	
@@ -60,8 +65,10 @@ public class Player {
         	
         	//Integer tentative_g = node.getHeuristicValue() + 100;
         	
+                
+                
         	for(Move neighbour: node.getNextMoves())
-        	{	       		                		
+        	{	       		                    
         		if(neighbour.board.isWin())
         			return neighbour;
         		
@@ -73,15 +80,14 @@ public class Player {
         		
         		
         		if (closedSet.contains(neighbour.board) || to_g == Integer.MIN_VALUE) {        			
-                	continue;
+                            continue;
         		}
-        		
         		
         		if(!toVisitSet.contains(neighbour.board))
         		{        		        			
         			openSet.add(neighbour);
         			toVisitSet.add(neighbour.board);
-        		}        		        		
+        		}
         	}
         	
         	
@@ -104,16 +110,30 @@ public class Player {
 		initial.path = new Path();
 		//Move.initPreanalyser(initialState);		
 		
-		
-		Move win = getVictoryPath(initial);
-		if(win != null) {
-			//System.out.println(win.board);
-			return win.path;
-		} else {
-                    if(VERBOSE)
-                        System.out.println("wat?");			
+		Move win = null;
+                if(Player.CHEAT)
+                {
+                    win = getVictoryPath(initial);
+                    System.out.print("CHEAT");
+                    if(win != null)
+                        return win.path;
+                }
+                
+                if(Player.FALLBACK)
+                {
+                    Player.CHEAT = false;
+                    System.out.print("FALLBACK");
+                    win = getVictoryPath(initial);
+                }
+                else if(!Player.CHEAT)
+                {
+                    win = getVictoryPath(initial);
+                }
+                
+		if(win == null)
                     return null;
-		}
+                else
+                    return win.path;
 		/*
 		for(Move nextMove : initial.getNextMoves())
 		{
@@ -126,16 +146,17 @@ public class Player {
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
 		BoardState board;
-                //board = BoardState.getBoardFromFile("testing/simpleplaytest3");
+                //board = BoardState.getBoardFromFile("testing/simpleplaytest5");
                 //board = BoardState.getBoardFromFile("testing/level3");
-                //board = BoardState.getBoardFromFile("test100/test099.in");
+               /// board = BoardState.getBoardFromFile("test100/test092.in");
                 //board = BoardState.getBoardFromFile("test100/test004.in");
-                board = BoardState.getBoardFromFile("test100/test092.in");
+                board = BoardState.getBoardFromFile("test100/test086.in");
+                //board = BoardState.getBoardFromFile("test100/test016.in");
                 
             // Can solve
                 //board = BoardState.getBoardFromFile("test100/test059.in");
                 //board = BoardState.getBoardFromFile("test100/test069.in");
-                //board = BoardState.getBoardFromFile("test100/test092.in");
+               // board = BoardState.getBoardFromFile("test100/test092.in");
                 
             // Cant't solve
                 //board = BoardState.getBoardFromFile("test100/test089.in");
@@ -158,13 +179,24 @@ public class Player {
                 //board = BoardState.getBoardFromFile("test100/test099.in");
                 Player.VERBOSE = false;
                 
-                Player.DO_BIPARTITE_MATCHING = true;
-                Player.DO_CORRAL_LIVE_DETECTION = true;
-                Player.DO_DEADLOCKS_CONSTANTCHECK = true;
-                Player.DO_DEADLOCKS_4x4 = true;
-                Player.DO_GOAL_SORTING = false;
+        Player.DO_GOAL_SORTING = true;
+        Player.DO_DEADLOCKS_CONSTANTCHECK = true;
+        Player.DO_DEADLOCKS_4x4 = true;
+        Player.DO_BIPARTITE_MATCHING = true;
+        Player.DO_CORRAL_LIVE_DETECTION = true;
+        Player.DO_TUNNEL_MACRO_MOVE = true;
+        Player.DO_CORRAL_CACHING = true;
+        Player.DO_HEURISTIC_CACHING = true;
+    
                 
+        sokoban.fredmaster2.Player.CHEAT = false;
+        sokoban.fredmaster2.Player.FALLBACK = false;
+        
 		System.out.println(board);
+//                System.out.println(board.getTunnels());
+            //    try{Thread.sleep(500000);}catch(InterruptedException ex){}
+                
+                
 		Player noob = new Player(board);
 		Path path = noob.play();
                 

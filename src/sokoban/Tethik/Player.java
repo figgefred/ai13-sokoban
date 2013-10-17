@@ -10,20 +10,25 @@ import java.util.Queue;
 /***
  * A* variant on boardstate
  * @author tethik
- *
  */
 public class Player {	
 	
 	private Queue<Move> openSet;
     private HashSet<Integer> closedSet;
-    public static boolean VERBOSE = true;
+    
     public volatile boolean shouldStop = false;
+    public Settings settings;
+    public Analyser analyser;
+    public PathFinder pathfinder; 
     
 	private BoardState initialState;
 	
-	public Player(BoardState initialState)
+	public Player(BoardState initialState, Settings settings)
 	{		
+		this.settings = settings;
 		this.initialState = initialState;
+		this.analyser = new Analyser(initialState, settings);
+		this.pathfinder = new PathFinder();
 		
 		if(initialState.getBlockNodes().size() != initialState.getGoalNodes().size())
 			throw new IllegalArgumentException("Different number of goals than blocks");
@@ -39,7 +44,7 @@ public class Player {
         {
         	Move node = openSet.poll();
         	
-        	if(VERBOSE) {
+        	if(settings.VERBOSE) {
 	        	System.out.println(openSet.size() + " " + closedSet.size());
 	        	System.out.println("Pushes : " + node.pushes);
 	        	System.out.println(node.path.getPath().size() + ", " + node.getHeuristicValue() + ", " + closedSet.size() + ", " + node.board.hashCode());
@@ -51,15 +56,17 @@ public class Player {
         	
         	List<Move> moves = node.getNextMoves();
         	for(Move neighbour : moves)
-        	{	            		       		
-        		if (closedSet.contains(neighbour.board.hashCode())) {        			
+        	{	
+        		if(closedSet.contains(neighbour.board.hashCode())) {        			
                 	continue;
         		}
         		
-    			closedSet.add(neighbour.board.hashCode());
-    			
+    			closedSet.add(neighbour.board.hashCode());    			
+    		
     			if(neighbour.getHeuristicValue() > Integer.MIN_VALUE)
     				openSet.add(neighbour);  	
+    			else if(neighbour.isWin())
+    				return neighbour;
         	}
         }
 
@@ -67,43 +74,43 @@ public class Player {
 	}
 	
 	
-	public Path play() {				
+	public Path play() {
 		
-		Analyser analyser = new Analyser(initialState);
-		PathFinder pathfinder = new PathFinder();
 		Move initial = new Move(analyser, pathfinder);
 		initial.board = initialState;
+		initialState.setSettings(settings);
 		initial.path = new Path();
 		
 		Move win = getVictoryPath(initial);
-		if(win != null) {		
-			//System.out.println(win.path);
+		if(win != null) {
 			return win.path;
-		}				
-		
-		//System.out.println();
-		return null;
-		/*
-		for(Move nextMove : initial.getNextMoves())
-		{
-			System.out.println(nextMove.board);
-			System.out.println(nextMove.path)4
-			System.out.println(nextMove.getHeuristicValue())
+		} else {						
+			settings.BOARDSTATE_PLAYER_HASHING = true;
+			win = getVictoryPath(initial);
+			if(win != null) 
+				return win.path;
 		}
-		*/
+				
+		return null;
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		//BoardState board = BoardState.getBoardFromFile("test100/test099.in");
-		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
+//		BoardState board = BoardState.getBoardFromFile("test100/test099.in");
+		BoardState board = BoardState.getBoardFromFile("test100/test031.in");
+//		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest5");
+		
+		long timeStart = System.currentTimeMillis();
 		
 		System.out.println(board);
-		Player noob = new Player(board);
+		Player noob = new Player(board, new Settings());
 		Path path = noob.play();
+		long timeStop = System.currentTimeMillis();
 		System.out.println(path);
 		if(path != null)
 			board.movePlayer(path);
 		System.out.println(board);
+		
+		System.out.println("Time: " + (timeStop - timeStart) + " ms");
 	}
 }
 

@@ -1,4 +1,4 @@
-package tester;
+package sokoban.FredTethMerge.Tester;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,13 +6,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import sokoban.FredTethMerge.*;
+
 
 public class BatchTester {
 	
-	private static int TIMELIMIT = 11000;
-	private static int NUMBER_OF_THREADS = 4;
+	private static int TIMELIMIT = 2000;
+	//private static int NUMBER_OF_THREADS = 8;
 	private static int NUMBER_OF_TESTS = 100;
-	static final ExecutorService threadPool = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
+	static final ExecutorService threadPool = Executors.newFixedThreadPool(1);
 	
 
 	public static void main(String[] args) throws InterruptedException {		
@@ -21,12 +23,28 @@ public class BatchTester {
 		List<TimingRunner> timers = new ArrayList<TimingRunner>();
 		
 		// Some statics..
-		sokoban.fredmaster2.BoardState.initZobristTable(50, 50);
-		sokoban.Tethik.BoardState.initZobristTable(50, 50);
-		sokoban.Tethik.IDA.BoardState.initZobristTable(50, 50);
-		sokoban.fredmaster2.Player.VERBOSE = false;
-		//Player.VERBOSE = false;
-//		sokoban.Tethik.IDA.Player.VERBOSE = false;
+		BoardState.initZobristTable(50, 50);
+		BoardState.initZobristTable(50, 50);
+                
+                Player.DO_GOAL_SORTING = true;
+                Player.DO_DEADLOCKS_CONSTANTCHECK = true;
+                Player.DO_DEADLOCKS_4x4 = true;
+                Player.DO_EXPENSIVE_DEADLOCK = true;
+                Player.DO_BIPARTITE_MATCHING = true;
+                Player.DO_CORRAL_LIVE_DETECTION = true;
+                Player.DO_CORRAL_CACHING = true;
+                Player.DO_HEURISTIC_CACHING = true;
+
+                Player.DO_TUNNEL_MACRO_MOVE = false;
+
+                Player.CHEAT = false;
+                Player.FALLBACK = true;
+                
+                Player.VERBOSE = false;
+		
+//		TestJob job = new TestJob("test100/test099.in");
+//		TimingRunner runner = new TimingRunner(job, TIMELIMIT);
+//		runner.run();
 		
 
 		for(int i = 0; i < NUMBER_OF_TESTS; ++i) {

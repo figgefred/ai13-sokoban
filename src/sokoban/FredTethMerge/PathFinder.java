@@ -1,5 +1,6 @@
-package sokoban.Tethik;
+package sokoban.FredTethMerge;
 
+import sokoban.Tethik.*;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;

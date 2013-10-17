@@ -1,5 +1,4 @@
 package kattisredo;
-
 /**
  *
  * @author figgefred

@@ -1,4 +1,6 @@
-package tester;
+package sokoban.FredTethMerge.Tester;
+
+import tester.*;
 
 public class TimingRunner implements Runnable {
 	
@@ -27,11 +29,7 @@ public class TimingRunner implements Runnable {
 		while((timetaken = System.currentTimeMillis() - starttime) < timetorun) {			
 			if(!runnableToTime.isRunning)
 			{
-				if(runnableToTime.result)
-					System.out.print("+");
-				else
-					System.out.println("-");
-				
+				System.out.print("+");
 				return;
 			}
 			try {

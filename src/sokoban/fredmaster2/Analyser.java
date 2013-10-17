@@ -90,7 +90,7 @@ public class Analyser {
                 
 		for(int row = 0; row < rows; ++row)
 			for(int col = 0; col < cols; ++col) {
-				NodeType type = board.getNode(row, col);				
+				NodeType type = board.get(row, col);				
 				
 				// Remove blocks from the map
 				if(type == NodeType.BLOCK || type == NodeType.PLAYER)
@@ -121,7 +121,7 @@ public class Analyser {
 		//i = 0;
 		for(BoardPosition goal : board.getGoalNodes()) {
 		
-			if(board.getNode(goal) == NodeType.BLOCK_ON_GOAL)
+			if(board.get(goal) == NodeType.BLOCK_ON_GOAL)
 				continue;
 			
 			positions.clear();
@@ -132,7 +132,7 @@ public class Analyser {
 			distances.add(0);
 			visited.add(goal);
 			
-			if(board.getNode(goal) == NodeType.BLOCK_ON_GOAL) {
+			if(board.get(goal) == NodeType.BLOCK_ON_GOAL) {
 				continue;
 			}
 			
@@ -151,7 +151,7 @@ public class Analyser {
 				++distance;				
 
 				/*
-				if(board.getNode(pos) == NodeType.BLOCK || board.getNode(pos) == NodeType.BLOCK_ON_GOAL)
+				if(board.get(pos) == NodeType.BLOCK || board.get(pos) == NodeType.BLOCK_ON_GOAL)
 					continue;						
 				*/
 				
@@ -159,7 +159,7 @@ public class Analyser {
 					if(visited.contains(neighbour)) 
 						continue;
 					
-					NodeType node = board.getNode(neighbour);
+					NodeType node = board.get(neighbour);
 					if(node == NodeType.WALL || node == NodeType.INVALID) 
 						continue;
 									
@@ -279,7 +279,7 @@ public class Analyser {
             int count = 0;
             for(BoardPosition p: positions)
             {
-                if(state.getNode(p) == NodeType.WALL)
+                if(state.get(p) == NodeType.WALL)
                 {
                     count++;
                 }
@@ -304,7 +304,7 @@ public class Analyser {
 		{		
 			reachMap.put(goal, new ArrayList<BoardPosition>());			
 			
-			if(board.getNode(goal) == NodeType.BLOCK_ON_GOAL) {
+			if(board.get(goal) == NodeType.BLOCK_ON_GOAL) {
 				goalDist[i] = 0;
 			}
 			
@@ -430,7 +430,7 @@ public class Analyser {
 		
 		for(BoardPosition block : blocks)
 		{			
-			if(board.getNode(block) == NodeType.BLOCK_ON_GOAL)
+			if(board.get(block) == NodeType.BLOCK_ON_GOAL)
                             blockDist[b] =-50;
 			else if(board.isInCorner(block)) {
                             return Integer.MIN_VALUE;		
@@ -443,7 +443,7 @@ public class Analyser {
 		{		
 			reachMap.put(goal, new ArrayList<BoardPosition>());			
 			
-			if(board.getNode(goal) == NodeType.BLOCK_ON_GOAL) {
+			if(board.get(goal) == NodeType.BLOCK_ON_GOAL) {
 				goalDist[i] = 0;
 			}
 			
@@ -479,9 +479,25 @@ public class Analyser {
 			val -= blockDist[i];
 		}
 
+                if(Player.DO_CORRAL_LIVE_DETECTION)
+                {
+                    List<CorralArea> l = LiveAnalyser.getAreas(board);
+                    if(l != null && l.size() > 1)
+                    {
+                        blocks = new ArrayList<>();
+                        for(CorralArea a: l)
+                        {
+                            if(a.isCorralArea())
+                            {
+                                if(!a.getFencePositions().contains(pushedBlock))
+                                {
+                                    val -= 1000;
+                                }
+                            }
+                        }
+                    }
+                }
 		
-                
-                
                 //int val = 0;
                 /*List<BoardPosition> goals = (List) GoalQueue;
                 
@@ -490,7 +506,7 @@ public class Analyser {
                 for(BoardPosition goal: goals)
                 {
                     //BoardPosition block = board.getBlockNodes().get(GoalToBlockIndexMap.get(goal));
-                    if(board.getNode(goal) != NodeType.BLOCK_ON_GOAL)
+                    if(board.get(goal) != NodeType.BLOCK_ON_GOAL)
                     {
                         penaltyWeight -= penaltyWeight;
                     }
@@ -503,9 +519,9 @@ public class Analyser {
                 if(blockLastPushedIndex != -1)
                 {
                     BoardPosition block = board.getBlockNodes().get(blockLastPushedIndex);
-                    if(pushedBlock.equals(block))
+                    if(!pushedBlock.equals(block))
                     {
-                        val += 100;
+                        val -= 500;
                     }
                 }
 
@@ -525,10 +541,10 @@ public class Analyser {
 					continue;
 				
 				NodeType nodes[] = new NodeType[] {
-					board.getNode(row, col),
-					board.getNode(row, col+1),
-					board.getNode(row+1, col),
-					board.getNode(row+1, col+1)
+					board.get(row, col),
+					board.get(row, col+1),
+					board.get(row+1, col),
+					board.get(row+1, col+1)
 				};
 				
 				

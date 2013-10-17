@@ -1,4 +1,4 @@
-package tester;
+package sokoban.FredTethMerge.Tester;
 
 import java.io.IOException;
 
@@ -6,10 +6,7 @@ import java.io.IOException;
 //import sokoban.Tethik.*;
 
 // Fred:
-//import sokoban.fredmaster2.*;
-
-// Tethik IDA*
-import sokoban.Tethik.IDA.*;
+import sokoban.FredTethMerge.*;
 
 public class TestJob implements Runnable {
 
@@ -18,6 +15,7 @@ public class TestJob implements Runnable {
 	public String message = "";
 	public volatile boolean isRunning = true;
 	public Player play0r;
+//	public IDAPlayer play0r;
 	
 	public TestJob(String filename) {
 		this.filename = filename;
@@ -40,7 +38,7 @@ public class TestJob implements Runnable {
 		}
 		
 		try {
-			play0r = new Player(board, new Settings());
+			play0r = new Player(board);
 			Path path = play0r.play();
 			
 			if(path != null) {			

@@ -1,4 +1,4 @@
-package sokoban.Tethik;
+package sokoban.Tethik.IDA;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +26,20 @@ public class Move implements Comparable<Move> {
 		if(heuristic_value != null)
 			return heuristic_value;
 		
-		heuristic_value = analyser.getHeuristicValue(board);		
+		heuristic_value = analyser.getHeuristicValue(board);
+		
+//		if(heuristic_value == Integer.MAX_VALUE || heuristic_value == Integer.MIN_VALUE)
+//			return heuristic_value;
+		
 		return heuristic_value; 
+	}
+	
+	private Integer lower_bound = null;
+	public int getLowerBound() {
+		if(lower_bound == null)
+			lower_bound = analyser.getLowerBound(board);
+		
+		return lower_bound;
 	}
 	
 	public boolean isWin() {
@@ -81,7 +93,7 @@ public class Move implements Comparable<Move> {
 		
 		List<Move> possibleMoves = getNextPushMoves();
 		
-		if(analyser.getSettings().MOVE_DO_GOAL_MOVES) {		
+		if(analyser.getSettings().MOVE_DO_GOAL_MOVES) {
 			List<BoardPosition> blocks = board.getBlockNodes();
 			for(BoardPosition block : blocks)
 			{
@@ -91,8 +103,8 @@ public class Move implements Comparable<Move> {
 				List<Move> goalPushingMoves = singleBlockPlayer.findGoalMoves(this, block);
 				possibleMoves.addAll(goalPushingMoves);
 				
-	//			if(goalPushingMoves.size() > 0)
-	//				break;
+//				if(goalPushingMoves.size() > 0)
+//					break;
 			} 
 		}
 		

@@ -1,64 +1,51 @@
-package sokoban.fredmaster2;
+package sokoban.FredTethMerge;
 
+import sokoban.Tethik.*;
 import java.util.ArrayList;
 import java.util.List;
 
 import sokoban.BoardPosition;
-import sokoban.Direction;
+import sokoban.NodeType;
 
 public class Move implements Comparable<Move> {
-	private PathFinder pathfinder;
-	private Analyser analyser = null;
+	public PathFinder pathfinder = new PathFinder();
+	public Analyser analyser = null;
+        public LiveAnalyser liveAnalyser;
 	public BoardState board;
 	public Path path;
 	private Integer heuristic_value = null;
-        
-        private LiveAnalyser LiveAnalyser;
+	public int pushes = 1;
 	
-        public Move(PathFinder pathfinder, Analyser analyser)
-        {
-            //super();
-            this.pathfinder = pathfinder;
-            this.analyser = analyser;
-            
-            this.LiveAnalyser = analyser.LiveAnalyser;
-        }
-        
-	/*public static void initPreanalyser(BoardState board) {
-		analyser = new Analyser(board);
-	}*/
+	private SingleBlockPlayer singleBlockPlayer;
 	
+	public Move(LiveAnalyser liveAnalyser, Analyser analyser, PathFinder pathfinder) {
+		this.pathfinder = pathfinder;
+		this.analyser = analyser;
+                this.liveAnalyser = liveAnalyser;
+		singleBlockPlayer = new SingleBlockPlayer(liveAnalyser, analyser);
+	}
 
 	public int getHeuristicValue() {
 		if(heuristic_value != null)
 			return heuristic_value;
 		
-		BoardPosition lastpos = path.get(path.getPath().size() - 2);
-		BoardPosition pushedBlock = null;
-		if(lastpos != null) {
-			Direction pushDirection = lastpos.getDirection(board.getPlayerNode());
-			pushedBlock = board.getPlayerNode().getNeighbouringPosition(pushDirection);
-		}
-                
-                if(Player.DO_HEURISTIC_CACHING)
-                {
-                    Integer val = LiveAnalyser.getHeuristicCacheVal(board, pushedBlock);
-                    if(val != null)
-                        return val.intValue();
-                }
-		heuristic_value = analyser.getHeuristicValue(board, pushedBlock);
-                if(Player.DO_HEURISTIC_CACHING)
-                {
-                    LiveAnalyser.setHeuristic(board, pushedBlock, heuristic_value);
-                }
+		heuristic_value = analyser.getHeuristicValue(board);
+		
+//		if(heuristic_value == Integer.MAX_VALUE || heuristic_value == Integer.MIN_VALUE)
+//			return heuristic_value;
+		
 		return heuristic_value; 
 	}
 	
-	public List<Move> getNextMoves() {
+	public boolean isWin() {
+		return board.isWin();
+	}
+	
+	public List<Move> getNextPushMoves() {
 		List<Move> possibleMoves = new ArrayList<Move>();
-		List<BoardPosition> blocks = null;
-                BoardPosition playerPos = board.getPlayerNode();		
-                
+		List<BoardPosition> blocks = board.getBlockNodes();
+		BoardPosition playerPos = board.getPlayerNode();	
+
                 boolean isRealCorral = false;
                 
                 /*
@@ -84,7 +71,7 @@ public class Move implements Comparable<Move> {
                 
                 if(Player.DO_CORRAL_LIVE_DETECTION)
                 {
-                    List<CorralArea> l = LiveAnalyser.getAreas(board);
+                    List<CorralArea> l = liveAnalyser.getAreas(board);
                     if(l != null && l.size() > 1)
                     {   
                         CorralArea playerArea = null;
@@ -113,46 +100,64 @@ public class Move implements Comparable<Move> {
                             }
                         }   
                     }
-                    else 
-                        blocks = board.getBlockNodes();
                 }
                 
                 if(!isRealCorral)
                     blocks = board.getBlockNodes();
-		
+                
 		/* Block move based */
-		for(BoardPosition blockPos : blocks)
+		for(BoardPosition block : blocks)
 		{
 			// hitta ställen man kan göra förflyttningar av block.
 			// skriva om sen..
-			List<BoardPosition> pushPositions = board.getPushingPositions(blockPos);
+			List<BoardPosition> pushPositions = board.getPushingPositions(block);
 		
 			// now do pathfinding to see if player can reach it..
 			for(BoardPosition candidate : pushPositions)
 			{
-				Path toPush;
+				Path getThere;
 				if(candidate.equals(playerPos))
-                                    toPush = new Path(candidate);
+					getThere = new Path(candidate);
 				else
-                                    toPush = pathfinder.getPath(board, candidate);		
+					getThere = pathfinder.getPath(board, candidate);		
 				
-				if(toPush == null) // no path found
+				if(getThere == null) // no path found
 					continue;				
-				
-				toPush.append(blockPos);
 				
 				BoardState newBoard = (BoardState) board.clone();
 				// move the player along the path.
-				newBoard.movePlayer(toPush);
+				newBoard.haxMovePlayer(getThere);
 				// push the block by moving towards the block.
-				newBoard.movePlayerTo(blockPos);
+				newBoard.movePlayerTo(block);
 				
-				Move move = new Move(pathfinder, analyser);
+				Move move = new Move(liveAnalyser, analyser, pathfinder);
 				move.board = newBoard;
-				move.path = path.cloneAndAppend(toPush);
+				move.path = path.cloneAndAppend(getThere);
+				move.path.append(block);
+				move.pushes = pushes + 1;
 				possibleMoves.add(move);					
-			}		
-						
+			}	
+		}
+		
+		return possibleMoves;
+	}
+	
+	public List<Move> getNextMoves() {
+		
+		
+		List<Move> possibleMoves = getNextPushMoves();
+		
+		List<BoardPosition> blocks = board.getBlockNodes();
+		for(BoardPosition block : blocks)
+		{
+			if(board.get(block) == NodeType.BLOCK_ON_GOAL)
+				continue;
+			
+			List<Move> goalPushingMoves = singleBlockPlayer.findGoalMoves(this, block);
+			possibleMoves.addAll(goalPushingMoves);
+			
+			if(goalPushingMoves.size() > 0)
+				break;
 		} 
 		
 		return possibleMoves;
@@ -175,5 +180,10 @@ public class Move implements Comparable<Move> {
 		else if(o.getHeuristicValue() < this.getHeuristicValue())
 			return -1;
 		return 0;
+	}
+	
+	@Override
+	public int hashCode() {
+		return board.hashCode();
 	}
 }

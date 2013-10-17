@@ -1,5 +1,6 @@
-package sokoban.Tethik;
+package sokoban.FredTethMerge;
 
+import sokoban.Tethik.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -27,7 +28,7 @@ public class Main {
 		
 		//System.out.println(board);
 		BoardState board = new BoardState(b);
-		Player noob = new Player(board, new Settings());
+		Player noob = new Player(board);
 		noob.play();
 	}
 

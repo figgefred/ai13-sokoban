@@ -1,4 +1,4 @@
-package sokoban.Tethik;
+package sokoban.Tethik.IDA;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,6 +40,7 @@ public class Analyser {
 	{
 		this.settings = settings;
 		this.board = board;
+		
 		constructTableAndWorkbench();
 		// Hitta distanser?
 		mapDistancesToGoals(new BoardState(workbench));
