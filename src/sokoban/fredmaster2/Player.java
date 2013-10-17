@@ -126,11 +126,12 @@ public class Player {
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
 		BoardState board;
-                //board = BoardState.getBoardFromFile("testing/simpleplaytest3");
+                //board = BoardState.getBoardFromFile("testing/simpleplaytest5");
                 //board = BoardState.getBoardFromFile("testing/level3");
                 //board = BoardState.getBoardFromFile("test100/test099.in");
                 //board = BoardState.getBoardFromFile("test100/test004.in");
-                board = BoardState.getBoardFromFile("test100/test092.in");
+                //board = BoardState.getBoardFromFile("test100/test086.in");
+                board = BoardState.getBoardFromFile("test100/test016.in");
                 
             // Can solve
                 //board = BoardState.getBoardFromFile("test100/test059.in");
@@ -156,7 +157,7 @@ public class Player {
                 //board = BoardState.getBoardFromFile("test100/test079.in");
                 //board = BoardState.getBoardFromFile("test100/test089.in");
                 //board = BoardState.getBoardFromFile("test100/test099.in");
-                Player.VERBOSE = false;
+                Player.VERBOSE = true;
                 
                 Player.DO_BIPARTITE_MATCHING = true;
                 Player.DO_CORRAL_LIVE_DETECTION = true;

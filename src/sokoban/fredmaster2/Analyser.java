@@ -479,6 +479,24 @@ public class Analyser {
 			val -= blockDist[i];
 		}
 
+                if(Player.DO_CORRAL_LIVE_DETECTION)
+                {
+                    List<CorralArea> l = LiveAnalyser.getAreas(board);
+                    if(l != null && l.size() > 1)
+                    {
+                        blocks = new ArrayList<>();
+                        for(CorralArea a: l)
+                        {
+                            if(a.isCorralArea())
+                            {
+                                if(!a.getFencePositions().contains(pushedBlock))
+                                {
+                                    val -= 1000;
+                                }
+                            }
+                        }
+                    }
+                }
 		
                 
                 
@@ -503,9 +521,9 @@ public class Analyser {
                 if(blockLastPushedIndex != -1)
                 {
                     BoardPosition block = board.getBlockNodes().get(blockLastPushedIndex);
-                    if(pushedBlock.equals(block))
+                    if(!pushedBlock.equals(block))
                     {
-                        val += 100;
+                        val -= 500;
                     }
                 }
 

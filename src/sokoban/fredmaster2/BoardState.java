@@ -18,6 +18,7 @@ import sokoban.BoardPosition;
 import sokoban.NodeType;
 import sokoban.Direction;
 
+
 /**
  *
  * @author figgefred
@@ -33,6 +34,8 @@ public class BoardState implements Cloneable
     private List<List<NodeType>> Map = new ArrayList<>();
     private List<BoardPosition> Goals;
     private BoardPosition CurrentNode;
+    private List<Tunnel> Tunnels;
+    
     
     private int rows;
     private int cols;
@@ -66,6 +69,100 @@ public class BoardState implements Cloneable
         
         setInvalidFields(Map);
         
+    }
+    
+    private void setAllTunnels()
+    {
+        Tunnels = new ArrayList<>();
+        for(int i = 0; i < getRowsCount(); i++)
+        {
+            for(int j = 0; j < getColumnsCount(j); j++)
+            {
+                    BoardPosition centerP = new BoardPosition(i, j);
+                    
+                    if(getNode(centerP).isTunnelSpaceNode())
+                    {
+                        boolean horizontal = false;
+                        // UP || DOWN
+                        BoardPosition p1 = new BoardPosition(i, j-1);
+                        BoardPosition p3 = new BoardPosition(i, j+1);
+                        if(getNode(p1).isWallNode() && getNode(centerP).isWallNode())
+                        {
+                            Tunnel t = new Tunnel(this);
+                            Tunnels.add(t);
+                            expandTunnel(t, centerP, Direction.NONE);
+                        }
+                        else
+                            horizontal = true;
+                        if(horizontal)
+                        {
+                            p1 = new BoardPosition(i-1, j);
+                            p3 = new BoardPosition(i+1, j);    
+                            if(getNode(p1).isWallNode() && getNode(centerP).isWallNode())
+                            {
+                                Tunnel t = new Tunnel(this);
+                                Tunnels.add(t);
+                                expandTunnel(t, centerP, Direction.NONE);    
+                            }
+                        }
+                    }
+            }
+        }
+    }
+    
+    private void expandTunnel(Tunnel t, BoardPosition p, Direction direction)
+    {
+        BoardPosition p1;
+        BoardPosition p2;
+        BoardPosition p3;
+        switch(direction)
+        {
+            case UP:
+            {
+                p1 = new BoardPosition(p.Row-1, p.Column-1);
+                p2 = new BoardPosition(p.Row-1, p.Column);
+                p3 = new BoardPosition(p.Row-1, p.Column+1);
+                break;
+            }
+            case DOWN:
+            {
+                p1 = new BoardPosition(p.Row+1, p.Column-1);
+                p2 = new BoardPosition(p.Row+1, p.Column);
+                p3 = new BoardPosition(p.Row+1, p.Column+1);
+                break;
+            }
+            case LEFT:
+            {
+                p1 = new BoardPosition(p.Row-1, p.Column-1);
+                p2 = new BoardPosition(p.Row, p.Column-1);
+                p3 = new BoardPosition(p.Row+1, p.Column-1);
+                break;
+            }
+            case RIGHT:
+            {
+                p1 = new BoardPosition(p.Row-1, p.Column+1);
+                p2 = new BoardPosition(p.Row, p.Column+1);
+                p3 = new BoardPosition(p.Row+1, p.Column+1);
+                break;
+            }
+            default: 
+            {
+                return;
+            }
+        }
+            
+        // Add head position
+        t.add(p);
+        if(getNode(p1).isWallNode() && getNode(p2).isTunnelSpaceNode() && getNode(p3).isWallNode())
+        {
+            expandTunnel(t, p, direction);
+        }
+    }
+    
+    
+    public List<Tunnel> getTunnels()
+    {
+        return Tunnels;
     }
     
     private void sortGoals()
