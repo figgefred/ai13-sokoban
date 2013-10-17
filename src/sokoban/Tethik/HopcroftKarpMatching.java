@@ -5,8 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-import sokoban.BoardPosition;
-
 /***
  * Hopcroft-Karp maximal bipartite matching
  * http://en.wikipedia.org/wiki/Hopcroft%E2%80%93Karp_algorithm

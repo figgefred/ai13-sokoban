@@ -9,9 +9,6 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
-import sokoban.BoardPosition;
-import sokoban.NodeType;
-
 public class PathFinder {
     
 	private int[][] playerDistMatrix;
