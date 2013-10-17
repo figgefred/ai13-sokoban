@@ -29,19 +29,20 @@ public class Player {
 		if(shouldStop)
 			return Integer.MIN_VALUE;
 		
-		if(node.getHeuristicValue() == Integer.MIN_VALUE)
-			return Integer.MIN_VALUE;
-		
-		int lb = node.getLowerBound() + node.pushes;		
-		
-		if(lb > bound)	{
-			return lb;	
-		}
+		int lb = node.getLowerBound() + node.pushes;	
 		
 		if(settings.VERBOSE) {
 			System.out.println("lb: "+lb+" bound: "+bound + " h:" + node.getHeuristicValue());
 			System.out.println(node.board);
 		}
+		
+		if(node.getHeuristicValue() == Integer.MIN_VALUE)
+			return Integer.MIN_VALUE;	
+		
+		
+		if(lb > bound)	{
+			return lb;	
+		}		
 				
 		List<Move> moves = node.getNextMoves();		
 		Collections.sort(moves);		
@@ -49,7 +50,8 @@ public class Player {
 		for(Move child : moves) {				
 			int t;
 			if(visitedStates.containsKey(child.hashCode()) &&
-					(visitedStates.get(child.hashCode()) > bound || visitedStates.get(child.hashCode()) == Integer.MIN_VALUE))
+					(visitedStates.get(child.hashCode()) > bound ||
+							visitedStates.get(child.hashCode()) == Integer.MIN_VALUE))
 				// Transition table
 				t = visitedStates.get(child.hashCode());
 			else if(child.isWin()) {
@@ -78,7 +80,8 @@ public class Player {
 	}
 	
 	public Move idaStar(Move root) {		
-		
+		visitedStates = new HashMap<Integer, Integer>();
+		winMove = null;
 		int bound = analyser.getLowerBound(root.board);
 		
 		while(true) {
@@ -90,7 +93,7 @@ public class Player {
 			if(t == Integer.MIN_VALUE) 
 				return null; //return not found
 			
-			bound=t;
+			bound = t;
 		}
 	}
 	
@@ -103,9 +106,12 @@ public class Player {
 		Move win = idaStar(initial);
 		if(win != null) {
 			return win.path;
-		} else {						
+		} else {			
 			settings.BOARDSTATE_PLAYER_HASHING = true;
-			win = idaStar(initial);
+			//settings.VERBOSE = true;
+			initialState.resetHash();
+			
+			win = idaStar(initial);			
 			if(win != null) 
 				return win.path;
 		}
@@ -114,13 +120,14 @@ public class Player {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-//		BoardState board = BoardState.getBoardFromFile("test100/test031.in");
-		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
+		BoardState board = BoardState.getBoardFromFile("test100/test012.in");
+//		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
 		
-		long timeStart = System.currentTimeMillis();
-		
+		long timeStart = System.currentTimeMillis();		
 		System.out.println(board);
-		Player noob = new Player(board, new Settings());		
+		Settings settings = new Settings();
+		//settings.VERBOSE = true;
+		Player noob = new Player(board, settings);		
 		Path path = noob.play();
 		long timeStop = System.currentTimeMillis();
 		System.out.println(path);

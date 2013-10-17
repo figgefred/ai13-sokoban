@@ -526,7 +526,10 @@ public class BoardState implements Cloneable
 				for(int i = 0; i < vals.length; ++i)
 					zobrist_table[row][col][i] = random.nextInt();
 		
-		//System.err.println("zobrist inited.");
+	}
+	
+	public void resetHash() {
+		zobrist_hash = null;
 	}
 	
 	@Override

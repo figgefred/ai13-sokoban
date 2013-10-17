@@ -103,8 +103,8 @@ public class Move implements Comparable<Move> {
 				List<Move> goalPushingMoves = singleBlockPlayer.findGoalMoves(this, block);
 				possibleMoves.addAll(goalPushingMoves);
 				
-				if(goalPushingMoves.size() > 0)
-					break;
+//				if(goalPushingMoves.size() > 0)
+//					break;
 			} 
 		}
 		
