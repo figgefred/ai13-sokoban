@@ -53,7 +53,7 @@ public class PathFinder {
 				if(visited.contains(neighbour)) 
 					continue;
 				
-				NodeType node = board.getNode(neighbour);
+				NodeType node = board.get(neighbour);
 				visited.add(neighbour);
 				
 				if(node == NodeType.WALL || node == NodeType.INVALID || node == NodeType.BLOCK || node == NodeType.BLOCK_ON_GOAL) 

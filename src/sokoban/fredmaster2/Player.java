@@ -12,6 +12,8 @@ import java.util.Queue;
  *
  */
 public class Player {	
+    public static boolean CHEAT;
+    public static boolean FALLBACK;
 	
 	private Queue<Move> openSet;
         private HashSet<BoardState> closedSet;
@@ -25,6 +27,8 @@ public class Player {
         public static boolean DO_BIPARTITE_MATCHING = true;
         public static boolean DO_CORRAL_LIVE_DETECTION = true;
         public static boolean DO_TUNNEL_MACRO_MOVE = true;
+        public static boolean DO_CORRAL_CACHING = true;
+        public static boolean DO_HEURISTIC_CACHING = true;
     
 	private BoardState initialState;
 	
@@ -106,16 +110,30 @@ public class Player {
 		initial.path = new Path();
 		//Move.initPreanalyser(initialState);		
 		
-		
-		Move win = getVictoryPath(initial);
-		if(win != null) {
-			//System.out.println(win.board);
-			return win.path;
-		} else {
-                    if(VERBOSE)
-                        System.out.println("wat?");			
+		Move win = null;
+                if(Player.CHEAT)
+                {
+                    win = getVictoryPath(initial);
+                    System.out.print("CHEAT");
+                    if(win != null)
+                        return win.path;
+                }
+                
+                if(Player.FALLBACK)
+                {
+                    Player.CHEAT = false;
+                    System.out.print("FALLBACK");
+                    win = getVictoryPath(initial);
+                }
+                else if(!Player.CHEAT)
+                {
+                    win = getVictoryPath(initial);
+                }
+                
+		if(win == null)
                     return null;
-		}
+                else
+                    return win.path;
 		/*
 		for(Move nextMove : initial.getNextMoves())
 		{
@@ -161,12 +179,19 @@ public class Player {
                 //board = BoardState.getBoardFromFile("test100/test099.in");
                 Player.VERBOSE = false;
                 
-                Player.DO_BIPARTITE_MATCHING = true;
-                Player.DO_CORRAL_LIVE_DETECTION = true;
-                Player.DO_DEADLOCKS_CONSTANTCHECK = true;
-                Player.DO_DEADLOCKS_4x4 = true;
-                Player.DO_GOAL_SORTING = false;
+        Player.DO_GOAL_SORTING = true;
+        Player.DO_DEADLOCKS_CONSTANTCHECK = true;
+        Player.DO_DEADLOCKS_4x4 = true;
+        Player.DO_BIPARTITE_MATCHING = true;
+        Player.DO_CORRAL_LIVE_DETECTION = true;
+        Player.DO_TUNNEL_MACRO_MOVE = true;
+        Player.DO_CORRAL_CACHING = true;
+        Player.DO_HEURISTIC_CACHING = true;
+    
                 
+        sokoban.fredmaster2.Player.CHEAT = false;
+        sokoban.fredmaster2.Player.FALLBACK = false;
+        
 		System.out.println(board);
 //                System.out.println(board.getTunnels());
             //    try{Thread.sleep(500000);}catch(InterruptedException ex){}

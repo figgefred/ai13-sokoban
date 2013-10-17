@@ -39,7 +39,18 @@ public class Move implements Comparable<Move> {
 			Direction pushDirection = lastpos.getDirection(board.getPlayerNode());
 			pushedBlock = board.getPlayerNode().getNeighbouringPosition(pushDirection);
 		}
+                
+                if(Player.DO_HEURISTIC_CACHING)
+                {
+                    Integer val = LiveAnalyser.getHeuristicCacheVal(board, pushedBlock);
+                    if(val != null)
+                        return val.intValue();
+                }
 		heuristic_value = analyser.getHeuristicValue(board, pushedBlock);
+                if(Player.DO_HEURISTIC_CACHING)
+                {
+                    LiveAnalyser.setHeuristic(board, pushedBlock, heuristic_value);
+                }
 		return heuristic_value; 
 	}
 	
@@ -94,7 +105,7 @@ public class Move implements Comparable<Move> {
                                 playerArea = a;
                             }
                         }
-                        if(playerArea != null)
+                        if(!Player.CHEAT && playerArea != null)
                         {
                             for(BoardPosition p: playerArea.getNoFenceBlockPositions())
                             {
