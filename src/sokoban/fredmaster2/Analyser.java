@@ -479,7 +479,7 @@ public class Analyser {
 			val -= blockDist[i];
 		}
 
-             /*   if(Player.DO_CORRAL_LIVE_DETECTION)
+                if(Player.DO_CORRAL_LIVE_DETECTION)
                 {
                     List<CorralArea> l = LiveAnalyser.getAreas(board);
                     if(l != null && l.size() > 1)
@@ -496,7 +496,7 @@ public class Analyser {
                             }
                         }
                     }
-                }*/
+                }
 		
                 //int val = 0;
                 /*List<BoardPosition> goals = (List) GoalQueue;
