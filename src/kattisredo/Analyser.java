@@ -26,19 +26,17 @@ public class Analyser {
 	private int goalDist[];
 	private int blockDist[];
 	
+	//private DeadlockFinder deadlockerFinder2 = new DeadlockFinder();
 	
 	private BoardState board;
 	private int rows;
 	private int cols;
-	private BlockPathFinder pathfinder = new BlockPathFinder();
 	private HopcroftKarpMatching bipartiteMatcher = new HopcroftKarpMatching();
 	
 	public Analyser(BoardState board)
 	{
 		this.board = board;
 		constructTableAndWorkbench();
-		// Hitta dåliga positions
-		analyse();
 		// Hitta distanser?
 		mapDistancesToGoals(new BoardState(workbench));
 	}
@@ -64,6 +62,7 @@ public class Analyser {
 					type = NodeType.GOAL;
 				
 				workbench[row][col] = type;
+				badTable[row][col] = true;
 			}	
 	}	
 	
@@ -109,10 +108,9 @@ public class Analyser {
 				int distance = distances.poll();
 				
 				// Uppdatera positions i matrisen
-				distanceMatrix[i][pos.Row][pos.Column] = distance;
+				distanceMatrix[i][pos.Row][pos.Column] = distance++;
+				badTable[pos.Row][pos.Column] = false;
 				
-				++distance;				
-
 				/*
 				if(board.getNode(pos) == NodeType.BLOCK || board.getNode(pos) == NodeType.BLOCK_ON_GOAL)
 					continue;						
@@ -136,82 +134,12 @@ public class Analyser {
 		}
 	}
 	
-	private void analyse() {
-		for(int row = 0; row < rows; ++row)
-			for(int col = 0; col < cols; ++col) {
-				NodeType type = workbench[row][col];
-				
-				if(type == NodeType.WALL || type == NodeType.INVALID) {
-					badTable[row][col] = true;
-					continue;
-				}
-				
-				if(type == NodeType.GOAL)
-				{
-					badTable[row][col] = false;
-					continue;
-				}				
-				
-				workbench[row][col] = NodeType.PLAYER;
-				BoardState testBoard = new BoardState(workbench);
-				//System.out.println(row + " " + col);
-				//System.out.println(testBoard);				
-				Path path = pathfinder.getPath(testBoard, new BoardPosition(row, col), board.getGoalNodes());
-				badTable[row][col] = path == null;
-				// reset
-				workbench[row][col] = type;
-			}
-	}
-	
-	public boolean isBadPosition(int Row, int Col)
-	{
+	public boolean isBadPosition(int Row, int Col) {		
 		return badTable[Row][Col];
 	}
 	
 	public boolean isBadPosition(BoardPosition pos) {
 		return isBadPosition(pos.Row, pos.Column);
-	}
-	
-	/***
-	 * Kanske borde abstraheras till vissa mönster?
-	 * @param board
-	 * @return
-	 */
-	private boolean has4x4Block(BoardState board) {
-		
-		for(int row = 0; row < rows - 1; ++row)
-			mainloop:
-			for(int col = 0; col < cols - 1; ++col) {
-				
-				if(!board.isBlockingNode(new BoardPosition(row, col)))
-					continue;
-				
-				NodeType nodes[] = new NodeType[] {
-					board.getNode(row, col),
-					board.getNode(row, col+1),
-					board.getNode(row+1, col),
-					board.getNode(row+1, col+1)
-				};
-				
-				
-				
-				boolean atLeastOneIsBlock = false;
-				for(NodeType node : nodes)
-				{
-					if(!board.isBlockingNode(node))
-						continue mainloop;
-					
-					atLeastOneIsBlock = atLeastOneIsBlock || node == NodeType.BLOCK;
-				}
-				
-				if(atLeastOneIsBlock) {
-					//System.out.println("found 4x4 block at " + row + " " + col);					
-					return true;
-				}
-				
-			}
-		
-		return false;		
 	}
 	
 	@Override
@@ -270,10 +198,24 @@ public class Analyser {
 			return Integer.MAX_VALUE;
 		}		
 		
-		if(has4x4Block(board)) {
-			return Integer.MIN_VALUE;
-		}		
 		
+		
+//		if(pushedBlock != null)
+//		{
+//			if(deadlockFinder.isBadState(board, pushedBlock))
+//				return Integer.MIN_VALUE;
+//		} else if(deadlockFinder.isBadState(board)) {
+//			return Integer.MIN_VALUE;
+//		}
+//		
+//		
+		/*
+		if(deadlockerFinder2.isDeadLock(board)) 
+			return Integer.MIN_VALUE;
+		*/
+		
+		if(has4x4Block(board))
+			return Integer.MIN_VALUE;
 		//mapDistancesToGoals(board);
 		
 		for(int i = 0; i < goalDist.length; i++) {
@@ -288,18 +230,18 @@ public class Analyser {
 		
 		int b = 0; 
 		for(BoardPosition block : blocks)
-		{
-			
+		{			
 			if(board.getNode(block) == NodeType.BLOCK_ON_GOAL)
 				blockDist[b] = 0;
-			else if(board.isInCorner(block)) {// || isBadPosition(block))
+			else if(board.isInCorner(block)) {
 				return Integer.MIN_VALUE;		
 			}
-			b++;
-			
+			b++;	
 		} 
 		
 		int i = 0;
+		int val = 0;
+		
 		for(BoardPosition goal : board.getGoalNodes())
 		{		
 			reachMap.put(goal, new ArrayList<BoardPosition>());			
@@ -323,9 +265,29 @@ public class Analyser {
 					blockDist[b] = Math.min(dist, blockDist[b++]);
 			}			
 			++i;
-		}	
+			
+			/*
+			 * Block med tre väggar runt prioriteras först
+			 */
+			NodeType[] neighbours = { // TODO skapa metod som returnerar detta
+				board.getNode(goal.Row, goal.Column + 1),
+				board.getNode(goal.Row, goal.Column - 1),
+				board.getNode(goal.Row + 1, goal.Column),
+				board.getNode(goal.Row - 1, goal.Column)
+			};
+			
+			int walls = 0;
+			for(NodeType type: neighbours) {
+				if(type == NodeType.WALL)
+					walls++;
+			}
+			
+			if(walls == 3) {
+				if(board.getNode(goal) == NodeType.BLOCK_ON_GOAL)
+					val += 100000;
+			}
+		}
 		
-		int val = 0;
 		for(i = 0; i < board.getGoalNodes().size(); ++i) {
 			if(goalDist[i] == Integer.MAX_VALUE || blockDist[i] == Integer.MAX_VALUE)
 			{
@@ -336,15 +298,52 @@ public class Analyser {
 			val -= blockDist[i];
 		}
 		
+		
 		if(bipartiteMatcher.maxBipartiteMatch(reachMap, board) < board.getGoalNodes().size())
 			return Integer.MIN_VALUE;
-		
-		
+				
 		return val;		
 	}
 	
+	private boolean has4x4Block(BoardState board) {
+		
+		for(int row = 0; row < board.getRowsCount() - 1; ++row)
+			mainloop:
+			for(int col = 0; col < board.getColumnsCount() - 1; ++col) {
+				
+				if(!board.isBlockingNode(new BoardPosition(row, col)))
+					continue;
+				
+				NodeType nodes[] = new NodeType[] {
+					board.getNode(row, col),
+					board.getNode(row, col+1),
+					board.getNode(row+1, col),
+					board.getNode(row+1, col+1)
+				};
+				
+				
+				
+				boolean atLeastOneIsBlock = false;
+				for(NodeType node : nodes)
+				{
+					if(!board.isBlockingNode(node))
+						continue mainloop;
+					
+					atLeastOneIsBlock = atLeastOneIsBlock || node == NodeType.BLOCK;
+				}
+				
+				if(atLeastOneIsBlock) {
+					//System.out.println("found 4x4 block at " + row + " " + col);					
+					return true;
+				}
+				
+			}
+		
+		return false;		
+	}
+	
 	public static void main(String[] args) throws IOException {
-		BoardState board = BoardState.getBoardFromFile("testing/deadlocktest6");
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
 		System.out.println(board);
 		Analyser analyser = new Analyser(board);
 		System.out.println(analyser);
