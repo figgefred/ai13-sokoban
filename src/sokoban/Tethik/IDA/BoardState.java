@@ -538,6 +538,12 @@ public class BoardState implements Cloneable
 			for(int col = 0; col < cols; ++col)
 			{
 				NodeType type = get(row, col);
+				
+				if(type == NodeType.PLAYER)
+					type = NodeType.SPACE;
+				else if(type == NodeType.PLAYER_ON_GOAL)
+					type = NodeType.GOAL;
+				
 				int val = 0;
 				typeloop:
 				for(; val < vals.length; val++)
@@ -556,8 +562,19 @@ public class BoardState implements Cloneable
 	
 	private void updateHashCode(int row, int col, NodeType oldType, NodeType newType)
 	{
-		if(zobrist_hash == null)
+		if(zobrist_hash == null)	
 			return;
+		
+		if(oldType == NodeType.PLAYER)
+			oldType = NodeType.SPACE;
+		else if(oldType == NodeType.PLAYER_ON_GOAL)
+			oldType = NodeType.GOAL;
+		
+		if(newType == NodeType.PLAYER)
+			newType = NodeType.SPACE;
+		else if(newType == NodeType.PLAYER_ON_GOAL)
+			newType = NodeType.GOAL;
+		
 		// XOra ut oldType
 		zobrist_hash ^= zobrist_table[row][col][oldType.getIndex()];
 		// XOra in newType

@@ -46,7 +46,8 @@ public class Player {
 		int min = Integer.MAX_VALUE;
 		for(Move child : moves) {				
 			int t;
-			if(visitedStates.containsKey(child.hashCode()) && (visitedStates.get(child.hashCode()) > bound || visitedStates.get(child.hashCode()) == Integer.MIN_VALUE))
+			if(visitedStates.containsKey(child.hashCode()) &&
+					(visitedStates.get(child.hashCode()) > bound || visitedStates.get(child.hashCode()) == Integer.MIN_VALUE))
 				// Transition table
 				t = visitedStates.get(child.hashCode());
 			else if(child.isWin()) {
@@ -99,12 +100,11 @@ public class Player {
 		if(win != null) {		
 			return win.path;
 		}	
-
 		return null;
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BoardState board = BoardState.getBoardFromFile("test100/test092.in");
+		BoardState board = BoardState.getBoardFromFile("test100/test031.in");
 //		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest5");
 		
 		long timeStart = System.currentTimeMillis();
