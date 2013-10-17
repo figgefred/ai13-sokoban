@@ -26,7 +26,7 @@ import sokoban.BoardPosition;
  */
 public class CorralFenceCandidate {
     
-    private Set<Area> AreasCovered;
+    private Set<CorralArea> AreasCovered;
     private BoardPosition Position;
     
     /**
@@ -43,7 +43,7 @@ public class CorralFenceCandidate {
      * Add an area that 'touches' this block node BoardPosition
      * @param area 
      */
-    public void addCorralArea(Area area)
+    public void addCorralArea(CorralArea area)
     {
         AreasCovered.add(area);
     }
@@ -53,12 +53,12 @@ public class CorralFenceCandidate {
         return Position;
     }
     
-    public Set<Area> getAreasCovered()
+    public Set<CorralArea> getAreasCovered()
     {
         return AreasCovered;
     }
     
-    public boolean isNodeOf(Area area)
+    public boolean isNodeOf(CorralArea area)
     {
         return AreasCovered.contains(area);
     }

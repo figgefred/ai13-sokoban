@@ -11,7 +11,7 @@ import sokoban.NodeType;
 
 /**
  * An area is a region of a map where the player can move to. If a player cannot
- * move to an area, then an Area is flagged as being a corral area, which means that
+ * move to an area, then an CorralArea is flagged as being a corral area, which means that
  * isCorralArea() function returns true.
  * 
  * If a map contains no corrals areas then the resp. function creating the areas
@@ -23,7 +23,7 @@ import sokoban.NodeType;
  * 
  * @author figgefred
  */
-public class Area 
+public class CorralArea 
 {
     private int ID;
     private Set<BoardPosition> Positions = new HashSet<BoardPosition>();
@@ -33,22 +33,22 @@ public class Area
     private BoardState Board;
     
     
-    public Area(int id)
+    public CorralArea(int id)
     {
         init(id, null);
     }
     
-    public Area(int id, BoardState board)
+    public CorralArea(int id, BoardState board)
     {
         init(id, board);
     }
     
-    public Area(int id, Set<BoardPosition> pos)
+    public CorralArea(int id, Set<BoardPosition> pos)
     {
         this(id, pos, null);
     }
     
-    public Area(int id, Set<BoardPosition> pos, BoardState board)
+    public CorralArea(int id, Set<BoardPosition> pos, BoardState board)
     {
         Positions  = pos;
         init(id, board);

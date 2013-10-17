@@ -4,13 +4,16 @@
  */
 package sokoban.fredmaster2;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 
 import sokoban.BoardPosition;
 import sokoban.NodeType;
@@ -177,18 +180,18 @@ public class LiveAnalyser {
      * A corral area is an area which a player cannot reach except by pushing
      * a block.
      * 
-     * Area's will hold a field pointing to a list of blocks that are acting
+     * CorralArea's will hold a field pointing to a list of blocks that are acting
      * as fences (creating the corrol fence). These should be prioritized so that
      * a corral area can be solved as fast as possible. This is so called 'corrol pruning'.
      * 
      * @param board
      * @return 
      */
-    public List<Area> getAreas(BoardState board)
+    public List<CorralArea> getAreas(BoardState board)
     {
         // A list containing all the nodes "visited"
         Set<BoardPosition> visited = new HashSet<>();
-        List<Area> list = new ArrayList<>();
+        List<CorralArea> list = new ArrayList<>();
         
         int areaCounter = 1;
         
@@ -205,7 +208,7 @@ public class LiveAnalyser {
                 
                 if( !visited.contains(p) && nodeType.isSpaceNode() )
                 {
-                    Area area = new Area(areaCounter++, board);
+                    CorralArea area = new CorralArea(areaCounter++, board);
                     setCorralArea(board, area, p, visited);
                     list.add(area);
                 }
@@ -229,7 +232,7 @@ public class LiveAnalyser {
         
         // This part is crucial, we must find out which blocks are 'touched'
         // by more then 1 area
-        for(Area a: list)
+        for(CorralArea a: list)
         {
             //for(BoardPosition p: board.getBlockNodes())
             for(BoardPosition p: a.getAreaPositions())
@@ -255,7 +258,7 @@ public class LiveAnalyser {
         // Naive merge
         for(CorralFenceCandidate f : fenceCandidates.values())
         {
-            for(Area a: list)
+            for(CorralArea a: list)
             {
                 if(f.isNodeOf(a))
                 {
@@ -273,12 +276,12 @@ public class LiveAnalyser {
         return list;
     }
     
-    public Map<Area, List<BoardPosition>> getBlockAreas(BoardState board, List<Area> corrals, BoardPosition movedBlock)
+    public Map<CorralArea, List<BoardPosition>> getBlockAreas(BoardState board, List<CorralArea> corrals, BoardPosition movedBlock)
     {
         boolean hasAllBoxesOnGoals = true;
         boolean isACombinedCorral = false;
         
-        for(Area cArea: corrals)
+        for(CorralArea cArea: corrals)
         {
             // This is the "Play area", lets skip it
             if(!cArea.isCorralArea())
@@ -303,7 +306,7 @@ public class LiveAnalyser {
         return null;
     }
     
-    private void setCorralArea(BoardState board, Area area, BoardPosition spaceNode, Set<BoardPosition> visited)
+    private void setCorralArea(BoardState board, CorralArea area, BoardPosition spaceNode, Set<BoardPosition> visited)
     {
         NodeType nodeType = board.getNode(spaceNode);
         area.add(spaceNode, nodeType);
@@ -325,7 +328,7 @@ public class LiveAnalyser {
         }
     }
     
-    private void visitNeighbouringBlocks(BoardState board, Area area, BoardPosition blockNode, Set<BoardPosition> visited)
+    private void visitNeighbouringBlocks(BoardState board, CorralArea area, BoardPosition blockNode, Set<BoardPosition> visited)
     {
         NodeType nodeType = board.getNode(blockNode);
         area.add(blockNode, nodeType);
@@ -341,49 +344,42 @@ public class LiveAnalyser {
         }
     }
     
-    public static void main(String args[]) throws IOException
-    {
-        
-        String[] files = 
-        {
-            "testing/deadlocktest1",
-            "testing/deadlocktest2",
-            "testing/deadlocktest3",
-            "testing/deadlocktest4",
-            "testing/deadlocktest5",
-            "testing/deadlocktest6",
-            "testing/deadlocktest7",
-            "testing/deadlocktest9",
-            "testing/deadlocktest10",
-        };
-        for(String file: files)
-        {
-            BoardState board = BoardState.getBoardFromFile(file);
-            BoardPosition p = null;
-            for(int r = 0; r < board.getRowsCount(); r++)
-            {
-                p = null;
-                for(int c = 0; c < board.getColumnsCount(); c++)
-                {
-                    if(board.getNode(r, c) == NodeType.BLOCK_ON_GOAL)
-                    {
-                        p = new BoardPosition(r,c);
+	public static void main(String[] args) throws IOException, InterruptedException {
+//		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
+		
+		Vector<String> b = new Vector<String>();
+		
+		BufferedReader br = new BufferedReader(
+				new InputStreamReader(System.in));
+		
+		String line;
+                line = br.readLine();
+		while(line != null) {
+                    if(line.equals(""))
                         break;
-                    }
+                    b.add(line);
+                    line = br.readLine();
+		} // End while
+		
+                Player.DO_BIPARTITE_MATCHING = true;
+                Player.DO_CORRAL_LIVE_DETECTION = true;
+                Player.DO_DEADLOCKS_CONSTANTCHECK = true;
+                Player.DO_DEADLOCKS_4x4 = true;
+                Player.DO_GOAL_SORTING = false;
+                
+		//System.out.println(board);
+		BoardState board = new BoardState(b, true);
+                Analyser ana = new Analyser(board);
+                PathFinder pFinder = new PathFinder();
+                LiveAnalyser liveAnalyser = new LiveAnalyser(ana, pFinder);
+                
+                List<CorralArea> areas = liveAnalyser.getAreas(board);
+                for(CorralArea a: areas)
+                {
+                    System.out.println(a);
                 }
-                if( p != null)
-                    break;
-            }
-            if(p == null)
-                System.out.println("ERROR! Expected a BLOCK_ON_GOAL ('*') node to investigate.");
-            
-            Analyser bestanalyser = new Analyser(board);
-            PathFinder finder = new PathFinder();
-            LiveAnalyser analyser = new LiveAnalyser(bestanalyser, finder);
-            System.out.println(board);
-            Set<BoardPosition> visitedBlock = new HashSet<BoardPosition>();
-            System.out.println("Analyser verdict: State deadlock? - " + analyser.isDeadlockState(board, visitedBlock, p));
-            System.out.println("Visited: " + visitedBlock);
-        }
-    }
+                
+	//	Player noob = new Player(board);
+		//System.out.println(noob.play());
+	}
 }
