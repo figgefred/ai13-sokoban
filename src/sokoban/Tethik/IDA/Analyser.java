@@ -34,13 +34,20 @@ public class Analyser {
 	private int rows;
 	private int cols;
 	private HopcroftKarpMatching bipartiteMatcher = new HopcroftKarpMatching();
+	private Settings settings;
 	
-	public Analyser(BoardState board)
+	public Analyser(BoardState board, Settings settings)
 	{
+		this.settings = settings;
 		this.board = board;
+		
 		constructTableAndWorkbench();
 		// Hitta distanser?
 		mapDistancesToGoals(new BoardState(workbench));
+	}
+	
+	public Settings getSettings() {
+		return settings;
 	}
 	
 	private void constructTableAndWorkbench() {
@@ -232,7 +239,7 @@ public class Analyser {
 			++i;
 		}			
 		
-		if(bipartiteMatcher.maxBipartiteMatch(reachMap, board) < board.getGoalNodes().size())
+		if(settings.ANALYSER_BIPARTITE_MATCHING && bipartiteMatcher.maxBipartiteMatch(reachMap, board) < board.getGoalNodes().size())
 			return Integer.MIN_VALUE;
 		
 		int val = 0;
@@ -363,7 +370,7 @@ public class Analyser {
 	public static void main(String[] args) throws IOException {
 		BoardState board = BoardState.getBoardFromFile("test100/test001.in");
 		System.out.println(board);
-		Analyser analyser = new Analyser(board);
+		Analyser analyser = new Analyser(board, new Settings());
 		System.out.println(analyser);
 		analyser.printDistanceMatrix(board);
 		

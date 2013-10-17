@@ -11,11 +11,13 @@ public class Player {
 	private PathFinder pathfinder;
 	private BoardState initialState;
 	public volatile boolean shouldStop = false;
-	public static volatile boolean VERBOSE = true;
 	
-	public Player(BoardState initialState) {
+	public Settings settings;
+	
+	public Player(BoardState initialState, Settings settings) {
+		this.settings = settings;
 		this.initialState = initialState;
-		analyser = new Analyser(initialState);
+		analyser = new Analyser(initialState, settings);
 		pathfinder = new PathFinder();
 	}
 	
@@ -36,7 +38,7 @@ public class Player {
 			return lb;	
 		}
 		
-		if(VERBOSE) {
+		if(settings.VERBOSE) {
 			System.out.println("lb: "+lb+" bound: "+bound + " h:" + node.getHeuristicValue());
 			System.out.println(node.board);
 		}
@@ -76,6 +78,7 @@ public class Player {
 	}
 	
 	public Move idaStar(Move root) {		
+		
 		int bound = analyser.getLowerBound(root.board);
 		
 		while(true) {
@@ -93,25 +96,31 @@ public class Player {
 	
 	public Path play() {				
 		Move initial = new Move(analyser, pathfinder);
-		initial.board = initialState;
+		initialState.setSettings(settings);
+		initial.board = initialState;		
 		initial.path = new Path();
 
 		Move win = idaStar(initial);
-		if(win != null) {		
+		if(win != null) {
 			return win.path;
-		}	
+		} else {						
+			settings.BOARDSTATE_PLAYER_HASHING = true;
+			win = idaStar(initial);
+			if(win != null) 
+				return win.path;
+		}
+		
 		return null;
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BoardState board = BoardState.getBoardFromFile("test100/test031.in");
-//		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest5");
+//		BoardState board = BoardState.getBoardFromFile("test100/test031.in");
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
 		
 		long timeStart = System.currentTimeMillis();
 		
 		System.out.println(board);
-		Player noob = new Player(board);
-		Player.VERBOSE = true;
+		Player noob = new Player(board, new Settings());		
 		Path path = noob.play();
 		long timeStop = System.currentTimeMillis();
 		System.out.println(path);

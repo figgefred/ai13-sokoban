@@ -34,13 +34,19 @@ public class Analyser {
 	private int rows;
 	private int cols;
 	private HopcroftKarpMatching bipartiteMatcher = new HopcroftKarpMatching();
+	private Settings settings;
 	
-	public Analyser(BoardState board)
+	public Analyser(BoardState board, Settings settings)
 	{
+		this.settings = settings;
 		this.board = board;
 		constructTableAndWorkbench();
 		// Hitta distanser?
 		mapDistancesToGoals(new BoardState(workbench));
+	}
+	
+	public Settings getSettings() {
+		return settings;
 	}
 	
 	private void constructTableAndWorkbench() {
@@ -232,7 +238,7 @@ public class Analyser {
 			++i;
 		}			
 		
-		if(bipartiteMatcher.maxBipartiteMatch(reachMap, board) < board.getGoalNodes().size())
+		if(settings.ANALYSER_BIPARTITE_MATCHING && bipartiteMatcher.maxBipartiteMatch(reachMap, board) < board.getGoalNodes().size())
 			return Integer.MIN_VALUE;
 		
 		int val = 0;
@@ -264,7 +270,57 @@ public class Analyser {
 		for(int i = 0; i < board.getGoalNodes().size(); ++i)
 			min = Math.min(min, distanceMatrix[i][block.Row][block.Column]);
 		
-		return -min;
+		return min;
+	}
+	
+	public int getLowerBound(BoardState board) {
+		for(int i = 0; i < goalDist.length; i++) {
+			goalDist[i] = Integer.MAX_VALUE;
+			blockDist[i] = Integer.MAX_VALUE;
+		}
+		
+		List<BoardPosition> blocks = board.getBlockNodes();
+		
+		int b = 0; 
+		for(BoardPosition block : blocks)
+		{			
+			 if(board.get(block) == NodeType.BLOCK_ON_GOAL) 
+				blockDist[b] = 0;
+			b++;	
+		} 
+		
+		int i = 0;
+		for(BoardPosition goal : board.getGoalNodes())
+		{		
+			if(board.get(goal) == NodeType.BLOCK_ON_GOAL) {
+				goalDist[i] = 0;
+			}
+			
+			b = 0; 
+			for(BoardPosition block : blocks)
+			{
+				int dist = distanceMatrix[i][block.Row][block.Column];
+				
+				goalDist[i] = Math.min(dist, goalDist[i]);
+				
+				if(goalDist[i] > 0)
+					blockDist[b] = Math.min(dist, blockDist[b++]);
+			}			
+			++i;
+		}			
+		
+		int val = 0;
+		for(i = 0; i < goalDist.length; ++i) {
+			if(goalDist[i] == Integer.MAX_VALUE || blockDist[i] == Integer.MAX_VALUE)
+			{
+				return Integer.MIN_VALUE;
+			}
+			
+			val += goalDist[i];
+			val += blockDist[i];
+		}
+		
+		return val;		
 	}
 	
 	private boolean is4x4BlockTopLeftCorner(BoardState board, BoardPosition pos) {
@@ -313,7 +369,7 @@ public class Analyser {
 	public static void main(String[] args) throws IOException {
 		BoardState board = BoardState.getBoardFromFile("test100/test001.in");
 		System.out.println(board);
-		Analyser analyser = new Analyser(board);
+		Analyser analyser = new Analyser(board, new Settings());
 		System.out.println(analyser);
 		analyser.printDistanceMatrix(board);
 		

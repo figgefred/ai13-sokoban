@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
 import sokoban.BoardPosition;
 import sokoban.NodeType;
 /**
@@ -25,6 +26,11 @@ public class BoardState implements Cloneable
     private int rows;
     private int cols;
     private BoardPosition lastPushedBlock;
+    private Settings settings;
+    
+    public void setSettings(Settings settings) {
+    	this.settings = settings;
+    }
     
     // fult, kanske ska byta interna kartan till samma typ av matris sen?
     public BoardState(NodeType[][] map) {
@@ -493,6 +499,7 @@ public class BoardState implements Cloneable
   		newState.zobrist_hash = zobrist_hash;
   		newState.cols = cols;
   		newState.rows = rows;
+  		newState.settings = settings;
   		
   		 // yay casts...
   		newState.Goals = Goals;
@@ -502,9 +509,6 @@ public class BoardState implements Cloneable
   			
   		return newState;
   	}
-
-
-	
 	
 	/**
 	 * Se: http://en.wikipedia.org/wiki/Zobrist_hashing
@@ -539,10 +543,12 @@ public class BoardState implements Cloneable
 			{
 				NodeType type = get(row, col);
 				
-				if(type == NodeType.PLAYER)
-					type = NodeType.SPACE;
-				else if(type == NodeType.PLAYER_ON_GOAL)
-					type = NodeType.GOAL;
+				if(!settings.BOARDSTATE_PLAYER_HASHING) {
+					if(type == NodeType.PLAYER)
+						type = NodeType.SPACE;
+					else if(type == NodeType.PLAYER_ON_GOAL)
+						type = NodeType.GOAL;
+				}
 				
 				int val = 0;
 				typeloop:
@@ -565,15 +571,17 @@ public class BoardState implements Cloneable
 		if(zobrist_hash == null)	
 			return;
 		
-		if(oldType == NodeType.PLAYER)
-			oldType = NodeType.SPACE;
-		else if(oldType == NodeType.PLAYER_ON_GOAL)
-			oldType = NodeType.GOAL;
-		
-		if(newType == NodeType.PLAYER)
-			newType = NodeType.SPACE;
-		else if(newType == NodeType.PLAYER_ON_GOAL)
-			newType = NodeType.GOAL;
+		if(!settings.BOARDSTATE_PLAYER_HASHING) {
+			if(oldType == NodeType.PLAYER)
+				oldType = NodeType.SPACE;
+			else if(oldType == NodeType.PLAYER_ON_GOAL)
+				oldType = NodeType.GOAL;
+			
+			if(newType == NodeType.PLAYER)
+				newType = NodeType.SPACE;
+			else if(newType == NodeType.PLAYER_ON_GOAL)
+				newType = NodeType.GOAL;
+		}
 		
 		// XOra ut oldType
 		zobrist_hash ^= zobrist_table[row][col][oldType.getIndex()];

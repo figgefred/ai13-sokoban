@@ -27,7 +27,7 @@ public class Main {
 		
 		//System.out.println(board);
 		BoardState board = new BoardState(b);
-		Player noob = new Player(board);
+		Player noob = new Player(board, new Settings());
 		noob.play();
 	}
 

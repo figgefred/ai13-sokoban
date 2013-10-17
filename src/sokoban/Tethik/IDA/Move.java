@@ -93,18 +93,20 @@ public class Move implements Comparable<Move> {
 		
 		List<Move> possibleMoves = getNextPushMoves();
 		
-		List<BoardPosition> blocks = board.getBlockNodes();
-		for(BoardPosition block : blocks)
-		{
-			if(board.get(block) == NodeType.BLOCK_ON_GOAL)
-				continue;
-			
-			List<Move> goalPushingMoves = singleBlockPlayer.findGoalMoves(this, block);
-			possibleMoves.addAll(goalPushingMoves);
-			
-			if(goalPushingMoves.size() > 0)
-				break;
-		} 
+		if(analyser.getSettings().MOVE_DO_GOAL_MOVES) {
+			List<BoardPosition> blocks = board.getBlockNodes();
+			for(BoardPosition block : blocks)
+			{
+				if(board.get(block) == NodeType.BLOCK_ON_GOAL)
+					continue;
+				
+				List<Move> goalPushingMoves = singleBlockPlayer.findGoalMoves(this, block);
+				possibleMoves.addAll(goalPushingMoves);
+				
+				if(goalPushingMoves.size() > 0)
+					break;
+			} 
+		}
 		
 		return possibleMoves;
 	}

@@ -122,7 +122,7 @@ public class SingleBlockPlayer {
 		BoardState board = BoardState.getBoardFromFile("testing/level3");
 		
 		System.out.println(board);
-		Analyser analyser = new Analyser(board);
+		Analyser analyser = new Analyser(board, new Settings());
 		PathFinder pathfinder = new PathFinder();
 		SingleBlockPlayer noob = new SingleBlockPlayer(analyser);
 		SingleBlockPlayer.VERBOSE = false;
