@@ -19,6 +19,7 @@ public class Player {
         
         private Map<BoardState, Map<BoardPosition, List<Move>>> MyCachedMoves;
         public static boolean CHEAT;
+        public static boolean HALF_CHEAT = true;
         public static boolean DO_MOVE_CACHING = true;
         //public static boolean FALLBACK;
         public static boolean DO_GOAL_SORTING = false;
@@ -170,9 +171,9 @@ public class Player {
             //BoardState board = BoardState.getBoardFromFile("test100/test098.in");
             //BoardState board = BoardState.getBoardFromFile("test100/test004.in");
             //BoardState board = BoardState.getBoardFromFile("test100/test050.in");
-            BoardState board = BoardState.getBoardFromFile("test100/test059.in");
+         //   BoardState board = BoardState.getBoardFromFile("test100/test059.in");
             //            BoardState board = BoardState.getBoardFromFile("test100/test069.in");
-            //BoardState board = BoardState.getBoardFromFile("test100/test099.in");
+            BoardState board = BoardState.getBoardFromFile("test100/test099.in");
 	//	BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest5");
           //BoardState board = BoardState.getBoardFromFile("testing/tunnelmap");
 		
@@ -180,7 +181,7 @@ public class Player {
 		
                 Player.VERBOSE = false;
                 Player.DO_GOAL_SORTING = true;
-                Player.DO_EXPENSIVE_DEADLOCK = true;
+                Player.DO_EXPENSIVE_DEADLOCK = false;
                 Player.DO_CORRAL_LIVE_DETECTION = true;
                 Player.DO_CORRAL_CACHING = true;
                 Player.DO_TUNNEL_MACRO_MOVE = true;

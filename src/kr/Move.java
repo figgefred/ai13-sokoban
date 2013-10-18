@@ -232,7 +232,7 @@ public class Move implements Comparable<Move> {
                         playerArea = a;
                     }
                 }
-                if( !Player.CHEAT && playerArea != null)
+                if( (!Player.CHEAT && !Player.HALF_CHEAT) && playerArea != null)
                 {
                     for(BoardPosition p: playerArea.getNoFenceBlockPositions())
                     {
