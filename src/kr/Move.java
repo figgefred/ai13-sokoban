@@ -1,6 +1,7 @@
 package kr;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -250,6 +251,11 @@ public class Move implements Comparable<Move> {
 	public List<Move> getNextMoves() {
 		
 		
+                if( !settings.MOVE_DO_GOAL_MOVES &&(new Date().getTime() - settings.StartTime) >= settings.HaxTimeSwitch)
+                {
+                    settings.MOVE_DO_GOAL_MOVES = true;
+                }	
+            
 		List<Move> possibleMoves = getNextPushMoves();
 		
                 if(settings.MOVE_DO_GOAL_MOVES)

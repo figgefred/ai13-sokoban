@@ -88,8 +88,9 @@ public class Move implements Comparable<Move> {
 				// push the block by moving towards the block.
 				newBoard.movePlayerTo(block);
                                 
-                                if(Player.DO_EXPENSIVE_DEADLOCK && liveAnalyser.isFrozenDeadlockState(board, new HashSet<BoardPosition>(), newBoard.getLastPushedBlock()))
+                                if(Player.DO_EXPENSIVE_DEADLOCK &&  liveAnalyser.isFrozenDeadlockState(board, new HashSet<BoardPosition>(), newBoard.getLastPushedBlock()))
                                 {
+         //                           System.out.println("Cut");
                                     continue; // DEADLOCK
                                 }
                                 
@@ -227,13 +228,13 @@ public class Move implements Comparable<Move> {
                         playerArea = a;
                     }
                 }
-                if( !Player.CHEAT && playerArea != null)
+              /*  if( !Player.CHEAT && playerArea != null)
                 {
                     for(BoardPosition p: playerArea.getNoFenceBlockPositions())
                     {
                         blocks.add(p);
                     }
-                }  
+                }  */
                 //try{Thread.sleep(60000);}catch(InterruptedException ex){}
             }
             

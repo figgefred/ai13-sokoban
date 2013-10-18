@@ -25,7 +25,7 @@ public class Player {
         public static boolean DO_GOAL_SORTING = false;
         public static boolean DO_DEADLOCKS_CONSTANTCHECK = true;
         public static boolean DO_DEADLOCKS_4x4 = true;
-        public static boolean DO_EXPENSIVE_DEADLOCK = true;
+        public static boolean DO_EXPENSIVE_DEADLOCK = false;
         public static boolean DO_BIPARTITE_MATCHING = true;
         public static boolean DO_CORRAL_LIVE_DETECTION = true;
         public static boolean DO_TUNNEL_MACRO_MOVE = true;
@@ -123,7 +123,7 @@ public class Player {
 	public Move idaStar(Move root) {		
 		int bound = analyser.getLowerBound(root.board);
 		long initTime = (new Date().getTime());
-                settings.MOVE_DO_GOAL_MOVES = false;
+                settings.StartTime = (new Date().getTime());
 		while(true) {
                     
                         if((new Date().getTime() - initTime) >= 4000)

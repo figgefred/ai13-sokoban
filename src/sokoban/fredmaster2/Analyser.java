@@ -416,16 +416,17 @@ public class Analyser {
                         }
                     }
                 }
-                if(Player.DO_EXPENSIVE_DEADLOCK)
+                /*if(Player.DO_EXPENSIVE_DEADLOCK)
                 {
                     if(pushedBlock != null)
                     {
-                        if(LiveAnalyser.isFrozenDeadlockState(board, new HashSet<BoardPosition>(), pushedBlock))
+                        if( !board.get(pushedBlock).isGoalNode() && LiveAnalyser.isFrozenDeadlockState(board, new HashSet<BoardPosition>(), pushedBlock))
                         {
+                            System.out.println("cut");
                             return Integer.MIN_VALUE;
                         }
                     }
-                }
+                }*/
                 
 		//mapDistancesToGoals(board);
 		

@@ -54,8 +54,7 @@ public enum NodeType
     public boolean isTunnelSpaceNode()
     {
         boolean isTunnelSpace = 
-                isSpaceNode() ||
-                isBlockNode();
+                !isWallNode();
         return isTunnelSpace;
     }
     

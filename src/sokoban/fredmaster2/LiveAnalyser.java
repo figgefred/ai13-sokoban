@@ -363,12 +363,17 @@ public class LiveAnalyser {
                 PathFinder pFinder = new PathFinder();
                 LiveAnalyser liveAnalyser = new LiveAnalyser(pFinder);
                 Analyser ana = new Analyser(board);
-                
+                Settings settings = new Settings();
+                board.setSettings(settings);
                 List<CorralArea> areas = liveAnalyser.getAreas(board);
                 for(CorralArea a: areas)
                 {
                     System.out.println(a);
                 }
+                
+                BoardPosition test = board.getBlockNodes().get(0);
+                System.out.println("Testing deadlockstate for position: " + test);
+                System.out.println("Is deadlock? " + liveAnalyser.isFrozenDeadlockState(board, new HashSet<BoardPosition>(), test));
                 
 	//	Player noob = new Player(board);
 		//System.out.println(noob.play());
@@ -420,20 +425,13 @@ public class LiveAnalyser {
         // Check if there are any walls blocking horizontally
         // Or of course if there is any block already checked that is blocking
         boolean horizontalWallBlocking = (left.Column >= 0 && state.get(left) == NodeType.WALL)
-			|| (right.Column < state.getColumnsCount() && state.get(right) == NodeType.WALL);
-        
-        horizontalWallBlocking = horizontalWallBlocking || 
-        		((left.Column >= 0 ) && 
-        				(right.Column < state.getColumnsCount() ));
-        
+			|| (right.Column < state.getColumnsCount() && state.get(right) == NodeType.WALL);       
         
         
         
         // Check same as above just vertical
         boolean verticalWallBlocking = (up.Row >= 0 && state.get(up) == NodeType.WALL) 
-                || (down.Row < state.getRowsCount() && state.get(down) == NodeType.WALL)   
-                || ((up.Row >= 0 ) 
-                && (down.Row < state.getRowsCount()));
+                || (down.Row < state.getRowsCount() && state.get(down) == NodeType.WALL)   ;
                 
         
         // Can block be moved?

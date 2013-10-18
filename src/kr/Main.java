@@ -31,6 +31,8 @@ public class Main {
                 Player.VERBOSE = false;
                 Player.DO_GOAL_SORTING = false;
                 Player.DO_EXPENSIVE_DEADLOCK = false;
+                Player.DO_DEADLOCKS_4x4 = true;
+                Player.DO_DEADLOCKS_CONSTANTCHECK = true;
                 Player.DO_CORRAL_LIVE_DETECTION = true;
                 Player.DO_CORRAL_CACHING = true;
                 Player.DO_TUNNEL_MACRO_MOVE = true;
@@ -41,6 +43,7 @@ public class Main {
 		BoardState board = new BoardState(b, true);
                 Settings settings = new Settings();
                 settings.MOVE_DO_GOAL_MOVES = false;
+                settings.HaxTimeSwitch = 8000L;
                 
                 Player noob = new Player(board, settings);
 		System.out.println(noob.play());

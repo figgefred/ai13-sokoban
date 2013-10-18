@@ -1,9 +1,13 @@
 package sokoban.fredmaster2;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import sokoban.BoardPosition;
 
 
 /***
@@ -12,6 +16,7 @@ import java.util.Queue;
  *
  */
 public class Player {	
+    
 
 	
 	private Queue<Move> openSet;
@@ -20,12 +25,14 @@ public class Player {
         public static boolean VERBOSE = false;
         public volatile boolean shouldStop;
 
+        private Map<BoardState, Map<BoardPosition, List<Move>>> MyCachedMoves;
+        public static boolean DO_MOVE_CACHING = true;
         public static boolean CHEAT;
         public static boolean FALLBACK;
         public static boolean DO_GOAL_SORTING = true;
         public static boolean DO_DEADLOCKS_CONSTANTCHECK = true;
         public static boolean DO_DEADLOCKS_4x4 = true;
-        public static boolean DO_EXPENSIVE_DEADLOCK = false;
+        public static boolean DO_EXPENSIVE_DEADLOCK = true;
         public static boolean DO_BIPARTITE_MATCHING = true;
         public static boolean DO_CORRAL_LIVE_DETECTION = true;
         public static boolean DO_TUNNEL_MACRO_MOVE = true;
@@ -39,7 +46,7 @@ public class Player {
 	{		
 		this.initialState = initialState;
                 this.settings = settings;
-		
+		this.MyCachedMoves = new HashMap<>();
 		if(initialState.getBlockNodes().size() != initialState.getGoalNodes().size())
 			throw new IllegalArgumentException("Different number of goals than blocks");
 	}
@@ -70,8 +77,27 @@ public class Player {
         	//Integer tentative_g = node.getHeuristicValue() + 100;
         	
                 
-                
-        	for(Move neighbour: node.getNextMoves())
+                // SOME CACHING STUFF
+                Map<BoardPosition, List<Move>> map = MyCachedMoves.get(node.board);
+                List<Move> moves = null;
+                if(Player.DO_MOVE_CACHING && map != null)
+                {
+                    moves = map.get(node.board.getPlayerNode());
+                }
+                if( Player.DO_MOVE_CACHING && moves == null)
+                {
+                    moves = node.getNextMoves();
+                    if(map == null)
+                    {
+                        map = new HashMap<>();
+                    }
+                    map.put(node.board.getPlayerNode(), moves);
+                }      
+                else if(moves == null)
+                {
+                    moves = node.getNextMoves();
+                }
+        	for(Move neighbour: moves)
         	{	       		                    
         		if(neighbour.board.isWin())
         			return neighbour;
@@ -112,6 +138,7 @@ public class Player {
                 PathFinder p = new PathFinder();
 		Move initial = new Move( new LiveAnalyser(p), new Analyser(initialState), new Settings(), p);
 		initial.board = initialState;
+                initial.board.setSettings(settings);
 		initial.path = new Path();
 		//Move.initPreanalyser(initialState);		
 		
@@ -174,12 +201,14 @@ public class Player {
                 //board = BoardState.getBoardFromFile("test100/test029.in");
                 //board = BoardState.getBoardFromFile("test100/test039.in");
                 //board = BoardState.getBoardFromFile("test100/test049.in");
-                board = BoardState.getBoardFromFile("test100/test059.in");
+                board = BoardState.getBoardFromFile("test100/test093.in");
                 //board = BoardState.getBoardFromFile("test100/test069.in");
                 //board = BoardState.getBoardFromFile("test100/test079.in");
                 //board = BoardState.getBoardFromFile("test100/test089.in");
                 //board = BoardState.getBoardFromFile("test100/test099.in");
                 Player.VERBOSE = false;
+        
+        Player.DO_MOVE_CACHING = true;
                 
         Player.DO_GOAL_SORTING = false;
         Player.DO_DEADLOCKS_CONSTANTCHECK = true;
@@ -193,7 +222,7 @@ public class Player {
     
                 
         sokoban.fredmaster2.Player.CHEAT = false;
-        sokoban.fredmaster2.Player.FALLBACK = true;
+        sokoban.fredmaster2.Player.FALLBACK = false;
         
 		System.out.println(board);
 //                System.out.println(board.getTunnels());
@@ -202,7 +231,7 @@ public class Player {
                 
                 Settings settings = new Settings();
 		Player noob = new Player(board, settings);
-                board.setSettings(settings);
+                settings.MOVE_DO_GOAL_MOVES =false;
 		Path path = noob.play();
                 
                 System.out.println( (path == null?"no path": path.toString()) );

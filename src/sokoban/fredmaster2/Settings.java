@@ -12,6 +12,5 @@ public class Settings {
 	public boolean BOARDSTATE_PLAYER_HASHING = false;
 	public boolean MOVE_DO_GOAL_MOVES = true;
 	public boolean VERBOSE = false;
-	
 
 }
