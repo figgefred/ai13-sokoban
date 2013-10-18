@@ -25,7 +25,7 @@ public class BoardState implements Cloneable
 {
 	// Game board
 	private List<List<NodeType>> Map = new ArrayList<>();
-	private Set<BoardPosition> Goals;
+	private List<BoardPosition> Goals;
 	private BoardPosition CurrentNode;
 	private int rows;
 	private int cols;
@@ -34,7 +34,7 @@ public class BoardState implements Cloneable
 
 	// fult, kanske ska byta interna kartan till samma typ av matris sen?
 	public BoardState(NodeType[][] map) {
-		Goals = new HashSet<BoardPosition>();
+		Goals = new ArrayList<BoardPosition>();
 		rows = map.length;
 		cols = Integer.MIN_VALUE;
 		for(int row = 0; row < rows; ++row) {
@@ -105,7 +105,7 @@ public class BoardState implements Cloneable
 	{
 
 		//IDCounter = 1;
-		Goals = new HashSet<>();
+		Goals = new ArrayList<>();
 		Map = new ArrayList<>();
 
 		char[] columns = null;
@@ -310,7 +310,36 @@ public class BoardState implements Cloneable
 		return positions;
 	}
 
+    
+    public void RecalculateGoalNodes() {
+    	Goals = new ArrayList<BoardPosition>();
+    	for(int row = 0; row < rows; ++row) {
+    		 	
+    		for(int col = 0; col < getColumnsCount(); ++col)
+    		{    			
+    			NodeType type = get(row, col);
+    			if(type == NodeType.GOAL || type == NodeType.PLAYER_ON_GOAL || type == NodeType.BLOCK_ON_GOAL)
+    				Goals.add(new BoardPosition(row, col));    		
+    			
+    		}
+    	}
+    }    
+    
+    
+public NodeType get(int row, int col)
+{
+    if(row < 0 || row >= Map.size())
+        return NodeType.INVALID;
+    if(col < 0 || col >= Map.get(row).size())
+        return NodeType.INVALID;
+    
+    return Map.get(row).get(col);
+}
 
+public NodeType get(BoardPosition pos)
+{
+    return get(pos.Row, pos.Column);
+}
 
 
 	public boolean isBlockingNode(NodeType type) {
@@ -337,7 +366,7 @@ public class BoardState implements Cloneable
 		return CurrentNode;
 	}
 
-	public Set<BoardPosition> getGoalNodes()
+	public List<BoardPosition> getGoalNodes()
 	{
 		return Goals;
 	}
@@ -526,6 +555,9 @@ public class BoardState implements Cloneable
 	public boolean isWin() {
 		for(BoardPosition goal : Goals)
 		{
+			System.out.println(goal);
+			System.out.println("iswin");
+			System.out.println(getNode(goal));
 			if(getNode(goal) != NodeType.BLOCK_ON_GOAL)
 				return false;
 		}
@@ -683,7 +715,7 @@ public class BoardState implements Cloneable
 			Map.get(playerOriginRow).set(playerOriginCol, NodeType.BLOCK);
 			updateHashCode(playerOriginRow, playerOriginCol, NodeType.PLAYER, NodeType.BLOCK);
 		}else{ //if player came from goal
-			Map.get(playerOriginRow).set(playerOriginCol, NodeType.PLAYER_ON_GOAL);
+			Map.get(playerOriginRow).set(playerOriginCol, NodeType.BLOCK_ON_GOAL);
 			updateHashCode(playerOriginRow, playerOriginCol, NodeType.PLAYER_ON_GOAL, NodeType.BLOCK_ON_GOAL);
 		}
 		//update the old block position
@@ -694,6 +726,7 @@ public class BoardState implements Cloneable
 			Map.get(blockOriginRow).set(blockOriginCol, NodeType.GOAL);
 			updateHashCode(blockOriginRow, blockOriginCol, NodeType.BLOCK_ON_GOAL, NodeType.GOAL);
 		}
+		RecalculateGoalNodes();
 		
 			CurrentNode = new BoardPosition(row, col);	
 

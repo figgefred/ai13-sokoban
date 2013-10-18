@@ -56,8 +56,16 @@ public class Move implements Comparable<Move> {
 	
 	//Distance between block and player
 	public int getDistanceValue(){
+		System.out.println("board");
+		System.out.println(board);
+		if(board.isWin()){
+			return 0;
+		}
+		if(board.getBlockNodes().size()==0 && board.getGoalNodes().size()==0){
+			return 0;
+		}
 		BoardPosition goal = board.getBlockNodes().get(0);
-		BoardPosition w = board.getGNodes().get(0);
+		BoardPosition w = board.getGoalNodes().get(0);
 		
 		return (Math.abs(w.Row-goal.Row)+Math.abs(w.Column-goal.Column));
 	//	return analyser.getDistanceValue(board.getPlayerNode().Row,board.getPlayerNode().Column);
