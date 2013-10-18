@@ -2,9 +2,12 @@ package sokoban.Yvonne2;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
@@ -36,15 +39,15 @@ public class Player {
 			throw new IllegalArgumentException("Different number of goals than blocks");
 	}
 
-	
+
 
 
 	public Move idaStar (Move root){
 		winMove=null;
 		int bound = root.getHeuristicValue()*(-1);
-	
+
 		while(bound < Integer.MAX_VALUE){
-			System.out.println("search("+root.board.getBlockNodes().get(0).Row+ " "+root.board.getBlockNodes().get(0).Column+")");
+		//	System.out.println("search("+root.board.getBlockNodes().get(0).Row+ " "+root.board.getBlockNodes().get(0).Column+")");
 			bound = search(root,bound);
 		}
 
@@ -56,78 +59,93 @@ public class Player {
 
 		if(node.board.isWin()){ //if node is a goal, exit algorithm and return goal
 			winMove=node;
-			System.out.println("WIN!");
+			//System.out.println("WIN!");
 			return Integer.MAX_VALUE; 
 		}
 
 		if(node.getNextMoves().isEmpty()){ //if node has no children, return infinity
-			System.out.println(node.board.getPlayerNode().Row+ " "+node.board.getPlayerNode().Column+ " No children");
-			return Integer.MAX_VALUE; 
+			//System.out.println(node.board.getPlayerNode().Row+ " "+node.board.getPlayerNode().Column+ " No children");
+			return Integer.MIN_VALUE; 
 		}
 
-		int fn = Integer.MAX_VALUE;
+		int fn = Integer.MIN_VALUE;
 		for(Move neighbour : node.getNextMoves()){
 
-			int f=+neighbour.getHeuristicValue()*(-1);
+			int f=neighbour.pushes+neighbour.getHeuristicValue()*(-1);
 			if(f<=bound){		
-				System.out.println(neighbour.board.getPlayerNode().Row+ " "+neighbour.board.getPlayerNode().Column+ " < neighbour low bound");
+				//System.out.println(neighbour.board.getPlayerNode().Row+ " "+neighbour.board.getPlayerNode().Column+ " < neighbour low bound");
 
 				fn=Math.min(fn, search(neighbour,bound));				
 			}else{
-				System.out.println(neighbour.board.getPlayerNode().Row+ " "+neighbour.board.getPlayerNode().Column+ " < neighbour high bound");
+				//System.out.println(neighbour.board.getPlayerNode().Row+ " "+neighbour.board.getPlayerNode().Column+ " < neighbour high bound");
 
 				fn=Math.min(fn,f);
 			}
 		}
 		return fn;
 	}
+	
+//	private HashSet<Move> visitedStates = new HashSet<Move>();
 
 	public int wikiSearch(Move node, int g, int bound){
 		winMove=null;
+	//	visitedStates.add(node);
+
 		if(node.getHeuristicValue() == Integer.MIN_VALUE)
 			return Integer.MIN_VALUE;
 		int f = node.getHeuristicValue()-g;
 		if(VERBOSE){
-		System.out.println("f: "+f+" bound: "+bound);
-		System.out.println(node.board);
+			System.out.println("f: "+f+" bound: "+bound);
+			System.out.println(node.board);
 		}
 		if(node.board.isWin()){
 			//	System.out.println("Win");
-				winMove=node;
-				//System.out.println(winMove.board);
-				return Integer.MAX_VALUE;
-			}
+			winMove=node;
+			//System.out.println(winMove.board);
+			return Integer.MAX_VALUE;
+		}
 		if(f<bound){
-			
+
 			return f;
-		
+
 		}
 		int max=Integer.MIN_VALUE;
-		for(Move child : node.getNextMoves()){
+
+		List<Move> nextMoves=node.getNextMoves();
+		//Collections.sort(nextMoves, new moveComp());
+		Collections.sort(nextMoves);
+		for(Move child : nextMoves){
+		//for(Move child : node.getNextMoves()){
+	//		if(visitedStates.contains(child))
+		//		continue;
 			int t=wikiSearch(child,g+1,bound);
-		//	int t=wikiSearch(child,g,bound);
-		//	System.out.println("child with heuristic value: "+t + "move: "+child.hashCode());
+			//	int t=wikiSearch(child,g,bound);
+			//	System.out.println("child with heuristic value: "+t + "move: "+child.hashCode());
 			if(t==Integer.MAX_VALUE){ //if found return found
-			//	winMove=child;
-			//	System.out.println("Found");
-			//	System.out.println(winMove.board);
+				//	winMove=child;
+				//	System.out.println("Found");
+				//	System.out.println(winMove.board);
 				return Integer.MAX_VALUE; //return found
 			}if(t>=max){
 				max=t;
 			}
+
 		}
 		return max;
 	}
+
+
+
 	public Move wikidaStar(Move root){
 		int bound=root.getHeuristicValue();
 		while(true){
-		int t=wikiSearch(root,0,bound);
-		if(t==Integer.MAX_VALUE){ //if found return found
-			return winMove; //return found
-		}if(t==Integer.MIN_VALUE){
-			return null; //not found
-		}
-		bound=t;
+			int t=wikiSearch(root,0,bound);
+			if(t==Integer.MAX_VALUE){ //if found return found
+				return winMove; //return found
+			}if(t==Integer.MIN_VALUE){
+				return null; //not found
+			}
+			bound=t;
 		}
 	}
 
@@ -142,43 +160,44 @@ public class Player {
 			closedSet=new HashSet<Integer>();
 			openSet=new PriorityQueue<Move>();
 			HashSet<Integer> openSetHash=new HashSet<Integer>();
-		    openSet.add(initialPosition);
-		   // HashMap<Integer, Integer> f = new HashMap<Integer,Integer>();
-		    HashMap<Integer, Integer> g = new HashMap<Integer,Integer>();
+			openSet.add(initialPosition);
+			// HashMap<Integer, Integer> f = new HashMap<Integer,Integer>();
+			HashMap<Integer, Integer> g = new HashMap<Integer,Integer>();
 			g.put(initialPosition.board.hashCode(), 0);
-		   // f.put(initialPosition.board.hashCode(), g.get(initialPosition.board.hashCode())+initialPosition.getHeuristicValue());
-	
-		    
-		    while(!openSet.isEmpty()){
-		    	Move current = openSet.poll();
-				
-		    	System.out.println(current.board);
-				
+			// f.put(initialPosition.board.hashCode(), g.get(initialPosition.board.hashCode())+initialPosition.getHeuristicValue());
 
-		    	if(current.board.isWin())
-		    		return current;
-		    	
-		    	closedSet.add(current.board.hashCode());
-		    	for(Move neighbour : current.getNextMoves()){
-		    	
-		    		int tentG=neighbour.pushes;
-		    		int tentF=tentG+neighbour.getHeuristicValue();
-		    		if(closedSet.contains(neighbour.board.hashCode()) && tentF >=(neighbour.getHeuristicValue()+neighbour.pushes)){
-		    			continue;
-		    		}
-		    		
-		    		if(!openSetHash.contains(neighbour.board.hashCode()) || tentF <(neighbour.getHeuristicValue()+neighbour.pushes)){
-		    			g.put(neighbour.board.hashCode(), tentG);
-		    			neighbour.f=tentF;
-		    			if(!openSetHash.contains(neighbour.board.hashCode())){
-		    				openSet.add(neighbour);
-		    				openSetHash.add(neighbour.board.hashCode());
-		    			}
-		    		}
-		    	}
-		    }
-		    return null;
-	}else{
+
+			while(!openSet.isEmpty()){
+
+				Move current = openSet.poll();
+				//	System.out.println(current.board);
+
+
+				if(current.board.isWin())
+					return current;
+
+				closedSet.add(current.board.hashCode());
+				for(Move neighbour : current.getNextMoves()){
+
+					int tentG=current.pushes+1;
+					int tentF=tentG+neighbour.getHeuristicValue();
+
+					if(closedSet.contains(neighbour.board.hashCode()) && tentF >=(neighbour.getHeuristicValue()+neighbour.pushes)){
+						continue;
+					}
+
+					if(!openSetHash.contains(neighbour.board.hashCode()) || tentF <(neighbour.getHeuristicValue()+neighbour.pushes)){
+						neighbour.pushes=tentG;
+						neighbour.f=tentF;
+						if(!openSetHash.contains(neighbour.board.hashCode())){
+							openSet.add(neighbour);
+							openSetHash.add(neighbour.board.hashCode());
+						}
+					}
+				}
+			}
+			return null;
+		}else{
 			System.err.println();
 			openSet = new PriorityQueue<Move>();
 			closedSet = new HashSet<Integer>();
@@ -243,8 +262,8 @@ public class Player {
 	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-			BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest2");
-	//	BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest");
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
+	//		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest");
 
 		System.out.println(board);
 		Player noob = new Player(board);

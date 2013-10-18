@@ -212,8 +212,8 @@ public class Analyser {
 //		}
 //		
 //		
-		if(deadlockerFinder2.isDeadLock(board)) 
-			return Integer.MIN_VALUE;
+	//	if(deadlockerFinder2.isDeadLock(board)) 
+		//	return Integer.MIN_VALUE;
 		
 		
 		if(has4x4Block(board))
@@ -230,6 +230,7 @@ public class Analyser {
 		
 		HashMap<BoardPosition, List<BoardPosition>> reachMap = new HashMap<>(); 
 		
+		//Kollar ifall i mål eller i corner
 		int b = 0; 
 		for(BoardPosition block : blocks)
 		{			
@@ -241,6 +242,7 @@ public class Analyser {
 			b++;	
 		} 
 		
+		//
 		int i = 0;
 		for(BoardPosition goal : board.getGoalNodes())
 		{		
