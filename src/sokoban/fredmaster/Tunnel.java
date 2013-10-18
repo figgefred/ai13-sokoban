@@ -50,6 +50,7 @@ public class Tunnel {
         {
             BoardPosition neighbour = Positions.peekLast();
             if( StartingState.get(p).isTunnelSpaceNode())
+            //if( StartingState.get(p).isSpaceNode())
             {
                 boolean up = ((neighbour.Row-p.Row ) == 1 && (neighbour.Column-p.Column ) == 0 );
                 boolean down = ((p.Row-neighbour.Row ) == 1 && (neighbour.Column-p.Column ) == 0 );
