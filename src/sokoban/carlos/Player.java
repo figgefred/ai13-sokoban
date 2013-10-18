@@ -1,7 +1,7 @@
 package sokoban.carlos;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -11,21 +11,25 @@ import java.util.Queue;
 /***
  * A* variant on boardstate
  * @author tethik
- *
  */
 public class Player {	
 	
 	private Queue<Move> openSet;
     private HashSet<Integer> closedSet;
-    public static boolean VERBOSE = false;
+    
     public volatile boolean shouldStop = false;
+    public Settings settings;
+    public Analyser analyser;
+    public PathFinder pathfinder; 
     
 	private BoardState initialState;
 	
-	
-	public Player(BoardState initialState)
+	public Player(BoardState initialState, Settings settings)
 	{		
+		this.settings = settings;
 		this.initialState = initialState;
+		this.analyser = new Analyser(initialState, settings);
+		this.pathfinder = new PathFinder();
 		
 		if(initialState.getBlockNodes().size() != initialState.getGoalNodes().size())
 			throw new IllegalArgumentException("Different number of goals than blocks");
@@ -33,7 +37,6 @@ public class Player {
 
 	public Move getVictoryPath(Move initialPosition)
 	{
-		System.err.println();
 		openSet = new PriorityQueue<Move>();
 		closedSet = new HashSet<Integer>();
     	openSet.add(initialPosition);
@@ -41,30 +44,34 @@ public class Player {
         while(!openSet.isEmpty() && !shouldStop)
         {
         	Move node = openSet.poll();
-        	//System.out.println(node);
         	
-        	if(VERBOSE) {
+        	if(settings.VERBOSE) {
 	        	System.out.println(openSet.size() + " " + closedSet.size());
 	        	System.out.println("Pushes : " + node.pushes);
 	        	System.out.println(node.path.getPath().size() + ", " + node.getHeuristicValue() + ", " + closedSet.size() + ", " + node.board.hashCode());
 	        	System.out.println(node.board);
+	        	
+	        	try {
+	        		System.in.read();
+	        	} catch(IOException e) {
+	        		
+	        	}
         	}
         	
         	if(node.board.isWin())        	
-        		return node;
-
-        	List<Move> nextMoves = node.getNextMoves();
+        		return node;        	
         	
-        	for(Move neighbour: nextMoves)
-        	{	            		       		
-        		if (closedSet.contains(neighbour.board.hashCode())) {        			
+        	List<Move> moves = node.getNextMoves();
+        	for(Move neighbour : moves)
+        	{	
+        		if(closedSet.contains(neighbour.board.hashCode())) {        			
                 	continue;
         		}
         		
-    			closedSet.add(neighbour.board.hashCode());
-    			
+    			closedSet.add(neighbour.board.hashCode());    			
+    		
     			if(neighbour.getHeuristicValue() > Integer.MIN_VALUE)
-    				openSet.add(neighbour);  	
+    				openSet.add(neighbour);
         	}
         }
 
@@ -72,51 +79,47 @@ public class Player {
 	}
 	
 	
-	public Path play() {				
+	public Path play() {
 		
-		Analyser analyser = new Analyser(initialState);
-		PathFinder pathfinder = new PathFinder();
 		Move initial = new Move(analyser, pathfinder);
 		initial.board = initialState;
+		initialState.setSettings(settings);
 		initial.path = new Path();
 		
 		Move win = getVictoryPath(initial);
-		if(win != null) {		
-			//System.out.println(win.path);
+		if(win != null) {
 			return win.path;
-		}			
-	
-		
-		//System.out.println();
-		return null;
-		/*
-		for(Move nextMove : initial.getNextMoves())
-		{
-			System.out.println(nextMove.board);
-			System.out.println(nextMove.path)
-			System.out.println(nextMove.getHeuristicValue())
+		} else {						
+			settings.BOARDSTATE_PLAYER_HASHING = true;
+			win = getVictoryPath(initial);
+			if(win != null) 
+				return win.path;
 		}
-		*/
+				
+		return null;
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
+//		BoardState board = BoardState.getBoardFromFile("test100/test099.in");
+		BoardState board = BoardState.getBoardFromFile("test100/test006.in");
+//		BoardState board = BoardState.getBoardFromFile("testing/deadlocktest1");
+		
 		long timeStart = System.currentTimeMillis();
-		BoardState board = BoardState.getBoardFromFile("test100/test000.in");
-		BoardState orig = (BoardState) board.clone();
 		
-//		System.out.println(board);
-		Player noob = new Player(board);
+		System.out.println(board);
+		Settings settings = new Settings();
+		settings.VERBOSE = false;
+		settings.ANALYSER_BIPARTITE_MATCHING = false;
+//		settings.MOVE_DO_GOAL_MOVES = false;
+		Player noob = new Player(board, settings);
 		Path path = noob.play();
-		System.out.println(path);
-		board.movePlayer(path);
-//		System.out.println(board);
-		
-		orig.movePlayer(path);
-//		System.out.println(orig);
-		
 		long timeStop = System.currentTimeMillis();
+		System.out.println(path);
+		if(path != null)
+			board.movePlayer(path);
+		System.out.println(board);
 		
-//		System.out.println("Time: " + (timeStop - timeStart) + " ms");
+		System.out.println("Time: " + (timeStop - timeStart) + " ms");
 	}
 }
 

@@ -25,10 +25,10 @@ public class Main {
 			b.add(line);
 		} // End while
 		
-		//System.out.println(board);
-		BoardState board = new BoardState(b, true);
-		Player noob = new Player(board);
-		noob.play();
+		BoardState board = new BoardState(b);
+		
+		Player noob = new Player(board, new Settings());
+		System.out.println(noob.play());
 	}
 
 }
