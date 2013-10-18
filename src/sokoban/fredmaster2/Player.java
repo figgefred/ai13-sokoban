@@ -1,6 +1,5 @@
 package sokoban.fredmaster2;
 
-import tester.Move;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.PriorityQueue;
@@ -110,7 +109,8 @@ public class Player {
 	
 	public Path play() throws InterruptedException {				
 		
-		Move initial = new Move(new PathFinder(), new Analyser(initialState));
+                PathFinder p = new PathFinder();
+		Move initial = new Move( new LiveAnalyser(p), new Analyser(initialState), new Settings(), p);
 		initial.board = initialState;
 		initial.path = new Path();
 		//Move.initPreanalyser(initialState);		
@@ -174,17 +174,17 @@ public class Player {
                 //board = BoardState.getBoardFromFile("test100/test029.in");
                 //board = BoardState.getBoardFromFile("test100/test039.in");
                 //board = BoardState.getBoardFromFile("test100/test049.in");
-                //board = BoardState.getBoardFromFile("test100/test059.in");
+                board = BoardState.getBoardFromFile("test100/test059.in");
                 //board = BoardState.getBoardFromFile("test100/test069.in");
                 //board = BoardState.getBoardFromFile("test100/test079.in");
                 //board = BoardState.getBoardFromFile("test100/test089.in");
-                board = BoardState.getBoardFromFile("test100/test099.in");
+                //board = BoardState.getBoardFromFile("test100/test099.in");
                 Player.VERBOSE = false;
                 
         Player.DO_GOAL_SORTING = false;
         Player.DO_DEADLOCKS_CONSTANTCHECK = true;
         Player.DO_DEADLOCKS_4x4 = true;
-        Player.DO_EXPENSIVE_DEADLOCK = false;
+        Player.DO_EXPENSIVE_DEADLOCK = true;
         Player.DO_BIPARTITE_MATCHING = true;
         Player.DO_CORRAL_LIVE_DETECTION = true;
         Player.DO_TUNNEL_MACRO_MOVE = true;
@@ -202,6 +202,7 @@ public class Player {
                 
                 Settings settings = new Settings();
 		Player noob = new Player(board, settings);
+                board.setSettings(settings);
 		Path path = noob.play();
                 
                 System.out.println( (path == null?"no path": path.toString()) );

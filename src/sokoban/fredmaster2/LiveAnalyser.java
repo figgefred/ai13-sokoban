@@ -400,7 +400,7 @@ public class LiveAnalyser {
         Map<BoardPosition, Boolean> map = DeadlockCache.get(state);
         if(map != null)
         {
-            Boolean b = map.get(state);
+            Boolean b = map.get(block);
             if(b != null)
                 return b.booleanValue();
         }

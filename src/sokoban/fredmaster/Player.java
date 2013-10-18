@@ -149,7 +149,7 @@ public class Player {
                 Player.VERBOSE = false;
                 Player.DO_GOAL_SORTING = true;
                 Player.DO_EXPENSIVE_DEADLOCK = false;
-                Player.DO_CORRAL_LIVE_DETECTION = true;
+                Player.DO_CORRAL_LIVE_DETECTION = false;
                 Player.DO_CORRAL_CACHING = true;
                 Player.DO_TUNNEL_MACRO_MOVE = true;
                 
@@ -165,7 +165,7 @@ public class Player {
 		System.out.println(board);
 		
                 Player noob = new Player(board, settings);
-                
+                board.setSettings(settings);
 		Path path = noob.play();
 		long timeStop = System.currentTimeMillis();
 		System.out.println(path);

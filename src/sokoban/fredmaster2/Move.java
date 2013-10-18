@@ -32,7 +32,7 @@ public class Move implements Comparable<Move> {
 		if(heuristic_value != null)
 			return heuristic_value;
 		
-//		heuristic_value = analyser.getHeuristicValue(board);
+		heuristic_value = analyser.getHeuristicValue(board, board.getLastPushedBlock());
 		
 		if(heuristic_value == Integer.MAX_VALUE || heuristic_value == Integer.MIN_VALUE)
 			return heuristic_value;
