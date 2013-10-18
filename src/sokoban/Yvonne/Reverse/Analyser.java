@@ -233,7 +233,7 @@ public class Analyser {
 		
 		HashMap<BoardPosition, List<BoardPosition>> reachMap = new HashMap<>(); 
 		
-		//Kollar ifall i mål eller i corner
+		
 		int b = 0; 
 		for(BoardPosition block : blocks)
 		{			
