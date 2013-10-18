@@ -23,7 +23,7 @@ public class BoardState implements Cloneable
     private BoardPosition CurrentNode;
     private int rows;
     private int cols;
-    private BoardPosition lastPushedBlock;
+    private BoardPosition lastPushedBlock = new BoardPosition(-1,-1);
     private Settings settings;
     
     public void setSettings(Settings settings) {

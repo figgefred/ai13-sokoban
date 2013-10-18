@@ -32,10 +32,13 @@ public class Analyser {
 	private int cols;
 	private HopcroftKarpMatching bipartiteMatcher = new HopcroftKarpMatching();
 	private Settings settings;
+	private HashSet<BoardPosition> corners = new HashSet<BoardPosition>();
+	private LiveAnalyser lamealyser;
 	
 	public Analyser(BoardState board, Settings settings)
 	{
 		this.settings = settings;
+		this.lamealyser = new LiveAnalyser(settings);
 		this.board = board;
 		constructTableAndWorkbench();
 		// Hitta distanser?
@@ -58,8 +61,11 @@ public class Analyser {
 		
 		for(int row = 0; row < rows; ++row)
 			for(int col = 0; col < cols; ++col) {
-				NodeType type = board.get(row, col);				
+				BoardPosition pos = new BoardPosition(row,col);
+				NodeType type = board.get(pos);
 				
+				if(board.isInCorner(pos))
+					corners.add(new BoardPosition(row,col));
 				// Remove blocks from the map
 				if(type == NodeType.BLOCK || type == NodeType.PLAYER)
 					type = NodeType.SPACE;
@@ -186,6 +192,56 @@ public class Analyser {
 		System.out.println(builder.toString());
 	}
 	
+	public int getLowerBound(BoardState board) {
+		for(int i = 0; i < goalDist.length; i++) {
+			goalDist[i] = Integer.MAX_VALUE;
+			blockDist[i] = Integer.MAX_VALUE;
+		}
+		
+		List<BoardPosition> blocks = board.getBlockNodes();
+		
+		int b = 0; 
+		for(BoardPosition block : blocks)
+		{			
+			 if(board.get(block) == NodeType.BLOCK_ON_GOAL) 
+				blockDist[b] = 0;
+			b++;	
+		} 
+		
+		int i = 0;
+		for(BoardPosition goal : board.getGoalNodes())
+		{		
+			if(board.get(goal) == NodeType.BLOCK_ON_GOAL) {
+				goalDist[i] = 0;
+			}
+			
+			b = 0; 
+			for(BoardPosition block : blocks)
+			{
+				int dist = distanceMatrix[i][block.Row][block.Column];
+				
+				goalDist[i] = Math.min(dist, goalDist[i]);
+				
+				if(goalDist[i] > 0)
+					blockDist[b] = Math.min(dist, blockDist[b++]);
+			}			
+			++i;
+		}			
+		
+		int val = 0;
+		for(i = 0; i < goalDist.length; ++i) {
+			if(goalDist[i] == Integer.MAX_VALUE || blockDist[i] == Integer.MAX_VALUE)
+			{
+				return Integer.MIN_VALUE;
+			}
+			
+			val += goalDist[i];
+			val += blockDist[i];
+		}
+		
+		return val;		
+	}
+	
 	public int getHeuristicValue(BoardState board) {
 		this.board = board;
 		
@@ -202,11 +258,28 @@ public class Analyser {
 				blockDist[b] = 0;
 				if(isBadPosition(block))
 					blockDist[b] = -100;
-			 } else if(isBadPosition(block) || is4x4Block(board, block)) {
+			 } else if(isBadPosition(block)) {
 				return Integer.MIN_VALUE;		
 			} 
 			b++;	
 		} 
+		
+		if(has4x4Block(board))
+			return Integer.MIN_VALUE;
+		
+		if(settings.ANALYSER_CORNER_DEADLOCK && isCornerLock(board))
+			return Integer.MIN_VALUE;		
+		
+		if(settings.DO_CORRAL_CACHING) {
+			List<CorralArea> areas = lamealyser.getAreas(board);
+			for(CorralArea area : areas) {
+				if(area.isCorralArea() || area.isGoalArea())
+					continue;
+				
+				if(area.getFencePositions().size() >= area.getAreaPositions().size())
+					return Integer.MIN_VALUE;
+			}
+		}
 		
 		HashMap<BoardPosition, List<BoardPosition>> reachMap = new HashMap<>(); 
 		int i = 0;
@@ -270,56 +343,6 @@ public class Analyser {
 		return min;
 	}
 	
-	public int getLowerBound(BoardState board) {
-		for(int i = 0; i < goalDist.length; i++) {
-			goalDist[i] = Integer.MAX_VALUE;
-			blockDist[i] = Integer.MAX_VALUE;
-		}
-		
-		List<BoardPosition> blocks = board.getBlockNodes();
-		
-		int b = 0; 
-		for(BoardPosition block : blocks)
-		{			
-			 if(board.get(block) == NodeType.BLOCK_ON_GOAL) 
-				blockDist[b] = 0;
-			b++;	
-		} 
-		
-		int i = 0;
-		for(BoardPosition goal : board.getGoalNodes())
-		{		
-			if(board.get(goal) == NodeType.BLOCK_ON_GOAL) {
-				goalDist[i] = 0;
-			}
-			
-			b = 0; 
-			for(BoardPosition block : blocks)
-			{
-				int dist = distanceMatrix[i][block.Row][block.Column];
-				
-				goalDist[i] = Math.min(dist, goalDist[i]);
-				
-				if(goalDist[i] > 0)
-					blockDist[b] = Math.min(dist, blockDist[b++]);
-			}			
-			++i;
-		}			
-		
-		int val = 0;
-		for(i = 0; i < goalDist.length; ++i) {
-			if(goalDist[i] == Integer.MAX_VALUE || blockDist[i] == Integer.MAX_VALUE)
-			{
-				return Integer.MIN_VALUE;
-			}
-			
-			val += goalDist[i];
-			val += blockDist[i];
-		}
-		
-		return val;		
-	}
-	
 	private boolean is4x4BlockTopLeftCorner(BoardState board, BoardPosition pos) {
 		if(!board.isBlockingNode(pos))
 			return false;
@@ -352,7 +375,6 @@ public class Analyser {
 				|| is4x4BlockTopLeftCorner(board, leftTop);
 	}
 	
-	@SuppressWarnings("unused")
 	private boolean has4x4Block(BoardState board) {		
 		for(int row = 0; row < board.getRowsCount() - 1; ++row)			
 			for(int col = 0; col < board.getColumnsCount() - 1; ++col) {				
@@ -361,6 +383,37 @@ public class Analyser {
 				
 			}		
 		return false;		
+	}
+	
+	private boolean isCornerLock(BoardState board) {
+		for(BoardPosition me : corners) {				
+				if(!board.isInCorner(me) || board.get(me).isGoalNode())
+					continue;
+				
+				int num_locked_blocks = 0;
+				boolean atleast_one_normal_block = false;
+				for(BoardPosition neighbour : board.getNeighbours(me)) {
+					if(!board.get(neighbour).isBlockNode())
+						continue;
+					
+					atleast_one_normal_block = atleast_one_normal_block || board.get(neighbour) == NodeType.BLOCK;
+					
+					List<BoardPosition> pushPos = board.getPushingPositions(neighbour);
+					if(pushPos.size() > 2)
+						break;
+					
+					Direction dirToMe = neighbour.getDirection(me);
+					
+					if(pushPos.contains(me) &&
+						pushPos.contains(neighbour.getNeighbouringPosition(dirToMe.opposite())))
+						num_locked_blocks++;
+				}
+				
+				if(num_locked_blocks == 2 && atleast_one_normal_block)
+					return true;
+			}
+	
+		return false;
 	}
 	
 	public static void main(String[] args) throws IOException {

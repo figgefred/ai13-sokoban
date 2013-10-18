@@ -11,6 +11,7 @@ public class Move implements Comparable<Move> {
 	public Path path;
 	private Integer heuristic_value = null;
 	public int pushes = 1;
+	private int heuristic_bonus = 0;
 	
 	private SingleBlockPlayer singleBlockPlayer;
 	
@@ -24,7 +25,7 @@ public class Move implements Comparable<Move> {
 		if(heuristic_value != null)
 			return heuristic_value;
 		
-		heuristic_value = analyser.getHeuristicValue(board);		
+		heuristic_value = analyser.getHeuristicValue(board) + heuristic_bonus;		
 		return heuristic_value; 
 	}
 	
@@ -67,6 +68,10 @@ public class Move implements Comparable<Move> {
 				move.path = path.cloneAndAppend(getThere);
 				move.path.append(block);
 				move.pushes = pushes + 1;
+				
+				if(analyser.getSettings().MOVE_PRIORITISE_LAST_PUSHED_BLOCK && board.getLastPushedBlock().equals(block))
+					move.heuristic_bonus = 1;
+				
 				possibleMoves.add(move);					
 			}	
 		}
@@ -89,8 +94,8 @@ public class Move implements Comparable<Move> {
 				List<Move> goalPushingMoves = singleBlockPlayer.findGoalMoves(this, block);
 				possibleMoves.addAll(goalPushingMoves);
 				
-	//			if(goalPushingMoves.size() > 0)
-	//				break;
+				if(goalPushingMoves.size() > 0)
+					break;
 			} 
 		}
 		
