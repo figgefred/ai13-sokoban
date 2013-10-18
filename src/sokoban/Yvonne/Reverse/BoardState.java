@@ -29,7 +29,7 @@ public class BoardState implements Cloneable
 	private BoardPosition CurrentNode;
 	private int rows;
 	private int cols;
-
+	private BoardPosition initPlayerNode;
 
 
 	// fult, kanske ska byta interna kartan till samma typ av matris sen?
@@ -57,6 +57,10 @@ public class BoardState implements Cloneable
 	{
 		this(rows, true);
 	}    
+	
+	public BoardPosition getInitPlayerNode(){
+		return initPlayerNode;
+	}
 
 	public BoardState(List<String> rows, boolean initZobrist)
 	{    
@@ -731,7 +735,8 @@ public BoardState getEndingState()
 	BoardState endState = (BoardState) this.clone();
 
 	// First remove player from map
-
+//	initPlayerNode=endState.getPlayerNode();
+	//sSystem.out.println("endstate initplayernode: "+initPlayerNode);
 	NodeType t = endState.Map.get(endState.CurrentNode.Row).get(endState.CurrentNode.Column);
 	if(t == NodeType.PLAYER)
 	{
@@ -763,6 +768,7 @@ public BoardState getEndingState()
 	// Find out where the players end position can be
 	// north, south, west and east positions are were the player can stand
 	// next to block
+	
 	BoardPosition playerPos = null;
 
 	for(BoardPosition p: endState.Goals)
