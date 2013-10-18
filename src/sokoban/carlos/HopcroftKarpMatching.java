@@ -4,9 +4,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Set;
-
-import sokoban.BoardPosition;
 
 /***
  * Hopcroft-Karp maximal bipartite matching
@@ -29,7 +26,7 @@ public class HopcroftKarpMatching {
 		HashMap<BoardPosition, BoardPosition> block_pairings = new HashMap<BoardPosition, BoardPosition>();
 		HashMap<BoardPosition, Integer> dist = new HashMap<BoardPosition, Integer>();
 		
-		Set<BoardPosition> goalNodes = board.getGoalNodes();
+		List<BoardPosition> goalNodes = board.getGoalNodes();
 		List<BoardPosition> blockNodes = board.getBlockNodes();
 		
 		for(BoardPosition goal : goalNodes) {			

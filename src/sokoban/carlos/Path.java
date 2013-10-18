@@ -1,8 +1,8 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package sokoban.carlos;
-
-
-import sokoban.BoardPosition;
-import sokoban.Direction;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,6 +66,10 @@ public class Path {
     
     public BoardPosition first() {
     	return get(0);
+    }
+    
+    public int size() {
+    	return Nodes.size();
     }
     
     public boolean contains(BoardPosition pos) {

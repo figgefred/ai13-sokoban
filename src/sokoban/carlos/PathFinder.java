@@ -3,13 +3,11 @@ package sokoban.carlos;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
-
-import sokoban.BoardPosition;
-import sokoban.NodeType;
 
 public class PathFinder {
     
@@ -52,7 +50,7 @@ public class PathFinder {
 				if(visited.contains(neighbour)) 
 					continue;
 				
-				NodeType node = board.getNode(neighbour);
+				NodeType node = board.get(neighbour);
 				visited.add(neighbour);
 				
 				if(node == NodeType.WALL || node == NodeType.INVALID || node == NodeType.BLOCK || node == NodeType.BLOCK_ON_GOAL) 
@@ -77,15 +75,17 @@ public class PathFinder {
 	}
 	
 	public boolean isReachable(BoardState board, BoardPosition goal) {
-		if(board_hash != board.hashCode())
-			mapPlayerDistance(board);
+		if(board_hash != board.hashCode()) {
+			mapPlayerDistance(board);			
+		}
 		
 		return (playerDistMatrix[goal.Row][goal.Column] < Integer.MAX_VALUE);			
 	}
 
 	public Path getPath(BoardState board, BoardPosition goal) {
-		if(board_hash != board.hashCode())
+		if(board_hash != board.hashCode()) {
 			mapPlayerDistance(board);
+		}
 		
 		if(!isReachable(board, goal))
 			return null;		
@@ -97,8 +97,7 @@ public class PathFinder {
 		traversal:
 		while(!(pos = positionStack.peek()).equals(board.getPlayerNode())) {
 			
-			int distance = playerDistMatrix[pos.Row][pos.Column];
-			
+			int distance = playerDistMatrix[pos.Row][pos.Column];			
 			for(BoardPosition neighbour : board.getNeighbours(pos))
 			{			
 				if(playerDistMatrix[neighbour.Row][neighbour.Column] < distance)
@@ -112,8 +111,9 @@ public class PathFinder {
 		}
 		
 		//positionStack.pop();
-		
-		return new Path(positionStack);
+		Path path = new Path(positionStack);
+	//	pathCache.put(goal, path);
+		return path;
 	}
 		
 	public static void main(String[] args) throws IOException {
