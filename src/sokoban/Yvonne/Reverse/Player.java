@@ -22,7 +22,7 @@ public class Player {
 
 	private Queue<Move> openSet;
 	private HashSet<Integer> closedSet;
-	public static boolean VERBOSE = true;
+	public static boolean VERBOSE = false;
 	public volatile boolean shouldStop = false;
 	Move winMove=null;
 	public static boolean IDA =false;
@@ -204,7 +204,7 @@ public class Player {
 			openSet = new PriorityQueue<Move>();
 			closedSet = new HashSet<Integer>();
 			openSet.add(initialPosition);
-			initialPosition.print();
+			//initialPosition.print();
 
 			int bound=initialPosition.getDistanceValue();
 			while(!openSet.isEmpty() && !shouldStop)
@@ -217,17 +217,13 @@ public class Player {
 					System.out.println(node.board);
 				}
 
-				if(node.board.isWin())        	
+				if(node.board.isWin()){        	
 					return node;        	
-
+				}
 				for(Move neighbour: node.getNextMoves())
 				{
-					System.out.println("new neighbour");
-					System.out.println(neighbour.board);
 					int value = neighbour.getDistanceValue();
 				
-					System.out.println(neighbour.board);
-					System.out.println(neighbour.board.getPlayerNode()+" "+value);
 					if (closedSet.contains(neighbour.board.hashCode())) {        			
 						continue;
 					}
@@ -283,9 +279,11 @@ public class Player {
 		Player noob = new Player(board);
 		
 		Path path = noob.play();
-		System.out.println(path);
-		board.movePlayer(path);
-		System.out.println(board);
+		   if(path != null)
+           {
+               board.movePlayer(path);
+               System.out.println(board);
+           }
 	}
 }
 

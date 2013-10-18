@@ -56,8 +56,7 @@ public class Move implements Comparable<Move> {
 	
 	//Distance between block and player
 	public int getDistanceValue(){
-		System.out.println("board");
-		System.out.println(board);
+	
 		if(board.isWin()){
 			return 0;
 		}
@@ -121,6 +120,7 @@ public class Move implements Comparable<Move> {
 			  	
 			  	
 				toPush.append(new BoardPosition(row,col));
+				
 				newBoard.movePlayer(toPush);
 				// push the block by moving towards the block.
 

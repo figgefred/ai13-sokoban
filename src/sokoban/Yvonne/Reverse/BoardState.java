@@ -306,7 +306,6 @@ public class BoardState implements Cloneable
 				positions.add(right);		 	
 		}
 		
-		System.out.println("positions: "+positions);
 		return positions;
 	}
 
@@ -383,10 +382,8 @@ public NodeType get(BoardPosition pos)
 			throw new IllegalArgumentException("Can't move player more than one coordinate");
 
 		NodeType type = Map.get(row).get(col);
-		System.out.println(row+" "+col);
 		if(type == NodeType.BLOCK || type == NodeType.BLOCK_ON_GOAL)
 		{
-			System.out.println(row+ " "+col);
 			throw new IllegalArgumentException ("Invalid destination");
 
 
@@ -504,7 +501,6 @@ public NodeType get(BoardPosition pos)
 	 */
 	public void movePlayerTo(int row, int col)
 	{
-			System.out.println("move player to: "+row+ " "+col);
 		if(new BoardPosition(row, col).equals(CurrentNode))
 			return;
 
@@ -512,13 +508,11 @@ public NodeType get(BoardPosition pos)
 			Direction dir = getDirection(CurrentNode, new BoardPosition(row,col));
 			//	moveBlockTo(CurrentNode.Row, CurrentNode.Column, dir);
 			if(isBlockBehind(dir,row,col)){
-				System.out.println("pullblock");
 				pullBlock(dir,row,col);
 			}else{
 
 				playerWalk(dir,row,col);
 			}
-			System.out.println(this);
 			/*	
 			// Reset old position
 			NodeType playerType = Map.get(CurrentNode.Row).get(CurrentNode.Column);
@@ -555,9 +549,7 @@ public NodeType get(BoardPosition pos)
 	public boolean isWin() {
 		for(BoardPosition goal : Goals)
 		{
-			System.out.println(goal);
-			System.out.println("iswin");
-			System.out.println(getNode(goal));
+			
 			if(getNode(goal) != NodeType.BLOCK_ON_GOAL)
 				return false;
 		}
@@ -656,7 +648,6 @@ public NodeType get(BoardPosition pos)
 	}
 
 	public void pullBlock(Direction dir, int row, int col) {
-		System.out.println("pull block to "+row+" "+col );
 		NodeType dest = Map.get(row).get(col);
 		int playerOriginRow=row;
 		int playerOriginCol=col;
@@ -685,10 +676,7 @@ public NodeType get(BoardPosition pos)
 			break;
 		}
 
-		System.out.println("dest "+row+" "+col);
 
-		System.out.println("playerOrigin "+playerOriginRow+" "+playerOriginCol);
-		System.out.println("blockOrigin "+blockOriginRow+" "+blockOriginCol);
 		playerOrigin=Map.get(playerOriginRow).get(playerOriginCol);	
 		NodeType blockOrigin=Map.get(blockOriginRow).get(blockOriginCol);
 
@@ -807,7 +795,6 @@ public BoardState getEndingState()
 	//   Position the player on resp. position        
 	endState.Map.get(playerPos.Row).set(playerPos.Column, NodeType.PLAYER);
 	endState.CurrentNode = playerPos;
-	System.out.println("blocks size: "+getBlockNodes().size());
 	return endState;
 }
 
