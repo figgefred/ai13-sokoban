@@ -1,6 +1,7 @@
 package sokoban.Tethik;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -13,8 +14,7 @@ import java.util.Queue;
  */
 public class Player {	
 	
-	private Queue<Move> openSet;
-    private HashSet<Integer> closedSet;
+
     
     public volatile boolean shouldStop = false;
     public Settings settings;
@@ -35,40 +35,67 @@ public class Player {
 	}
 
 	public Move getVictoryPath(Move initialPosition)
-	{
-		openSet = new PriorityQueue<Move>();
-		closedSet = new HashSet<Integer>();
-    	openSet.add(initialPosition);
-    	
-        while(!openSet.isEmpty() && !shouldStop)
-        {
-        	Move node = openSet.poll();
-        	
-        	if(settings.VERBOSE) {
-	        	System.out.println(openSet.size() + " " + closedSet.size());
-	        	System.out.println("Pushes : " + node.pushes);
-	        	System.out.println(node.path.getPath().size() + ", " + node.getHeuristicValue() + ", " + closedSet.size() + ", " + node.board.hashCode());
-	        	System.out.println(node.board);
-        	}
-        	
-        	if(node.board.isWin())        	
-        		return node;        	
-        	
-        	List<Move> moves = node.getNextMoves();
-        	for(Move neighbour : moves)
-        	{	
-        		if(closedSet.contains(neighbour.board.hashCode())) {        			
-                	continue;
-        		}
-        		
-    			closedSet.add(neighbour.board.hashCode());    			
+	{	
+		HashSet<Integer> closedSet = new HashSet<Integer>();    	
+		
+    	for(int boundMultiplier = initialPosition.board.getRowsCount() / 2; boundMultiplier < 32768 && !shouldStop; boundMultiplier = boundMultiplier << 1)
+    	{
+    		Queue<Move> openSet = new PriorityQueue<Move>();
+    		HashSet<Integer> visitedSet = new HashSet<Integer>();
+    		openSet.add(initialPosition);
     		
-    			if(neighbour.getHeuristicValue() > Integer.MIN_VALUE)
-    				openSet.add(neighbour);  	
-    			else if(neighbour.isWin())
-    				return neighbour;
-        	}
-        }
+	    	int bound = analyser.getLowerBound(initialState) * boundMultiplier;
+	    	if(settings.VERBOSE)
+	    		System.out.println("Now at bound: " + bound);
+	    	
+	    	if(bound < 0)
+	    		throw new IllegalArgumentException("Bound is lower than 0!");	   
+	    	
+	        while(!openSet.isEmpty() && !shouldStop)
+	        {
+	        	Move node = openSet.poll();
+	        	
+	        	if(settings.VERBOSE) {
+		        	System.out.println(openSet.size() + " " + closedSet.size());
+		        	System.out.println("Pushes : " + node.pushes);
+		        	System.out.println(node.path.getPath().size() + ", " + node.getHeuristicValue() + ", " + closedSet.size() + ", " + node.board.hashCode());
+		        	System.out.println(node.board);
+	        	}
+	        	
+	        	if(node.board.isWin())        	
+	        		return node;    	        		
+	        	
+	        	List<Move> moves = node.getNextMoves();
+	        	int maxval = Integer.MIN_VALUE;
+	        	for(Move neighbour : moves)
+	        	{	
+	        		if(visitedSet.contains(neighbour.hashCode()))
+        				continue;
+	        		
+	        		if(closedSet.contains(neighbour.hashCode())) 
+	                	continue;
+
+	    			if(neighbour.getHeuristicValue() == Integer.MIN_VALUE) {
+	    				closedSet.add(neighbour.hashCode());
+	    				continue;
+	    			}
+	    			
+	    			maxval = Math.max(maxval, neighbour.getHeuristicValue());
+	    			
+	    			
+	    			if(analyser.getLowerBound(neighbour.board) + neighbour.pushes > bound) {		        		
+		        		continue;
+		        	}
+	    			
+	    			visitedSet.add(neighbour.hashCode());	
+	    			openSet.add(neighbour);  
+	        	}
+	        	
+	        	// All moves lead to deadlock..
+	        	if(maxval == Integer.MIN_VALUE)
+	        		closedSet.add(node.hashCode());
+	        }
+    	}
 
 		return null;
 	}
@@ -96,13 +123,14 @@ public class Player {
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
 //		BoardState board = BoardState.getBoardFromFile("test100/test099.in");
-		BoardState board = BoardState.getBoardFromFile("test100/test001.in");
+		BoardState board = BoardState.getBoardFromFile("test100/test000.in");
 //		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest5");
 		
 		long timeStart = System.currentTimeMillis();
 		
 		System.out.println(board);
 		Settings settings = new Settings();
+//		settings.MOVE_DO_GOAL_MOVES = true;
 		settings.VERBOSE = true;
 		Player noob = new Player(board, settings);
 		Path path = noob.play();

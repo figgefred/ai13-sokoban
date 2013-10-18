@@ -120,7 +120,7 @@ public class Player {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BoardState board = BoardState.getBoardFromFile("test100/test012.in");
+		BoardState board = BoardState.getBoardFromFile("test100/test001.in");
 //		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
 		
 		long timeStart = System.currentTimeMillis();		
