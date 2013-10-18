@@ -1,4 +1,4 @@
-package sokoban.carlos;
+package kr;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,8 +10,8 @@ public class SingleBlockMove extends Move {
 	public BoardPosition block;
 	public int goalindex;
 	
-	public SingleBlockMove(Analyser analyser, PathFinder pathfinder, BoardPosition block, int goalindex) {
-		super(analyser, pathfinder);
+	public SingleBlockMove(Settings settings, Analyser analyser, PathFinder pathfinder, BoardPosition block, int goalindex) {
+		super(analyser, settings, pathfinder);
 		this.block = block;
 		this.goalindex = goalindex;
 	}
@@ -52,7 +52,7 @@ public class SingleBlockMove extends Move {
 			// push the block by moving towards the block.
 			newBoard.movePlayerTo(block);
 			
-			SingleBlockMove move = new SingleBlockMove(analyser, pathfinder, newBoard.getLastPushedBlock(), goalindex);
+			SingleBlockMove move = new SingleBlockMove(settings, analyser, pathfinder, newBoard.getLastPushedBlock(), goalindex);
 			move.board = newBoard;
 			move.path = path.cloneAndAppend(getThere);
 			move.path.append(block);

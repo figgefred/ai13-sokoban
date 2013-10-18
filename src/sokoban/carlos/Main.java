@@ -1,4 +1,4 @@
-package sokoban.carlos;
+package kr;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,14 +20,29 @@ public class Main {
 				new InputStreamReader(System.in));
 		
 		String line;
-		while(br.ready()) {
-			line = br.readLine();
-			b.add(line);
+                line = br.readLine();
+		while(line != null) {
+                    if(line.equals(""))
+                        break;
+                    b.add(line);
+                    line = br.readLine();
 		} // End while
 		
-		BoardState board = new BoardState(b);
-		
-		Player noob = new Player(board, new Settings());
+                Player.VERBOSE = false;
+                Player.DO_GOAL_SORTING = false;
+                Player.DO_EXPENSIVE_DEADLOCK = false;
+                Player.DO_CORRAL_LIVE_DETECTION = true;
+                Player.DO_CORRAL_CACHING = true;
+                Player.DO_TUNNEL_MACRO_MOVE = true;
+                Player.DO_MOVE_CACHING = true;
+                Player.CHEAT = false;
+                Player.HALF_CHEAT = true;
+		//System.out.println(board);
+		BoardState board = new BoardState(b, true);
+                Settings settings = new Settings();
+                settings.MOVE_DO_GOAL_MOVES = false;
+                
+                Player noob = new Player(board, settings);
 		System.out.println(noob.play());
 	}
 

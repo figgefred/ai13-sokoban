@@ -2,7 +2,8 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package sokoban.carlos;
+package kr;
+
 
 /**
  *
@@ -35,13 +36,27 @@ public enum NodeType
     public char getChar() {
     	return this.c;
     }
-    
+
     public boolean isBlockNode()
     {
         boolean isBlockNode = 
             this == NodeType.BLOCK || 
             this == NodeType.BLOCK_ON_GOAL;
         return isBlockNode;
+    }
+    
+    public boolean isWallNode()
+    {
+        boolean isWallNode = 
+            this == NodeType.WALL;
+        return isWallNode;
+    }
+    
+    public boolean isTunnelSpaceNode()
+    {
+        boolean isTunnelSpace = 
+                !isWallNode();
+        return isTunnelSpace;
     }
     
     public boolean isSpaceNode()
