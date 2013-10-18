@@ -1,4 +1,4 @@
-package sokoban.Tethik.IDA;
+package sokoban.Tethik.Combo;
 
 public class Settings {
 	

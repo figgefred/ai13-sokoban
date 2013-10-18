@@ -1,4 +1,4 @@
-package sokoban.Tethik;
+package sokoban.Tethik.Combo;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -12,7 +12,7 @@ import java.util.Queue;
  * A* variant on boardstate
  * @author tethik
  */
-public class Player {	
+public class BFSPlayer {	
 	
 
     
@@ -23,7 +23,7 @@ public class Player {
     
 	private BoardState initialState;
 	
-	public Player(BoardState initialState, Settings settings)
+	public BFSPlayer(BoardState initialState, Settings settings)
 	{		
 		this.settings = settings;
 		this.initialState = initialState;
@@ -132,7 +132,7 @@ public class Player {
 		Settings settings = new Settings();
 //		settings.MOVE_DO_GOAL_MOVES = true;
 		settings.VERBOSE = true;
-		Player noob = new Player(board, settings);
+		BFSPlayer noob = new BFSPlayer(board, settings);
 		Path path = noob.play();
 		long timeStop = System.currentTimeMillis();
 		System.out.println(path);
