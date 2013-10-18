@@ -1,4 +1,4 @@
-package sokoban.Tethik;
+package sokoban.Tethik.Combo;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
+
 
 public class SingleBlockPlayer {
 	
@@ -119,9 +120,7 @@ public class SingleBlockPlayer {
 		BoardState board = BoardState.getBoardFromFile("testing/level3");
 		
 		System.out.println(board);
-		Settings settings = new Settings();
-		Analyser analyser = new Analyser(board, settings);
-		board.setSettings(settings);
+		Analyser analyser = new Analyser(board, new Settings());
 		PathFinder pathfinder = new PathFinder();
 		SingleBlockPlayer noob = new SingleBlockPlayer(analyser);
 		SingleBlockPlayer.VERBOSE = false;

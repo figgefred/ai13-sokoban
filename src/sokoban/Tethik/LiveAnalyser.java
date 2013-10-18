@@ -287,18 +287,12 @@ public class LiveAnalyser {
 //        boolean horizontalWallBlocking = (left.Column >= 0 && state.get(left) == NodeType.WALL)
 //			|| (right.Column < state.getColumnsCount() && state.get(right) == NodeType.WALL);
 //        
-//        horizontalWallBlocking = horizontalWallBlocking || 
-//        		((left.Column >= 0 ) && 
-//        				(right.Column < state.getColumnsCount() ));
-//        
 //        
 //        
 //        
 //        // Check same as above just vertical
 //        boolean verticalWallBlocking = (up.Row >= 0 && state.get(up) == NodeType.WALL) 
-//                || (down.Row < state.getRowsCount() && state.get(down) == NodeType.WALL)   
-//                || ((up.Row >= 0 ) 
-//                && (down.Row < state.getRowsCount()));
+//                || (down.Row < state.getRowsCount() && state.get(down) == NodeType.WALL);
 //                
 //        
 //        // Can block be moved?

@@ -1,4 +1,4 @@
-package sokoban.Tethik.IDA;
+package sokoban.Tethik.Combo;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-public class Player {
+public class IDAPlayer {
 	
 	private Analyser analyser; 
 	private PathFinder pathfinder;
@@ -16,7 +16,7 @@ public class Player {
 	
 	public Settings settings;
 	
-	public Player(BoardState initialState, Settings settings) {
+	public IDAPlayer(BoardState initialState, Settings settings) {
 		this.settings = settings;
 		this.initialState = initialState;
 		analyser = new Analyser(initialState, settings);
@@ -146,7 +146,7 @@ public class Player {
 		System.out.println(board);
 		Settings settings = new Settings();
 //		settings.VERBOSE = true;
-		Player noob = new Player(board, settings);		
+		IDAPlayer noob = new IDAPlayer(board, settings);		
 		Path path = noob.play();
 		long timeStop = System.currentTimeMillis();
 		System.out.println(path);
