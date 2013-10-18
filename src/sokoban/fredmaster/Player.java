@@ -31,6 +31,7 @@ public class Player {
         public static boolean DO_TUNNEL_MACRO_MOVE = true;
         public static boolean DO_CORRAL_CACHING = true;
         public static boolean DO_HEURISTIC_CACHING = true;
+        public static boolean HALF_CHEAT = true;
         
 	public Player(BoardState initialState, Settings settings) {
 		this.initialState = initialState;
@@ -167,7 +168,7 @@ public class Player {
             //BoardState board = BoardState.getBoardFromFile("test100/test004.in");
             //BoardState board = BoardState.getBoardFromFile("test100/test093.in");
             //BoardState board = BoardState.getBoardFromFile("test100/test059.in");
-                        BoardState board = BoardState.getBoardFromFile("test100/test006.in");
+                        BoardState board = BoardState.getBoardFromFile("test100/test015.in");
            // BoardState board = BoardState.getBoardFromFile("test100/test099.in");
 	//	BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest5");
           //BoardState board = BoardState.getBoardFromFile("testing/tunnelmap");
@@ -181,7 +182,8 @@ public class Player {
                 Player.DO_CORRAL_CACHING = true;
                 Player.DO_TUNNEL_MACRO_MOVE = true;
                 Player.DO_MOVE_CACHING = true;
-                Player.CHEAT = true;
+                Player.CHEAT = false;
+                Player.HALF_CHEAT = true;
                 
                 //Player.DO_DEADLOCKS_CONSTANTCHECK = true;
                 //Player.DO_DEADLOCKS_4x4 = true;

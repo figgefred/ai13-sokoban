@@ -247,6 +247,18 @@ public class LiveAnalyser {
                 }
             }
         }
+        if(!Player.CHEAT)
+        {
+            for(CorralArea a: list)
+            {
+                if(!a.getFencePositions().isEmpty())
+                {
+                    BoardPosition fenceBlock = a.getFencePositions().iterator().next();
+                    exploreAndSetFence(board, a, fenceBlock, new HashSet<BoardPosition>());    
+                }
+            }
+        }
+        
         
         if(playArea == null)
             System.err.println("Oooops, no playarea warning.");
@@ -292,6 +304,51 @@ public class LiveAnalyser {
         
         
         return null;
+    }
+    
+    /**
+     * Explore neighbouring blocks that could be part of fences. The input parameter
+     * must be of block type and part of the fence in the corral area.
+     * @param board
+     * @param area
+     * @param block
+     * @param visited 
+     */
+    private void exploreAndSetFence(BoardState board, CorralArea area, BoardPosition block, Set<BoardPosition> visited)
+    {
+        if(!board.get(block).isBlockNode() || !area.getFencePositions().contains(block))
+            return;
+        
+        if(!visited.contains(block))
+        {
+            visited.add(block);
+            for(BoardPosition candidate: board.getNeighbours(block))
+            {
+                // If a block
+                if(board.get(candidate).isBlockNode())
+                {
+                    // Is already part of post
+                    if(area.getFencePositions().contains(candidate))
+                    {
+                        exploreAndSetFence(board, area, candidate, visited);
+                    }
+                    else if(area.getNoFenceBlockPositions().contains(candidate))
+                    {
+                        // This is fence node, remove from old set and add to fence positions
+                        area.getNoFenceBlockPositions().remove(candidate);
+                        area.getFencePositions().add(candidate);
+                        exploreAndSetFence(board, area, candidate, visited);
+                    }
+                }
+                else
+                {
+                    // Its skipped. Not interesting for this corral area's fence
+                }
+                
+
+            }
+        }
+        
     }
     
     private void setCorralArea(BoardState board, CorralArea area, BoardPosition spaceNode, Set<BoardPosition> visited)
@@ -357,6 +414,8 @@ public class LiveAnalyser {
                 
 		//System.out.println(board);
 		BoardState board = new BoardState(b, true);
+                Settings s = new Settings();
+                board.setSettings(s);
                 PathFinder pFinder = new PathFinder();
                 LiveAnalyser liveAnalyser = new LiveAnalyser(pFinder);
                 Analyser ana = new Analyser(board, new Settings(), liveAnalyser);
@@ -418,7 +477,7 @@ public class LiveAnalyser {
         // Or of course if there is any block already checked that is blocking
         boolean horizontalWallBlocking = (left.Column >= 0 && state.get(left) == NodeType.WALL)
 			|| (right.Column < state.getColumnsCount() && state.get(right) == NodeType.WALL);
-      
+        
         
         
         

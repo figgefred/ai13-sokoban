@@ -1,4 +1,4 @@
-package sokoban.carlos;
+package kr;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+
 
 
 /***
@@ -32,16 +33,19 @@ public class Analyser {
 	private int cols;
 	private HopcroftKarpMatching bipartiteMatcher = new HopcroftKarpMatching();
 	private Settings settings;
+        public LiveAnalyser liveAnalyser;
 	
-	public Analyser(BoardState board, Settings settings)
+	public Analyser(BoardState board, Settings settings, LiveAnalyser liveAnalyser)
 	{
 		this.settings = settings;
 		this.board = board;
+		this.liveAnalyser = liveAnalyser;
 		constructTableAndWorkbench();
 		// Hitta distanser?
 		mapDistancesToGoals(new BoardState(workbench));
+		
 	}
-	
+
 	public Settings getSettings() {
 		return settings;
 	}
@@ -109,7 +113,11 @@ public class Analyser {
 				distanceMatrix[i][pos.Row][pos.Column] = distance++;
 				if(distance > 1)
 					badTable[pos.Row][pos.Column] = false;
-				
+				else {
+					if(!board.get(pos.Row, pos.Column).isGoalNode())
+						board.set(pos.Row, pos.Column, NodeType.INVALID);
+				}
+					
 				for(BoardPosition neighbour : board.getFromNeighbours(pos)) {
 					if(visited.contains(neighbour)) 
 						continue;
@@ -126,8 +134,6 @@ public class Analyser {
 			
 			i++;			
 		}
-		
-		this.board.injectForbiddenPositions(badTable);
 	}
 	
 	public boolean isBadPosition(int Row, int Col) {		
@@ -354,10 +360,22 @@ public class Analyser {
 				|| is4x4BlockTopLeftCorner(board, leftTop);
 	}
 	
+	@SuppressWarnings("unused")
+	private boolean has4x4Block(BoardState board) {		
+		for(int row = 0; row < board.getRowsCount() - 1; ++row)			
+			for(int col = 0; col < board.getColumnsCount() - 1; ++col) {				
+				if(is4x4BlockTopLeftCorner(board, new BoardPosition(row, col)))
+					return true;			
+				
+			}		
+		return false;		
+	}
+	
 	public static void main(String[] args) throws IOException {
-		BoardState board = BoardState.getBoardFromFile("testing/deadlocktest1");
+		BoardState board = BoardState.getBoardFromFile("test100/test001.in");
 		System.out.println(board);
-		Analyser analyser = new Analyser(board, new Settings());
+                LiveAnalyser l = new LiveAnalyser(null);
+		Analyser analyser = new Analyser(board, new Settings(),l);
 		System.out.println(analyser);
 		analyser.printDistanceMatrix(board);
 		

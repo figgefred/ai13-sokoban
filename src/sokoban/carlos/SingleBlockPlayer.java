@@ -1,4 +1,4 @@
-package sokoban.carlos;
+package kr;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
-public class SingleBlockPlayer {
-	
+
+public class SingleBlockPlayer {	
 	
 	private PathFinder pathfinder;
 	private Analyser analyser;
@@ -55,14 +55,14 @@ public class SingleBlockPlayer {
 	
 			clone.set(goal, NodeType.GOAL);
 			clone.RecalculateGoalNodes();
-			SingleBlockMove initial = new SingleBlockMove(analyser, pathfinder, block, goalindex);
+			SingleBlockMove initial = new SingleBlockMove(root.settings, analyser, pathfinder, block, goalindex);
 			initial.board = clone;		
 			initial.path = new Path();
 			
 			Move move = getGoalPath(initial);
 			
 			if(move != null) {
-				Move normalised = new Move(root.analyser, root.pathfinder);
+				Move normalised = new Move(root.analyser, root.settings, root.pathfinder);
 				normalised.board = (BoardState) board.clone();
 				normalised.board.movePlayer(move.path);
 				normalised.path = path.cloneAndAppend(move.path);
@@ -119,15 +119,17 @@ public class SingleBlockPlayer {
 		BoardState board = BoardState.getBoardFromFile("testing/level3");
 		
 		System.out.println(board);
-		Analyser analyser = new Analyser(board, new Settings());
 		PathFinder pathfinder = new PathFinder();
+                LiveAnalyser lAn = new LiveAnalyser(pathfinder);
+                Analyser analyser = new Analyser(board, new Settings(), lAn);
+		
 		SingleBlockPlayer noob = new SingleBlockPlayer(analyser);
 		SingleBlockPlayer.VERBOSE = false;
 		
 //		BoardPosition block = board.getBlockNodes().get(0);
 		for(BoardPosition block : board.getBlockNodes())
 		{	
-			Move initial = new Move(analyser, pathfinder);	
+			Move initial = new Move(analyser, new Settings(), pathfinder);	
 			initial.board = board;
 			initial.path = new Path();
 			for(Move move : noob.findGoalMoves(initial, block)) {			

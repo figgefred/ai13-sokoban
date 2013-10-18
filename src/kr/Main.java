@@ -30,12 +30,13 @@ public class Main {
 		
                 Player.VERBOSE = false;
                 Player.DO_GOAL_SORTING = false;
-                Player.DO_EXPENSIVE_DEADLOCK = true;
+                Player.DO_EXPENSIVE_DEADLOCK = false;
                 Player.DO_CORRAL_LIVE_DETECTION = true;
                 Player.DO_CORRAL_CACHING = true;
                 Player.DO_TUNNEL_MACRO_MOVE = true;
                 Player.DO_MOVE_CACHING = true;
-                Player.CHEAT = true;
+                Player.CHEAT = false;
+                Player.HALF_CHEAT = true;
 		//System.out.println(board);
 		BoardState board = new BoardState(b, true);
                 Settings settings = new Settings();
