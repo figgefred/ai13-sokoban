@@ -35,13 +35,28 @@ public enum NodeType
     public char getChar() {
     	return this.c;
     }
-    
+
     public boolean isBlockNode()
     {
         boolean isBlockNode = 
             this == NodeType.BLOCK || 
             this == NodeType.BLOCK_ON_GOAL;
         return isBlockNode;
+    }
+    
+    public boolean isWallNode()
+    {
+        boolean isWallNode = 
+            this == NodeType.WALL;
+        return isWallNode;
+    }
+    
+    public boolean isTunnelSpaceNode()
+    {
+        boolean isTunnelSpace = 
+                isSpaceNode() ||
+                isBlockNode();
+        return isTunnelSpace;
     }
     
     public boolean isSpaceNode()
