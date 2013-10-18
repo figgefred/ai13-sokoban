@@ -1,4 +1,4 @@
-package sokoban.Tethik.IDA;
+package sokoban.Tethik.Combo;
 
 import java.io.IOException;
 import java.util.ArrayList;

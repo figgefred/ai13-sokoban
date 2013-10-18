@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
-import sokoban.BoardPosition;
-import sokoban.NodeType;
 
 public class SingleBlockPlayer {
 	
