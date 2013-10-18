@@ -9,9 +9,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
-import sokoban.BoardPosition;
-import sokoban.NodeType;
-
 
 /***
  * PreAnalyser: analyse the board beforehand to calculate positions in which blocks will get stuck in.

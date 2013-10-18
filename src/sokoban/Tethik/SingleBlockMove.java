@@ -3,8 +3,6 @@ package sokoban.Tethik;
 import java.util.ArrayList;
 import java.util.List;
 
-import sokoban.BoardPosition;
-import sokoban.NodeType;
 
 public class SingleBlockMove extends Move {
 

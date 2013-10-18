@@ -96,13 +96,15 @@ public class Player {
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
 //		BoardState board = BoardState.getBoardFromFile("test100/test099.in");
-		BoardState board = BoardState.getBoardFromFile("test100/test031.in");
+		BoardState board = BoardState.getBoardFromFile("test100/test001.in");
 //		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest5");
 		
 		long timeStart = System.currentTimeMillis();
 		
 		System.out.println(board);
-		Player noob = new Player(board, new Settings());
+		Settings settings = new Settings();
+		settings.VERBOSE = true;
+		Player noob = new Player(board, settings);
 		Path path = noob.play();
 		long timeStop = System.currentTimeMillis();
 		System.out.println(path);
