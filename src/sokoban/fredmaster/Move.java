@@ -1,6 +1,7 @@
 package sokoban.fredmaster;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -56,7 +57,6 @@ public class Move implements Comparable<Move> {
 		List<Move> possibleMoves = new ArrayList<>();
 		List<BoardPosition> blocks = board.getBlockNodes();
 		BoardPosition playerPos = board.getPlayerNode();	
-		
                 
                 boolean isRealCorral = false;
                 
@@ -98,6 +98,7 @@ public class Move implements Comparable<Move> {
                                 
                                 if(Player.DO_EXPENSIVE_DEADLOCK && liveAnalyser.isFrozenDeadlockState(board, new HashSet<BoardPosition>(), newBoard.getLastPushedBlock()))
                                 {
+                                    //System.out.println("CUT");
                                     continue; // DEADLOCK
                                 }
                                 
@@ -252,7 +253,12 @@ public class Move implements Comparable<Move> {
 	
 	public List<Move> getNextMoves() {
 		
-		
+			
+                if( !settings.MOVE_DO_GOAL_MOVES &&(new Date().getTime() - settings.StartTime) >= settings.HaxTimeSwitch)
+                {
+                    settings.MOVE_DO_GOAL_MOVES = true;
+                }	
+            
 		List<Move> possibleMoves = getNextPushMoves();
 		
                 if(settings.MOVE_DO_GOAL_MOVES)

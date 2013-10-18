@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
+import sokoban.BoardPosition;
+
 
 
 /***
@@ -22,12 +24,13 @@ public class Player {
 
 	private Queue<Move> openSet;
 	private HashSet<Integer> closedSet;
-	public static boolean VERBOSE = true;
+	public static boolean VERBOSE = false;
 	public volatile boolean shouldStop = false;
 	Move winMove=null;
 	public static boolean IDA =false;
 	public static boolean WIKIDA=false;
 	public static boolean ASTAR=false;
+	private static BoardPosition initPlayerNode;
 
 	private BoardState initialState;
 
@@ -204,30 +207,31 @@ public class Player {
 			openSet = new PriorityQueue<Move>();
 			closedSet = new HashSet<Integer>();
 			openSet.add(initialPosition);
-			initialPosition.print();
+			//initialPosition.print();
 
-			int bound=initialPosition.getDistanceValue();
+			int bound=initialPosition.getDistanceValue(initialPosition.pair);
 			while(!openSet.isEmpty() && !shouldStop)
 			{
 				Move node = openSet.poll();
 				if(VERBOSE) {
 					System.out.println(openSet.size() + " " + closedSet.size());
 					System.out.println("Pushes : " + node.pushes);
-					System.out.println(node.path.getPath().size() + ", " + node.getDistanceValue() + ", " + closedSet.size() + ", " + node.board.hashCode());
+					System.out.println(node.path.getPath().size() + ", " + node.getDistanceValue(node.pair) + ", " + closedSet.size() + ", " + node.board.hashCode());
 					System.out.println(node.board);
 				}
 
-				if(node.board.isWin())        	
+				if(node.board.isWin()){       
+					
+					Path toPlayerPath = node.pathfinder.getPath(node.board, initPlayerNode);
+					node.path=node.path.cloneAndAppend(toPlayerPath);
+					
 					return node;        	
-
+					
+				}
 				for(Move neighbour: node.getNextMoves())
 				{
-					System.out.println("new neighbour");
-					System.out.println(neighbour.board);
-					int value = neighbour.getDistanceValue();
+					int value = neighbour.getDistanceValue(node.pair);
 				
-					System.out.println(neighbour.board);
-					System.out.println(neighbour.board.getPlayerNode()+" "+value);
 					if (closedSet.contains(neighbour.board.hashCode())) {        			
 						continue;
 					}
@@ -275,7 +279,7 @@ public class Player {
 	public static void main(String[] args) throws IOException, InterruptedException {
 	//	BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
 			BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest");
-
+		initPlayerNode=board.getPlayerNode();	
 		System.out.println(board);
 		
 		board=board.getEndingState();
@@ -283,9 +287,16 @@ public class Player {
 		Player noob = new Player(board);
 		
 		Path path = noob.play();
-		System.out.println(path);
-		board.movePlayer(path);
-		System.out.println(board);
+	//	System.out.println(path);
+		
+		if(path != null)
+           {
+               board.movePlayer(path);
+               Path rightPath = new Path(path.getPath(),true);
+               System.out.println(board);
+               System.out.println(rightPath);
+           }
+		
 	}
 }
 

@@ -2,8 +2,10 @@ package sokoban.fredmaster;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import sokoban.BoardPosition;
 
 public class Player {
@@ -16,7 +18,9 @@ public class Player {
         private Settings settings;
 	public static volatile boolean VERBOSE = true;
         
+        private Map<BoardState, Map<BoardPosition, List<Move>>> MyCachedMoves;
         public static boolean CHEAT;
+        public static boolean DO_MOVE_CACHING = true;
         //public static boolean FALLBACK;
         public static boolean DO_GOAL_SORTING = false;
         public static boolean DO_DEADLOCKS_CONSTANTCHECK = true;
@@ -34,6 +38,7 @@ public class Player {
                 this.settings = settings;
                 this.liveAnalyser = new LiveAnalyser(pathfinder);
                 analyser = new Analyser(initialState, settings, this.liveAnalyser);
+                MyCachedMoves = new HashMap<>();
                 
 		
 	}
@@ -61,8 +66,29 @@ public class Player {
                         try {Thread.sleep(200);}catch(InterruptedException ex) {};
 		}
 				
-		List<Move> moves = node.getNextMoves();		
-		Collections.sort(moves);		
+                
+                // SOME CACHING STUFF
+                Map<BoardPosition, List<Move>> map = MyCachedMoves.get(node.board);
+                List<Move> moves = null;
+                if(DO_MOVE_CACHING && map != null)
+                {
+                    moves = map.get(node.board.getPlayerNode());
+                }
+                if(DO_MOVE_CACHING && moves == null)
+                {
+                    moves = node.getNextMoves();
+                    Collections.sort(moves);		
+                    if(map == null)
+                    {
+                        map = new HashMap<>();
+                    }
+                    map.put(node.board.getPlayerNode(), moves);
+                } 
+                else if(moves == null)
+                {
+                    moves = node.getNextMoves();
+                    Collections.sort(moves);		
+                }
 		int min = Integer.MAX_VALUE;
 		for(Move child : moves) {				
 			int t;
@@ -96,8 +122,10 @@ public class Player {
 	
 	public Move idaStar(Move root) {		
 		int bound = analyser.getLowerBound(root.board);
-		
+		settings.StartTime = (new Date().getTime());
+                settings.MOVE_DO_GOAL_MOVES = false;
 		while(true) {
+
 			int t = search(root,bound);
 			
 			if(t == Integer.MAX_VALUE) 
@@ -137,21 +165,23 @@ public class Player {
 		//BoardState board = BoardState.getBoardFromFile("test100/test031.in");
             //BoardState board = BoardState.getBoardFromFile("test100/test098.in");
             //BoardState board = BoardState.getBoardFromFile("test100/test004.in");
-            //BoardState board = BoardState.getBoardFromFile("test100/test050.in");
-            BoardState board = BoardState.getBoardFromFile("test100/test059.in");
-                        //BoardState board = BoardState.getBoardFromFile("test100/test069.in");
-            //BoardState board = BoardState.getBoardFromFile("test100/test099.in");
+            //BoardState board = BoardState.getBoardFromFile("test100/test093.in");
+            //BoardState board = BoardState.getBoardFromFile("test100/test059.in");
+                        BoardState board = BoardState.getBoardFromFile("test100/test006.in");
+           // BoardState board = BoardState.getBoardFromFile("test100/test099.in");
 	//	BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest5");
           //BoardState board = BoardState.getBoardFromFile("testing/tunnelmap");
 		
 		long timeStart = System.currentTimeMillis();
 		
                 Player.VERBOSE = false;
-                Player.DO_GOAL_SORTING = true;
+                Player.DO_GOAL_SORTING = false;
                 Player.DO_EXPENSIVE_DEADLOCK = false;
-                Player.DO_CORRAL_LIVE_DETECTION = false;
+                Player.DO_CORRAL_LIVE_DETECTION = true;
                 Player.DO_CORRAL_CACHING = true;
                 Player.DO_TUNNEL_MACRO_MOVE = true;
+                Player.DO_MOVE_CACHING = true;
+                Player.CHEAT = true;
                 
                 //Player.DO_DEADLOCKS_CONSTANTCHECK = true;
                 //Player.DO_DEADLOCKS_4x4 = true;
@@ -160,10 +190,11 @@ public class Player {
                 //Player.DO_HEURISTIC_CACHING = true;
                 
                 Settings settings = new Settings();
-                settings.MOVE_DO_GOAL_MOVES = false;
+                settings.MOVE_DO_GOAL_MOVES = true;
                 
 		System.out.println(board);
-		
+		//System.out.println(board.getTunnels());
+                //try {Thread.sleep(100000);} catch(InterruptedException ex) {};
                 Player noob = new Player(board, settings);
                 board.setSettings(settings);
 		Path path = noob.play();

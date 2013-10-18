@@ -13,5 +13,6 @@ public class Settings {
 	public boolean MOVE_DO_GOAL_MOVES = true;
 	public boolean VERBOSE = false;
 	
-
+        public long HaxTimeSwitch = 5000;
+        public long StartTime = 0;
 }

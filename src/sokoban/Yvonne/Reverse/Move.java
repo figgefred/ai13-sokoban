@@ -7,7 +7,7 @@ import sokoban.BoardPosition;
 import sokoban.Direction;
 
 public class Move implements Comparable<Move> {
-	private PathFinder pathfinder = new PathFinder();
+	public PathFinder pathfinder = new PathFinder();
 	private Analyser analyser = null;
 	public BoardState board;
 	public Path path;
@@ -15,7 +15,8 @@ public class Move implements Comparable<Move> {
 	public int pushes = 1;
 	public Integer f=0;
 	public static boolean ASTAR = true;
-
+	public int pair=0;
+	
 	public Move(Analyser analyser, PathFinder pathfinder) {
 		this.pathfinder = pathfinder;
 		this.analyser = analyser;
@@ -55,20 +56,20 @@ public class Move implements Comparable<Move> {
 	}
 	
 	//Distance between block and player
-	public int getDistanceValue(){
-		System.out.println("board");
-		System.out.println(board);
+	public int getDistanceValue(int pair){
+	
 		if(board.isWin()){
 			return 0;
 		}
 		if(board.getBlockNodes().size()==0 && board.getGoalNodes().size()==0){
 			return 0;
 		}
-		BoardPosition goal = board.getBlockNodes().get(0);
-		BoardPosition w = board.getGoalNodes().get(0);
+		BoardPosition goal = board.getBlockNodes().get(pair);
+		BoardPosition w = board.getGoalNodes().get(pair);
 		
 		return (Math.abs(w.Row-goal.Row)+Math.abs(w.Column-goal.Column));
 	//	return analyser.getDistanceValue(board.getPlayerNode().Row,board.getPlayerNode().Column);
+		//return analyser.distanceMatrix[pair][w.Row][w.Column];
 	}
 
 	public List<Move> getNextMoves() {
@@ -77,8 +78,10 @@ public class Move implements Comparable<Move> {
 		BoardPosition playerPos = board.getPlayerNode();		
 
 		/* Block move based */
-		for(BoardPosition blockPos : blocks)
+	//	for(BoardPosition blockPos : blocks)
+		for(int i=0 ; i< board.getBlockNodes().size(); i++)
 		{
+			BoardPosition blockPos = board.getBlockNodes().get(i);
 			// hitta ställen man kan göra förflyttningar av block.
 			// skriva om sen..
 			List<BoardPosition> pullPositions = board.getPullingPositions(blockPos);
@@ -121,10 +124,12 @@ public class Move implements Comparable<Move> {
 			  	
 			  	
 				toPush.append(new BoardPosition(row,col));
+				
 				newBoard.movePlayer(toPush);
 				// push the block by moving towards the block.
 
 				Move move = new Move(analyser, pathfinder);
+				move.pair=i;
 				move.board = newBoard;
 				move.path = path.cloneAndAppend(toPush);
 				move.pushes = pushes + 1;
