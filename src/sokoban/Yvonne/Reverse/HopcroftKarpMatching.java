@@ -29,7 +29,7 @@ public class HopcroftKarpMatching {
 		HashMap<BoardPosition, BoardPosition> block_pairings = new HashMap<BoardPosition, BoardPosition>();
 		HashMap<BoardPosition, Integer> dist = new HashMap<BoardPosition, Integer>();
 		
-		Set<BoardPosition> goalNodes = board.getGoalNodes();
+		List<BoardPosition> goalNodes = board.getGoalNodes();
 		List<BoardPosition> blockNodes = board.getBlockNodes();
 		
 		for(BoardPosition goal : goalNodes) {			
