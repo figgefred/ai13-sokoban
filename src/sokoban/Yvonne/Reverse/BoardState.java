@@ -620,7 +620,7 @@ public NodeType get(BoardPosition pos)
 			for(int j = 0; j < Map.get(i).size(); j ++)
 			{
 				NodeType type = getNode(i,j);
-				if( type == NodeType.BLOCK || type == NodeType.BLOCK_ON_GOAL )
+				if( type == NodeType.BLOCK || type == NodeType.BLOCK_ON_GOAL)
 				{
 					blocks.add(new BoardPosition(i, j));
 				}
@@ -801,10 +801,67 @@ public BoardState getEndingState()
 	//   Position the player on resp. position        
 	endState.Map.get(playerPos.Row).set(playerPos.Column, NodeType.PLAYER);
 	endState.CurrentNode = playerPos;
+	sortGoals();
 	return endState;
 }
 
 
+public NodeType[] getNeighbourTypes(BoardPosition pos)
+{
+	return getNeighbourTypes(pos.Row, pos.Column);
+}
+
+public NodeType[] getNeighbourTypes(int row, int col)
+{
+	return new NodeType[] {
+		get(row + 1, col),
+		get(row - 1, col),
+		get(row, col + 1),
+		get(row, col - 1)
+	};
+}
+
+private void sortGoals()
+{
+    java.util.Collections.sort(Goals, new java.util.Comparator<BoardPosition>() {
+
+		@Override
+		public int compare(BoardPosition o1, BoardPosition o2) {
+			NodeType[] n1 = getNeighbourTypes(o1);
+			
+			int val1 = 0;
+			int val2 = 0;
+			
+			int w1 = 0;
+			int w2 = 0;
+			
+			NodeType[] n2 = getNeighbourTypes(o2);
+			
+			for(int i = 0; i < n1.length; i++) {
+				switch(n1[i]) {
+				case WALL: val1 += 10; break;
+				case GOAL: val1 += 8; break;
+				default: break;
+				}
+				
+				switch(n2[i]) {
+				case WALL: val2 += 10; break;
+				case GOAL: val2 += 8; break;
+				default: break;
+				}
+				/*
+				if(n1[i] == NodeType.WALL)
+					w1++;
+				
+				if(n2[i] == NodeType.WALL)
+					w2++;
+					*/
+			}
+			
+			return val1 > val2 ? -1 : val1 < val2 ? 1 : 0;
+		}
+	});
+}
 
 /**
  * Se: http://en.wikipedia.org/wiki/Zobrist_hashing

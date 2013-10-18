@@ -23,14 +23,15 @@ import sokoban.BoardPosition;
 public class Player {	
 
 	private Queue<Move> openSet;
+	public static Path toPlayerPath;
 	private HashSet<Integer> closedSet;
-	public static boolean VERBOSE = false;
+	public static boolean VERBOSE =false;
 	public volatile boolean shouldStop = false;
 	Move winMove=null;
 	public static boolean IDA =false;
 	public static boolean WIKIDA=false;
 	public static boolean ASTAR=false;
-	private static BoardPosition initPlayerNode;
+	public static BoardPosition initPlayerNode;
 
 	private BoardState initialState;
 
@@ -221,10 +222,7 @@ public class Player {
 				}
 
 				if(node.board.isWin()){       
-					
-					Path toPlayerPath = node.pathfinder.getPath(node.board, initPlayerNode);
-					node.path=node.path.cloneAndAppend(toPlayerPath);
-					
+
 					return node;        	
 					
 				}
@@ -256,10 +254,12 @@ public class Player {
 		Move initial = new Move(analyser, pathfinder);
 		initial.board = initialState;
 		initial.path = new Path();
+		
+		
 
 		Move win = getVictoryPath(initial);
 		if(win != null) {		
-			//System.out.println(win.path);
+			toPlayerPath = win.pathfinder.getPath(win.board, initPlayerNode);
 			return win.path;
 		}			
 
@@ -277,23 +277,26 @@ public class Player {
 	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-	//	BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest4");
-			BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest");
-		initPlayerNode=board.getPlayerNode();	
-		System.out.println(board);
-		
+		BoardState board = BoardState.getBoardFromFile("testing/simpleplaytest3");
+		//	BoardState board = BoardState.getBoardFromFile("test100/test000.in");
+		initPlayerNode=board.getPlayerNode();			
 		board=board.getEndingState();
-		System.out.println(board);
 		Player noob = new Player(board);
 		
 		Path path = noob.play();
-	//	System.out.println(path);
+
+		
 		
 		if(path != null)
            {
                board.movePlayer(path);
-               Path rightPath = new Path(path.getPath(),true);
-               System.out.println(board);
+       		   //System.out.println("path "+path);
+       		 //  System.out.println("toPlayerPath "+toPlayerPath);
+               Path rightPath=path.cloneAndAppend(toPlayerPath);
+               
+       		   Collections.reverse(rightPath.getPath());
+       		   //Path rightPath = new Path(path.getPath(),true);
+           //    System.out.println(board);
                System.out.println(rightPath);
            }
 		

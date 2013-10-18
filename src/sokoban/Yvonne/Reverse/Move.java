@@ -78,10 +78,10 @@ public class Move implements Comparable<Move> {
 		BoardPosition playerPos = board.getPlayerNode();		
 
 		/* Block move based */
-	//	for(BoardPosition blockPos : blocks)
-		for(int i=0 ; i< board.getBlockNodes().size(); i++)
+		for(BoardPosition blockPos : blocks)
+	//	for(int i=0 ; i< board.getBlockNodes().size(); i++)
 		{
-			BoardPosition blockPos = board.getBlockNodes().get(i);
+		//	BoardPosition blockPos = board.getBlockNodes().get(i);
 			// hitta ställen man kan göra förflyttningar av block.
 			// skriva om sen..
 			List<BoardPosition> pullPositions = board.getPullingPositions(blockPos);
@@ -129,7 +129,7 @@ public class Move implements Comparable<Move> {
 				// push the block by moving towards the block.
 
 				Move move = new Move(analyser, pathfinder);
-				move.pair=i;
+			//	move.pair=i;
 				move.board = newBoard;
 				move.path = path.cloneAndAppend(toPush);
 				move.pushes = pushes + 1;
