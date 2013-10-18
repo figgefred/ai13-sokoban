@@ -52,8 +52,8 @@ public class Analyser {
 		this.board = board;
 		constructTableAndWorkbench();
 		// Hitta distanser?
-		mapDistancesToGoals(new BoardState(workbench, false));
-		LiveAnalyser = new LiveAnalyser(this, new PathFinder());
+		mapDistancesToGoals(new BoardState(workbench));
+		LiveAnalyser = new LiveAnalyser(new PathFinder());
                 
               //  setGoalToBlockMapping();
                 setGoalQueueOrder();
@@ -416,6 +416,16 @@ public class Analyser {
                         }
                     }
                 }
+                if(Player.DO_EXPENSIVE_DEADLOCK)
+                {
+                    if(pushedBlock != null)
+                    {
+                        if(LiveAnalyser.isFrozenDeadlockState(board, new HashSet<BoardPosition>(), pushedBlock))
+                        {
+                            return Integer.MIN_VALUE;
+                        }
+                    }
+                }
                 
 		//mapDistancesToGoals(board);
 		
@@ -514,7 +524,7 @@ public class Analyser {
                 }
                 */
                 
-                int blockLastPushedIndex = board.getBlockLastMovedIndex();
+/*                int blockLastPushedIndex = board.getBlockLastMovedIndex();
                 // If not -1, then a block has been pushed sometime ago - lets prioritize it!
                 if(blockLastPushedIndex != -1)
                 {
@@ -524,7 +534,7 @@ public class Analyser {
                         val -= 500;
                     }
                 }
-
+*/
                 //try {Thread.sleep(1000000);}catch(InterruptedException ex){}
                 
 		return val;

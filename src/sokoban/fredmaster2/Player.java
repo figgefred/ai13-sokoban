@@ -1,5 +1,6 @@
 package sokoban.fredmaster2;
 
+import tester.Move;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.PriorityQueue;
@@ -12,18 +13,20 @@ import java.util.Queue;
  *
  */
 public class Player {	
-    public static boolean CHEAT;
-    public static boolean FALLBACK;
+
 	
 	private Queue<Move> openSet;
         private HashSet<BoardState> closedSet;
         private HashSet<BoardState> toVisitSet;
         public static boolean VERBOSE = false;
         public volatile boolean shouldStop;
-    
+
+        public static boolean CHEAT;
+        public static boolean FALLBACK;
         public static boolean DO_GOAL_SORTING = true;
         public static boolean DO_DEADLOCKS_CONSTANTCHECK = true;
         public static boolean DO_DEADLOCKS_4x4 = true;
+        public static boolean DO_EXPENSIVE_DEADLOCK = false;
         public static boolean DO_BIPARTITE_MATCHING = true;
         public static boolean DO_CORRAL_LIVE_DETECTION = true;
         public static boolean DO_TUNNEL_MACRO_MOVE = true;
@@ -31,10 +34,12 @@ public class Player {
         public static boolean DO_HEURISTIC_CACHING = true;
     
 	private BoardState initialState;
+        private Settings settings;
 	
-	public Player(BoardState initialState)
+	public Player(BoardState initialState, Settings settings)
 	{		
 		this.initialState = initialState;
+                this.settings = settings;
 		
 		if(initialState.getBlockNodes().size() != initialState.getGoalNodes().size())
 			throw new IllegalArgumentException("Different number of goals than blocks");
@@ -111,18 +116,16 @@ public class Player {
 		//Move.initPreanalyser(initialState);		
 		
 		Move win = null;
+                win = getVictoryPath(initial);
                 if(Player.CHEAT)
-                {
-                    win = getVictoryPath(initial);
-                    System.out.print("CHEAT");
-                    if(win != null)
-                        return win.path;
-                }
+                    System.out.print(" C ");
+                if(win != null)
+                    return win.path;
                 
                 if(Player.FALLBACK)
                 {
                     Player.CHEAT = false;
-                    System.out.print("FALLBACK");
+                    System.out.print(" F ");
                     win = getVictoryPath(initial);
                 }
                 else if(!Player.CHEAT)
@@ -148,14 +151,13 @@ public class Player {
 		BoardState board;
                 //board = BoardState.getBoardFromFile("testing/simpleplaytest5");
                 //board = BoardState.getBoardFromFile("testing/level3");
-               /// board = BoardState.getBoardFromFile("test100/test092.in");
-                //board = BoardState.getBoardFromFile("test100/test004.in");
-                board = BoardState.getBoardFromFile("test100/test086.in");
+              //  board = BoardState.getBoardFromFile("test100/test092.in");
+                //board = BoardState.getBoardFromFile("test100/test031.in");
                 //board = BoardState.getBoardFromFile("test100/test016.in");
                 
             // Can solve
                 //board = BoardState.getBoardFromFile("test100/test059.in");
-                //board = BoardState.getBoardFromFile("test100/test069.in");
+               // board = BoardState.getBoardFromFile("test100/test069.in");
                // board = BoardState.getBoardFromFile("test100/test092.in");
                 
             // Cant't solve
@@ -176,28 +178,30 @@ public class Player {
                 //board = BoardState.getBoardFromFile("test100/test069.in");
                 //board = BoardState.getBoardFromFile("test100/test079.in");
                 //board = BoardState.getBoardFromFile("test100/test089.in");
-                //board = BoardState.getBoardFromFile("test100/test099.in");
+                board = BoardState.getBoardFromFile("test100/test099.in");
                 Player.VERBOSE = false;
                 
-        Player.DO_GOAL_SORTING = true;
+        Player.DO_GOAL_SORTING = false;
         Player.DO_DEADLOCKS_CONSTANTCHECK = true;
         Player.DO_DEADLOCKS_4x4 = true;
+        Player.DO_EXPENSIVE_DEADLOCK = false;
         Player.DO_BIPARTITE_MATCHING = true;
         Player.DO_CORRAL_LIVE_DETECTION = true;
         Player.DO_TUNNEL_MACRO_MOVE = true;
         Player.DO_CORRAL_CACHING = true;
-        Player.DO_HEURISTIC_CACHING = true;
+        Player.DO_HEURISTIC_CACHING = false;
     
                 
         sokoban.fredmaster2.Player.CHEAT = false;
-        sokoban.fredmaster2.Player.FALLBACK = false;
+        sokoban.fredmaster2.Player.FALLBACK = true;
         
 		System.out.println(board);
 //                System.out.println(board.getTunnels());
             //    try{Thread.sleep(500000);}catch(InterruptedException ex){}
                 
                 
-		Player noob = new Player(board);
+                Settings settings = new Settings();
+		Player noob = new Player(board, settings);
 		Path path = noob.play();
                 
                 System.out.println( (path == null?"no path": path.toString()) );

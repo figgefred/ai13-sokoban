@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package sokoban.fredmaster2;
+package sokoban.fredmaster;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -870,13 +870,6 @@ public class BoardState implements Cloneable
     	}
     	
     	return builder.toString();   	
-    }
-
-    public void manipulate(BoardPosition p, NodeType nodeType) {
-        if(p.Row >= 0 && p.Row < Map.length && p.Column >= 0 && p.Column < getColumnsCount())
-        {
-            Map[p.Row][p.Column] = nodeType;
-        }
     }
 	
 

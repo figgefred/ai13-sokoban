@@ -1,4 +1,4 @@
-package sokoban.fredmaster2;
+package sokoban.fredmaster;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -18,26 +18,34 @@ public class Move implements Comparable<Move> {
         
         private LiveAnalyser liveAnalyser;
 	protected Settings settings;
-//	private SingleBlockPlayer singleBlockPlayer;
+	private SingleBlockPlayer singleBlockPlayer;
 	
-	public Move(LiveAnalyser liveAnalyser, Analyser analyser, Settings settings, PathFinder pathfinder) {
+	public Move(Analyser analyser, Settings settings, PathFinder pathfinder) {
 		this.pathfinder = pathfinder;
 		this.analyser = analyser;
                 this.settings = settings;
-                this.liveAnalyser = liveAnalyser;
-//		singleBlockPlayer = new SingleBlockPlayer(analyser);
+                this.liveAnalyser = analyser.liveAnalyser;
+		singleBlockPlayer = new SingleBlockPlayer(analyser);
 	}
 
 	public int getHeuristicValue() {
 		if(heuristic_value != null)
 			return heuristic_value;
 		
-//		heuristic_value = analyser.getHeuristicValue(board);
+		heuristic_value = analyser.getHeuristicValue(board);
 		
-		if(heuristic_value == Integer.MAX_VALUE || heuristic_value == Integer.MIN_VALUE)
-			return heuristic_value;
+//		if(heuristic_value == Integer.MAX_VALUE || heuristic_value == Integer.MIN_VALUE)
+//			return heuristic_value;
 		
 		return heuristic_value; 
+	}
+	
+	private Integer lower_bound = null;
+	public int getLowerBound() {
+		if(lower_bound == null)
+			lower_bound = analyser.getLowerBound(board)*2;
+		
+		return lower_bound;
 	}
 	
 	public boolean isWin() {
@@ -109,14 +117,14 @@ public class Move implements Comparable<Move> {
         
         private Move getMove(Tunnel tunnel, BoardState newBoard, BoardPosition playerPos, Path getThere)
         {
-            Move move = new Move(liveAnalyser, analyser, settings, pathfinder);        
+            Move move = new Move(analyser, settings, pathfinder);        
             Path tunnelPath = null;                 
             
             // Tunnel must be oneway
             if(tunnel != null && tunnel.isOneWay())
             {
                 tunnelPath = tunnel.getPath(newBoard.getLastPushedBlock());
-                if(tunnelPath != null && tunnelPath.getPath().size() > 1)
+                if(tunnelPath != null && tunnelPath.size() > 1)
                 {
                     BoardPosition initBlockPos = newBoard.getLastPushedBlock();
                     int counter = 1;
@@ -247,7 +255,7 @@ public class Move implements Comparable<Move> {
 		
 		List<Move> possibleMoves = getNextPushMoves();
 		
-              /*  if(settings.MOVE_DO_GOAL_MOVES)
+                if(settings.MOVE_DO_GOAL_MOVES)
                 {
                     List<BoardPosition> blocks = board.getBlockNodes();
                     for(BoardPosition block : blocks)
@@ -261,7 +269,7 @@ public class Move implements Comparable<Move> {
                             if(goalPushingMoves.size() > 0)
                                     break;
                     } 
-                }*/
+                }
 		
 		return possibleMoves;
 	}

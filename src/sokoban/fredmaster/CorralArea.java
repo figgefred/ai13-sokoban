@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package sokoban.fredmaster2;
+package sokoban.fredmaster;
 
 import java.util.HashSet;
 import java.util.Set;
